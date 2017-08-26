@@ -1,0 +1,51 @@
+{
+  "project_info": {
+    "project_number": "911360082592",
+    "project_id": "firebase-memestream"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:911360082592:android:10601800ff62c3da",
+        "android_client_info": {
+          "package_name": "stream.meme.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "911360082592-2bo9r86h0605hldmp8r4t55ddrdkcn8i.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "stream.meme.app",
+            "certificate_hash": "308b1bfce2e38183619b192120172f4279174423"
+          }
+        },
+        {
+          "client_id": "911360082592-94okm94vv0gr01ahbuucjc2esl002fnj.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDgASX7wJK3w0NosE5vmgHqqBP7WScxuVs"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 2,
+          "analytics_property": {
+            "tracking_id": "UA-104517860-1"
+          }
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 1
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

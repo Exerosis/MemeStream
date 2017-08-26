@@ -1,0 +1,18 @@
+<resources>
+    <string name="facebook_app_id" translatable="false">1420732458012279</string>
+    <string name="app_name">MemeStream</string>
+    <string name="description_open">PlaceHolder</string>
+    <string name="description_close">PlaceHolder</string>
+
+    <string name="facebook">Facebook</string>
+    <string name="twitter">Twitter</string>
+    <string name="google">Google</string>
+    <string name="github">GitHub</string>
+    <string name="linkedin">LinkedIn</string>
+    <string name="pinterest">Pinterest</string>
+    <string name="reddit">Reddit</string>
+
+    <string name="com.twitter.sdk.android.CONSUMER_KEY">ynYXFlQhJ0PExWRqiceKI3Mmd</string>
+    <string name="com.twitter.sdk.android.CONSUMER_SECRET">j3yPY3y5zxylyimkXq5kXPPGadU35LDA1efD5xmd9i21BbTdvh</string>
+    <string name="content_description_header_background">Header background</string>
+</resources>

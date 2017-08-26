@@ -1,0 +1,87 @@
+apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
+
+android {
+    compileSdkVersion 26
+    buildToolsVersion "26.0.1"
+
+    defaultConfig {
+        applicationId "stream.meme.app"
+        minSdkVersion 21
+        targetSdkVersion 26
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    dataBinding {
+        enabled = true
+    }
+
+    defaultConfig {
+        resConfigs "auto"
+    }
+}
+
+
+dependencies {
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
+    compile 'com.hannesdorfmann.mosby3:mvi-conductor:3.0.1-SNAPSHOT'
+    compile 'com.hannesdorfmann.mosby3:mvi:3.0.1'
+    compile 'com.bluelinelabs:conductor:2.1.4'
+    compile 'com.jakewharton.rxbinding2:rxbinding:2.0.0'
+    compile 'com.jakewharton.rxbinding2:rxbinding-support-v4:2.0.0'
+    compile 'com.jakewharton.rxbinding2:rxbinding-appcompat-v7:2.0.0'
+    compile 'com.jakewharton.rxbinding2:rxbinding-design:2.0.0'
+    compile 'com.jakewharton.rxbinding2:rxbinding-recyclerview-v7:2.0.0'
+
+
+    //--Support Libraries--
+    compile "com.android.support:support-v4:$androidSupportVersion"
+    compile "com.android.support:support-v13:$androidSupportVersion"
+    compile "com.android.support:appcompat-v7:$androidSupportVersion"
+    compile "com.android.support:appcompat-v7:$androidSupportVersion"
+    compile "com.android.support:palette-v7:$androidSupportVersion"
+    compile "com.android.support:recyclerview-v7:$androidSupportVersion"
+    compile "com.android.support:cardview-v7:$androidSupportVersion"
+    compile "com.android.support:design:$androidSupportVersion"
+
+    //--Store Libraries--
+/*    compile "com.nytimes.android:store:$storeVersion"
+    compile "com.nytimes.android:cache:$storeVersion"
+    compile "com.nytimes.android:filesystem:$storeVersion"*/
+
+    //--Butter Knife--
+    compile 'com.jakewharton:butterknife:8.5.1'
+    annotationProcessor 'com.jakewharton:butterknife-compiler:8.5.1'
+
+    //--Social Logins--
+    compile 'com.twitter.sdk.android:twitter:3.1.1'
+    compile 'com.facebook.android:facebook-android-sdk:4.20.0'
+
+    //--Play Services
+    compile 'com.google.android.gms:play-services-auth:11.0.4'
+
+    //--Other Libraries--
+    compile 'com.google.code.gson:gson:2.8.1'
+    compile 'com.squareup.okhttp3:okhttp:3.7.0'
+    compile 'com.squareup.picasso:picasso:2.5.2'
+//    compile 'io.reactivex:rxandroid:1.2.1'
+    compile 'com.google.guava:guava:20.0'
+    compile 'net.cachapa.expandablelayout:expandablelayout:2.9.1'
+    compile 'de.hdodenhof:circleimageview:2.1.0'
+
+    //--DataBindings Libraries--
+    testCompile 'junit:junit:4.12'
+    compile "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
+}
+
+apply plugin: 'com.google.gms.google-services'
+
+repositories {
+    mavenCentral()
+}
