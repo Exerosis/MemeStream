@@ -5,9 +5,7 @@
 
     <data>
 
-        <variable
-            name="controller"
-            type="stream.meme.app.home.container.HomeContainerController" />
+
     </data>
 
     <LinearLayout
@@ -18,7 +16,7 @@
         android:orientation="vertical"
         tools:layout_marginEnd="56dp">
 
-        <de.hdodenhof.circleimageview.CircleImageView
+      <!--  <de.hdodenhof.circleimageview.CircleImageView
             android:layout_width="56dp"
             android:layout_height="56dp"
             android:layout_marginBottom="8dp"
@@ -48,6 +46,6 @@
             android:layout_marginStart="16dp"
             android:text="@{controller.getAccount().getEmail()}"
             android:textColor="#FFF"
-            tools:text="exerosis@gmail.com" />
+            tools:text="exerosis@gmail.com" />-->
     </LinearLayout>
 </layout>

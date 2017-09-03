@@ -2,71 +2,63 @@
 
     <data>
 
-        <import
-            alias="Type"
-            type="stream.meme.app.login.LoginType" />
-
-        <variable
-            name="controller"
-            type="stream.meme.app.login.Login" />
     </data>
+        <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="36dp">
 
-    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="36dp">
+          <!--  <Button
+                style="@style/AppTheme.SocialButton"
+                android:backgroundTint="@color/facebook"
+                android:drawableStart="@drawable/ic_facebook"
+                android:onClick="@{view -> controller.startLogin(Type.FACEBOOK)}"
+                android:text="@string/facebook" />
 
-        <Button
-            style="@style/AppTheme.SocialButton"
-            android:backgroundTint="@color/facebook"
-            android:drawableStart="@drawable/ic_facebook"
-            android:onClick="@{view -> controller.startLogin(Type.FACEBOOK)}"
-            android:text="@string/facebook" />
+            <Button
+                style="@style/AppTheme.SocialButton"
+                android:backgroundTint="@color/twitter"
+                android:drawableStart="@drawable/ic_twitter"
+                android:onClick="@{view -> controller.startLogin(Type.TWITTER)}"
+                android:text="@string/twitter" />
 
-        <Button
-            style="@style/AppTheme.SocialButton"
-            android:backgroundTint="@color/twitter"
-            android:drawableStart="@drawable/ic_twitter"
-            android:onClick="@{view -> controller.startLogin(Type.TWITTER)}"
-            android:text="@string/twitter" />
+            <Button
+                style="@style/AppTheme.SocialButton"
+                android:backgroundTint="@color/github"
+                android:drawableStart="@drawable/ic_github"
+                android:onClick="@{view -> controller.startLogin(Type.GITHUB)}"
+                android:text="@string/github" />
 
-        <Button
-            style="@style/AppTheme.SocialButton"
-            android:backgroundTint="@color/github"
-            android:drawableStart="@drawable/ic_github"
-            android:onClick="@{view -> controller.startLogin(Type.GITHUB)}"
-            android:text="@string/github" />
+            <Button
+                style="@style/AppTheme.SocialButton"
+                android:backgroundTint="@color/google"
+                android:drawableStart="@drawable/ic_google"
+                android:onClick="@{view -> controller.startLogin(Type.GOOGLE)}"
+                android:text="@string/google"
+                android:textColor="@color/secondary_text" />
 
-        <Button
-            style="@style/AppTheme.SocialButton"
-            android:backgroundTint="@color/google"
-            android:drawableStart="@drawable/ic_google"
-            android:onClick="@{view -> controller.startLogin(Type.GOOGLE)}"
-            android:text="@string/google"
-            android:textColor="@color/secondary_text" />
+            <Button
+                style="@style/AppTheme.SocialButton"
+                android:backgroundTint="@color/reddit"
+                android:drawableStart="@drawable/ic_reddit"
+                android:onClick="@{view -> controller.startLogin(Type.PINTEREST)}"
+                android:text="@string/reddit" />
 
-        <Button
-            style="@style/AppTheme.SocialButton"
-            android:backgroundTint="@color/reddit"
-            android:drawableStart="@drawable/ic_reddit"
-            android:onClick="@{view -> controller.startLogin(Type.PINTEREST)}"
-            android:text="@string/reddit" />
+            <Button
+                style="@style/AppTheme.SocialButton"
+                android:backgroundTint="@color/linkedin"
+                android:drawableStart="@drawable/ic_linkedin"
+                android:onClick="@{view -> controller.startLogin(Type.LINKEDIN)}"
+                android:text="@string/linkedin" />
 
-        <Button
-            style="@style/AppTheme.SocialButton"
-            android:backgroundTint="@color/linkedin"
-            android:drawableStart="@drawable/ic_linkedin"
-            android:onClick="@{view -> controller.startLogin(Type.LINKEDIN)}"
-            android:text="@string/linkedin" />
-
-        <Button
-            style="@style/AppTheme.SocialButton"
-            android:backgroundTint="@color/pinterest"
-            android:drawableStart="@drawable/ic_pinterest"
-            android:onClick="@{view -> controller.startLogin(Type.REDDIT)}"
-            android:text="@string/pinterest" />
-
-    </LinearLayout>
+            <Button
+                style="@style/AppTheme.SocialButton"
+                android:backgroundTint="@color/pinterest"
+                android:drawableStart="@drawable/ic_pinterest"
+                android:onClick="@{view -> controller.startLogin(Type.REDDIT)}"
+                android:text="@string/pinterest" />
+-->
+        </LinearLayout>
 
 </layout>
