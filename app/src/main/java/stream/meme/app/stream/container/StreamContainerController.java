@@ -66,6 +66,7 @@ public class StreamContainerController extends BISPDatabindingController<Intents
             return new State();
         }), intents.NavigateIntent.map(id -> {
             State state = new State();
+            //TODO push tags into controller
             switch (id) {
                 case R.id.navigation_home: {
                     state.Stream = new StreamController();

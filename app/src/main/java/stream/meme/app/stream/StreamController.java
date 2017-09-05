@@ -1,157 +1,186 @@
 package stream.meme.app.stream;
 
-import android.support.v7.util.SortedList;
-
 import com.google.common.collect.Lists;
-import com.pacoworks.rxsealedunions2.Union2;
-import com.pacoworks.rxsealedunions2.Union3;
-import com.pacoworks.rxsealedunions2.generic.UnionFactories;
+import com.jakewharton.rxbinding2.support.v7.widget.RxRecyclerView;
+import com.jakewharton.rxbinding2.support.v7.widget.RxRecyclerViewAdapter;
 
 import java.util.ArrayDeque;
-import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
 
 import io.reactivex.Observable;
 import io.reactivex.functions.BiConsumer;
 import io.reactivex.functions.Function;
+import stream.meme.app.ItemOffsetDecoration;
 import stream.meme.app.MemeStream;
 import stream.meme.app.R;
 import stream.meme.app.bisp.BISPDatabindingController;
 import stream.meme.app.databinding.StreamViewBinding;
 
-import static stream.meme.app.stream.State.Load.*;
+import static com.jakewharton.rxbinding2.support.v4.widget.RxSwipeRefreshLayout.refreshes;
+import static com.jakewharton.rxbinding2.support.v4.widget.RxSwipeRefreshLayout.refreshing;
+import static com.jakewharton.rxbinding2.view.RxView.visibility;
 
 public class StreamController extends BISPDatabindingController<Intents, StreamViewBinding, State> {
     private final MemeStream memeStream;
-    private final Union2.Factory<State.LoadNext, State.Refresh> stateFactory = UnionFactories.doubletFactory();
+    private int page = 1;
 
     public StreamController() {
         super(R.layout.stream_view);
-        memeStream = (MemeStream) getActivity().getApplicationContext();
+        memeStream = (MemeStream) getApplicationContext();
     }
 
     @Override
     public BiConsumer<StreamViewBinding, Observable<State>> getStateToViewBinder() {
-        return (view, state) -> {
+        return (view, viewState) -> {
+            view.recyclerView.addItemDecoration(new ItemOffsetDecoration(getActivity(), R.dimen.item_offset));
+            view.recyclerView.setAdapter();
+            viewState.map(State::refreshing).subscribe(refreshing(view.refreshLayout));
+            viewState.map(State::firstPageLoading).subscribe(visibility(view.progressBar));
 
         };
     }
 
     @Override
     public BiConsumer<Intents, Binder<StreamViewBinding>> getViewToIntentBinder() {
-        return (intents, view) -> {
-            SortedList list = null;
-            list
+        return (intents, binder) -> {
+            intents.RefreshIntent = binder.bind(view -> refreshes(view.refreshLayout));
         };
     }
 
-    //TODO
     @Override
     public Function<Intents, Observable<State>> getIntentToStateBinder() {
-        return intents -> intents.RefreshIntent
-                .flatMap(ignored -> memeStream.loadMemes(0))
-                .<State.Refresh>map(State.Refresh.Loaded::new)
-                .startWith(new State.Refresh.Loading())
-                .onErrorReturn(error -> new State.Refresh.Error(error)).
-                .map(stateFactory::second)
-                .scan(new State(), this::reduceState);
+        return intents -> Observable.merge(
+                intents.LoadNextIntent
+                        .flatMap(ignored -> memeStream.loadMemes(page++)
+                                .map(Partial::NextPageLoaded)
+                                .startWith(Partial.NextPageLoading())
+                                .onErrorReturn(Partial::NextPageError)),
+                intents.LoadFirstIntent
+                        .flatMap(ignored -> memeStream.loadMemes(0)
+                                .map(Partial::FirstPageLoaded)
+                                .startWith(Partial.FirstPageLoading())
+                                .onErrorReturn(Partial::FirstPageError)),
+                intents.RefreshIntent
+                        .flatMap(ignored -> memeStream.loadMemes(0)
+                                .map(Partial::Refreshed)
+                                .startWith(Partial.Refreshing())
+                                .onErrorReturn(Partial::RefreshError)))
+                .scan(new State(), (state, partial) -> partial.apply(state));
     }
 
     @Override
     public Intents getIntents() {
         return new Intents();
     }
+}
 
-    private State reduceState(State state, Union3<State.Load.First, State.Load.Next, State.Load.Refresh> loadState) throws Exception {
-        state.error = loadState.join(First::error, Next::error, Refresh::error);
-        state.memes = loadState.join()
 
-                partialState.continued(loadNext -> {
-            state.loadNextError = loadNext.error;
-            state.loadNextLoading = loadNext.loading;
-            for (Meme meme : loadNext.memes)
+class Partial {
+    static Function<State, State> NextPageLoading() {
+        return state -> {
+            state.nextPageLoading = true;
+            return state;
+        };
+    }
+
+    static Function<State, State> NextPageError(Throwable error) {
+        return state -> {
+            state.nextPageLoading = false;
+            state.error = error;
+            return state;
+        };
+    }
+
+    static Function<State, State> NextPageLoaded(List<Meme> memes) {
+        return state -> {
+            state.nextPageLoading = false;
+            for (Meme meme : memes)
                 state.memes.addLast(meme);
-            state.refreshError = null;
-        }, refresh -> {
-            state.refreshError = refresh.error;
-            state.refreshLoading = refresh.loading;
-            for (Meme meme : Lists.reverse(refresh.memes))
+            return state;
+        };
+    }
+
+    static Function<State, State> FirstPageLoading() {
+        return state -> {
+            state.firstPageLoading = true;
+            return state;
+        };
+    }
+
+    static Function<State, State> FirstPageError(Throwable error) {
+        return state -> {
+            state.firstPageLoading = false;
+            state.error = error;
+            return state;
+        };
+    }
+
+    static Function<State, State> FirstPageLoaded(List<Meme> memes) {
+        return state -> {
+            state.firstPageLoading = false;
+            state.memes.addAll(memes);
+            return state;
+        };
+    }
+
+    static Function<State, State> Refreshing() {
+        return state -> {
+            state.refreshing = true;
+            return state;
+        };
+    }
+
+    static Function<State, State> RefreshError(Throwable error) {
+        return state -> {
+            state.refreshing = false;
+            state.error = error;
+            return state;
+        };
+    }
+
+    static Function<State, State> Refreshed(List<Meme> memes) {
+        return state -> {
+            state.refreshing = false;
+            for (Meme meme : Lists.reverse(memes))
                 if (!state.memes.contains(meme))
                     state.memes.addFirst(meme);
-        }, loadFirst -> {
-            state.loadNextError = loadFirst.error;
-            state.loadNextLoading = loadFirst.loading;
-            state.memes.addAll(loadFirst.memes);
-        });
-
-
-        return state;
-        state.error = null;
+            return state;
+        };
     }
 }
 
+
 class Intents {
-    Observable<Void> RefreshIntent;
+    Observable<Object> RefreshIntent;
     Observable<Void> LoadNextIntent;
     Observable<Void> LoadFirstIntent;
 }
 
 class State {
-    boolean refreshLoading = false;
-    boolean loadNextLoading = false;
-    boolean loadFirstLoading = false;
+    public boolean refreshing = false;
+    boolean nextPageLoading = false;
+    boolean firstPageLoading = false;
     Throwable error = new Throwable();
     Deque<Meme> memes = new ArrayDeque<>();
 
-    static class Load {
-        final boolean loading;
-        final List<Meme> memes;
-        final Throwable error;
-
-        private Load(List<Meme> memes) {
-            this.loading = false;
-            this.memes = memes;
-            this.error = null;
-        }
-
-        private Load() {
-            this.loading = true;
-            this.memes = new ArrayList<>();
-            this.error = null;
-        }
-
-        private Load(Throwable error) {
-            this.loading = false;
-            this.memes = new ArrayList<>();
-            this.error = error;
-        }
-
-        public List<Meme> memes() {
-            return memes;
-        }
-
-        public Throwable error() {
-            return error;
-        }
-
-        public boolean loading() {
-            return loading;
-        }
-
-        static class Refresh extends Load {
-
-        }
-
-        static class First extends Load {
-
-        }
-
-        static class Next extends Load {
-
-        }
+    public boolean refreshing() {
+        return refreshing;
     }
 
+    public boolean nextPageLoading() {
+        return nextPageLoading;
+    }
+
+    public boolean firstPageLoading() {
+        return firstPageLoading;
+    }
+
+    public Throwable error() {
+        return error;
+    }
+
+    public Deque<Meme> memes() {
+        return memes;
+    }
 }
-
-
