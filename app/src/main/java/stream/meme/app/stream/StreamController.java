@@ -1,11 +1,9 @@
 package stream.meme.app.stream;
 
 import com.google.common.collect.Lists;
-import com.jakewharton.rxbinding2.support.v7.widget.RxRecyclerView;
-import com.jakewharton.rxbinding2.support.v7.widget.RxRecyclerViewAdapter;
+import com.squareup.picasso.Picasso;
 
-import java.util.ArrayDeque;
-import java.util.Deque;
+import java.util.LinkedList;
 import java.util.List;
 
 import io.reactivex.Observable;
@@ -14,7 +12,10 @@ import io.reactivex.functions.Function;
 import stream.meme.app.ItemOffsetDecoration;
 import stream.meme.app.MemeStream;
 import stream.meme.app.R;
+import stream.meme.app.RxAdapter;
+import stream.meme.app.RxListCallback;
 import stream.meme.app.bisp.BISPDatabindingController;
+import stream.meme.app.databinding.MemeViewBinding;
 import stream.meme.app.databinding.StreamViewBinding;
 
 import static com.jakewharton.rxbinding2.support.v4.widget.RxSwipeRefreshLayout.refreshes;
@@ -33,8 +34,12 @@ public class StreamController extends BISPDatabindingController<Intents, StreamV
     @Override
     public BiConsumer<StreamViewBinding, Observable<State>> getStateToViewBinder() {
         return (view, viewState) -> {
+            RxAdapter.on(view.recyclerView, new RxListCallback<>(viewState.map(State::memes))).bind(R.layout.meme_view, (Meme meme, MemeViewBinding memeView) -> {
+                Picasso.with(getActivity()).load(meme.getImage()).into(memeView.image);
+                memeView.title.setText(meme.getTitle());
+                memeView.subtitle.setText(meme.getSubtitle());
+            });
             view.recyclerView.addItemDecoration(new ItemOffsetDecoration(getActivity(), R.dimen.item_offset));
-            view.recyclerView.setAdapter();
             viewState.map(State::refreshing).subscribe(refreshing(view.refreshLayout));
             viewState.map(State::firstPageLoading).subscribe(visibility(view.progressBar));
 
@@ -162,7 +167,7 @@ class State {
     boolean nextPageLoading = false;
     boolean firstPageLoading = false;
     Throwable error = new Throwable();
-    Deque<Meme> memes = new ArrayDeque<>();
+    LinkedList<Meme> memes = new LinkedList<>();
 
     public boolean refreshing() {
         return refreshing;
@@ -180,7 +185,7 @@ class State {
         return error;
     }
 
-    public Deque<Meme> memes() {
+    public LinkedList<Meme> memes() {
         return memes;
     }
 }
