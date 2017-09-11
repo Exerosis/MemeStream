@@ -3,6 +3,7 @@ package stream.meme.app.bisp;
 
 import io.reactivex.Observable;
 import io.reactivex.functions.BiConsumer;
+import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Function;
 
 public interface BISP<Intents, View, State> {
@@ -17,5 +18,9 @@ public interface BISP<Intents, View, State> {
 
     interface Binder<View> {
         <Type> Observable<Type> bind(Function<View, Observable<Type>> binder);
+    }
+
+    interface StateBinder<View, State> {
+        <Type> Consumer<Type> bind(Function<View, Consumer<Type>> binder);
     }
 }

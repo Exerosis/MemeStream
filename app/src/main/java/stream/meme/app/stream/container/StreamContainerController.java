@@ -37,22 +37,23 @@ public class StreamContainerController extends BISPDatabindingController<Intents
     public BiConsumer<Intents, Binder<StreamContainerViewBinding>> getViewToIntentBinder() {
         return (intents, binder) -> {
             //Bind changes in view to intents
-            if (getActivity() != null)
-                intents.NavigateIntent = binder.bind(view -> Observable.create(subscriber ->
-                        new DrawerBuilder(getActivity())
-                                .inflateMenu(R.menu.home_navigation_menu)
-                                .withAccountHeader(new AccountHeaderBuilder()
-                                        .addProfiles(new ProfileDrawerItem()
-                                                .withEmail("exerosis@gmail.com")
-                                                .withName("Exerosis")
-                                                .withIcon("")
-                                                .withIdentifier(0L))
-                                        .build())
-                                .withOnDrawerItemClickListener((v, position, drawerItem) -> {
-                                    subscriber.onNext(((int) drawerItem.getIdentifier()));
-                                    return true;
-                                })
-                                .build()));
+            intents.NavigateIntent = binder.bind(view -> Observable.create(subscriber -> {
+                new DrawerBuilder(getActivity())
+                        .inflateMenu(R.menu.home_navigation_menu)
+                        .withAccountHeader(new AccountHeaderBuilder()
+                                .withActivity(getActivity())
+                                .addProfiles(new ProfileDrawerItem()
+                                        .withEmail("exerosis@gmail.com")
+                                        .withName("Exerosis")
+                                        .withIcon("")
+                                        .withIdentifier(0L))
+                                .build())
+                        .withOnDrawerItemClickListener((v, position, drawerItem) -> {
+                            subscriber.onNext(((int) drawerItem.getIdentifier()));
+                            return true;
+                        })
+                        .build();
+            }));
             intents.ProfileClickedIntent = intents.NavigateIntent.filter(id -> id.equals(0)).map(id -> null);
         };
     }
@@ -62,7 +63,7 @@ public class StreamContainerController extends BISPDatabindingController<Intents
         //Bind changes of intent to changes of state
         return intents -> Observable.merge(intents.ProfileClickedIntent.map(test -> {
             //Handle changes in test
-            getRouter().setRoot(RouterTransaction.with(new ProfileController()));
+            StreamContainerController.this.getRouter().setRoot(RouterTransaction.with(new ProfileController()));
             return new State();
         }), intents.NavigateIntent.map(id -> {
             State state = new State();

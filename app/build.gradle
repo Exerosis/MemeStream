@@ -1,7 +1,4 @@
 apply plugin: 'com.android.application'
-apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-android-extensions'
-apply plugin: 'kotlin-kapt'
 
 android {
     compileSdkVersion 26
@@ -30,10 +27,6 @@ android {
 
 
 dependencies {
-    kapt 'com.android.databinding:compiler:2.3.3'
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
-    compile 'com.hannesdorfmann.mosby3:mvi-conductor:3.0.1-SNAPSHOT'
-    compile 'com.hannesdorfmann.mosby3:mvi:3.0.1'
     compile 'com.bluelinelabs:conductor:2.1.4'
     compile 'com.jakewharton.rxbinding2:rxbinding:2.0.0'
     compile 'com.jakewharton.rxbinding2:rxbinding-support-v4:2.0.0'
@@ -82,7 +75,6 @@ dependencies {
 
     //--DataBindings Libraries--
     testCompile 'junit:junit:4.12'
-    compile "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
 }
 
 apply plugin: 'com.google.gms.google-services'

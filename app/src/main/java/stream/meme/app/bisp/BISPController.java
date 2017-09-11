@@ -19,16 +19,18 @@ import io.reactivex.subjects.BehaviorSubject;
 import io.reactivex.subjects.Subject;
 
 public abstract class BISPController<Intents, View, State> extends Controller implements BISP<Intents, View, State> {
-    protected int layout;
+    private final Intents intents;
     private final List<Disposable> disposables = new ArrayList<>();
     private final Map<Subject<?>, Function<View, ?>> viewBinders = new HashMap<>();
+    protected int layout;
     private Observable<State> state;
+    private Subject<State> stateSubject = BehaviorSubject.create();
 
     public BISPController(@LayoutRes int layout) {
         this.layout = layout;
+        intents = getIntents();
         try {
-            state = getIntentToStateBinder().apply(getIntents());
-            getViewToIntentBinder().accept(getIntents(), new Binder<View>() {
+            getViewToIntentBinder().accept(intents, new Binder<View>() {
                 @Override
                 public <Type> Observable<Type> bind(Function<View, Observable<Type>> binder) {
                     Subject<Type> subject = BehaviorSubject.create();
@@ -36,7 +38,10 @@ public abstract class BISPController<Intents, View, State> extends Controller im
                     return subject;
                 }
             });
-
+            state = getIntentToStateBinder().apply(intents);
+            state.subscribe(test -> {
+                System.out.println(test);
+            });
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -50,21 +55,19 @@ public abstract class BISPController<Intents, View, State> extends Controller im
         return inflater.inflate(layout, container, false);
     }
 
-
     @SuppressWarnings("unchecked")
     @Override
     protected void onAttach(@NonNull android.view.View view) {
-        Subject<State> subject = BehaviorSubject.create();
         try {
             for (Map.Entry<Subject<?>, Function<View, ?>> entry : viewBinders.entrySet()) {
                 Subject<Object> key = (Subject<Object>) entry.getKey();
                 disposables.add(((Function<View, Observable<Object>>) entry.getValue()).apply(getViewHolder()).subscribe(key::onNext, key::onError, key::onComplete));
             }
-            getStateToViewBinder().accept(getViewHolder(), subject);
+            getStateToViewBinder().accept(getViewHolder(), stateSubject);
+            disposables.add(state.subscribe(stateSubject::onNext, stateSubject::onError, stateSubject::onComplete));
         } catch (Exception e) {
             e.printStackTrace();
         }
-        disposables.add(state.subscribe(subject::onNext, subject::onError, subject::onComplete));
     }
 
     @Override

@@ -1,4 +1,4 @@
-package stream.meme.app;
+package stream.meme.app.rxadapter;
 
 import android.support.v7.util.DiffUtil;
 import android.support.v7.util.ListUpdateCallback;
@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.functions.BiPredicate;
 import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
@@ -47,8 +48,9 @@ public class RxListCallback<Type> implements Supplier<List<Type>>, Consumer<List
 
     @Override
     public void accept(ListUpdateCallback callback) throws Exception {
-        data.observeOn(Schedulers.computation()).subscribe(newList -> {
-            DiffUtil.DiffResult result = DiffUtil.calculateDiff(new DiffUtil.Callback() {
+        data.observeOn(Schedulers.computation()).map(newList -> {
+            list = newList;
+            return DiffUtil.calculateDiff(new DiffUtil.Callback() {
                 @Override
                 public int getOldListSize() {
                     return list.size();
@@ -79,8 +81,6 @@ public class RxListCallback<Type> implements Supplier<List<Type>>, Consumer<List
                     return false;
                 }
             }, detectMoves);
-            list = newList;
-            result.dispatchUpdatesTo(callback);
-        });
+        }).observeOn(AndroidSchedulers.mainThread()).subscribe(result -> result.dispatchUpdatesTo(callback));
     }
 }
