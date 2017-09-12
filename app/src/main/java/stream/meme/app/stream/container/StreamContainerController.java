@@ -27,6 +27,7 @@ public class StreamContainerController extends BISPDatabindingController<Intents
         return (view, viewState) -> {
             //Bind changes of state to changes of view.
             viewState.subscribe(state -> {
+
                 //Sets the main content of our view to the specified controllers.
                 getChildRouter(view.container).setRoot(RouterTransaction.with(state.Stream));
             });

@@ -2,8 +2,10 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/MemeStream.iml" filepath="$PROJECT_DIR$/MemeStream.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/MemeStream.iml" filepath="$PROJECT_DIR$/.idea/MemeStream.iml" />
+      <module fileurl="file://C:\Home\Workspace\Android Studio\MemeStream\MemeStream.iml" filepath="C:\Home\Workspace\Android Studio\MemeStream\MemeStream.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://C:\Home\Workspace\Android Studio\MemeStream\app\app.iml" filepath="C:\Home\Workspace\Android Studio\MemeStream\app\app.iml" />
     </modules>
   </component>
 </project>
