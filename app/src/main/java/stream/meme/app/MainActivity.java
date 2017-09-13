@@ -21,7 +21,11 @@ public class MainActivity extends AppCompatActivity {
         ChangeHandlerFrameLayout container = findViewById(R.id.container);
         router = Conductor.attachRouter(this, container, savedInstanceState);
         if (!router.hasRootController())
-            router.setRoot(RouterTransaction.with(new StreamController()));
+            try {
+                router.setRoot(RouterTransaction.with(new StreamController()));
+            } catch (Exception eggsAgainstTheWall) {
+                throw new RuntimeException(eggsAgainstTheWall);
+            }
     }
 
     @Override

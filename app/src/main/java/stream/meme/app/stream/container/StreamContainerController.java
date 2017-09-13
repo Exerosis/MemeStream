@@ -1,5 +1,7 @@
 package stream.meme.app.stream.container;
 
+import android.support.v4.util.Pair;
+
 import com.bluelinelabs.conductor.Controller;
 import com.bluelinelabs.conductor.RouterTransaction;
 import com.mikepenz.materialdrawer.AccountHeaderBuilder;
@@ -7,38 +9,28 @@ import com.mikepenz.materialdrawer.DrawerBuilder;
 import com.mikepenz.materialdrawer.model.ProfileDrawerItem;
 
 import io.reactivex.Observable;
-import io.reactivex.functions.BiConsumer;
-import io.reactivex.functions.Function;
+import io.reactivex.functions.Consumer;
 import stream.meme.app.R;
-import stream.meme.app.bisp.BISPDatabindingController;
+import stream.meme.app.bisp.DatabindingBIVSCModule;
 import stream.meme.app.databinding.StreamContainerViewBinding;
 import stream.meme.app.profile.ProfileController;
 import stream.meme.app.stream.StreamController;
 
 
-public class StreamContainerController extends BISPDatabindingController<Intents, StreamContainerViewBinding, State> {
+public class StreamContainerController extends DatabindingBIVSCModule<StreamContainerViewBinding, State, Intents> {
+    private Intents intents;
 
-    public StreamContainerController() {
+    public StreamContainerController() throws Exception {
         super(R.layout.stream_container_view);
     }
 
     @Override
-    public BiConsumer<StreamContainerViewBinding, Observable<State>> getStateToViewBinder() {
-        return (view, viewState) -> {
-            //Bind changes of state to changes of view.
-            viewState.subscribe(state -> {
+    public Consumer<Observable<Pair<StreamContainerViewBinding, Observable<State>>>> getBinder() {
+        return binder -> {
+            Observable<StreamContainerViewBinding> viewModel = binder.map(pair -> pair.first);
+            Observable<State> state = binder.flatMap(pair -> pair.second);
 
-                //Sets the main content of our view to the specified controllers.
-                getChildRouter(view.container).setRoot(RouterTransaction.with(state.Stream));
-            });
-        };
-    }
-
-    @Override
-    public BiConsumer<Intents, Binder<StreamContainerViewBinding>> getViewToIntentBinder() {
-        return (intents, binder) -> {
-            //Bind changes in view to intents
-            intents.NavigateIntent = binder.bind(view -> Observable.create(subscriber -> {
+            getIntents().NavigateIntent = viewModel.switchMap(view -> Observable.create(subscriber -> {
                 new DrawerBuilder(getActivity())
                         .inflateMenu(R.menu.home_navigation_menu)
                         .withAccountHeader(new AccountHeaderBuilder()
@@ -55,18 +47,20 @@ public class StreamContainerController extends BISPDatabindingController<Intents
                         })
                         .build();
             }));
-            intents.ProfileClickedIntent = intents.NavigateIntent.filter(id -> id.equals(0)).map(id -> null);
+            getIntents().ProfileClickedIntent = getIntents().NavigateIntent.filter(id -> id.equals(0)).map(id -> null);
+
+            viewModel.subscribe(view -> {
+                state.map(State::stream).map(RouterTransaction::with).forEach(getChildRouter(view.container)::setRoot);
+            });
         };
     }
 
     @Override
-    public Function<Intents, Observable<State>> getIntentToStateBinder() {
-        //Bind changes of intent to changes of state
-        return intents -> Observable.merge(intents.ProfileClickedIntent.map(test -> {
-            //Handle changes in test
+    public Observable<State> getController() {
+        return Observable.merge(getIntents().ProfileClickedIntent.map(test -> {
             StreamContainerController.this.getRouter().setRoot(RouterTransaction.with(new ProfileController()));
             return new State();
-        }), intents.NavigateIntent.map(id -> {
+        }), getIntents().NavigateIntent.map(id -> {
             State state = new State();
             //TODO push tags into controller
             switch (id) {
@@ -84,7 +78,9 @@ public class StreamContainerController extends BISPDatabindingController<Intents
 
     @Override
     public Intents getIntents() {
-        return new Intents();
+        if (intents == null)
+            intents = new Intents();
+        return intents;
     }
 }
 
@@ -95,4 +91,8 @@ class Intents {
 
 class State {
     Controller Stream;
+
+    Controller stream() {
+        return Stream;
+    }
 }

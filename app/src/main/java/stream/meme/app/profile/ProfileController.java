@@ -1,36 +1,29 @@
 package stream.meme.app.profile;
 
-import io.reactivex.functions.BiConsumer;
-import io.reactivex.functions.Function;
-import stream.meme.app.R;
-import stream.meme.app.bisp.BISPDatabindingController;
+import android.support.v4.util.Pair;
 
-public class ProfileController extends BISPDatabindingController {
-    public ProfileController() {
+import io.reactivex.Observable;
+import io.reactivex.functions.Consumer;
+import stream.meme.app.R;
+import stream.meme.app.bisp.DatabindingBIVSCModule;
+
+public class ProfileController extends DatabindingBIVSCModule {
+    public ProfileController() throws Exception {
         super(R.layout.meme_view);
     }
 
     @Override
-    public BiConsumer getStateToViewBinder() {
-        return (o, o2) -> {
-
-        };
-    }
-
-    @Override
-    public BiConsumer getViewToIntentBinder() {
-        return (o, o2) -> {
-
-        };
-    }
-
-    @Override
-    public Function getIntentToStateBinder() {
-        return o -> null;
-    }
-
-    @Override
     public Object getIntents() {
+        return null;
+    }
+
+    @Override
+    public Consumer<Observable<Pair>> getBinder() {
+        return null;
+    }
+
+    @Override
+    public Observable getController() {
         return null;
     }
 }
