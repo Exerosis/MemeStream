@@ -11,7 +11,7 @@ public abstract class DatabindingBIVSCModule<View extends ViewDataBinding, State
     @LayoutRes
     private final int layout;
 
-    public DatabindingBIVSCModule(@LayoutRes int layout) throws Exception {
+    public DatabindingBIVSCModule(@LayoutRes int layout) {
         this.layout = layout;
     }
 

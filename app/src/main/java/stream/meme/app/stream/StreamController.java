@@ -2,7 +2,6 @@ package stream.meme.app.stream;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
-import android.support.v4.util.Pair;
 import android.support.v7.widget.LinearLayoutManager;
 
 import com.google.common.collect.Lists;
@@ -12,10 +11,8 @@ import java.util.LinkedList;
 import java.util.List;
 
 import io.reactivex.Observable;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.functions.Consumer;
+import io.reactivex.functions.BiConsumer;
 import io.reactivex.functions.Function;
-import io.reactivex.observables.ConnectableObservable;
 import io.reactivex.subjects.PublishSubject;
 import io.reactivex.subjects.Subject;
 import stream.meme.app.ItemOffsetDecoration;
@@ -32,60 +29,45 @@ import static com.jakewharton.rxbinding2.support.v4.widget.RxSwipeRefreshLayout.
 import static com.jakewharton.rxbinding2.support.v4.widget.RxSwipeRefreshLayout.refreshing;
 import static com.jakewharton.rxbinding2.view.RxView.visibility;
 
-public class StreamController extends DatabindingBIVSCModule<StreamViewBinding, State, Intents> {
+public class StreamController extends DatabindingBIVSCModule<StreamViewBinding, State> {
+    private final Intents intents = new Intents();
     private MemeStream memeStream;
-    private Intents intents;
     private int page = 1;
 
-    public StreamController() throws Exception {
+    public StreamController() {
         super(R.layout.stream_view);
     }
 
     @Override
-    public Consumer<ConnectableObservable<Pair<StreamViewBinding, ConnectableObservable<State>>>> getBinder() {
-        return binder -> {
-            getIntents().RefreshIntent = binder.switchMap(pair -> refreshes(pair.first.refreshLayout));
-            binder.connect(disposable -> {});
-
-            binder.subscribe((Pair<StreamViewBinding, ConnectableObservable<State>> pair) -> {
-                StreamViewBinding view = pair.first;
-                Observable<State> state = pair.second;
-
-                state = state.observeOn(AndroidSchedulers.mainThread());
+    public BiConsumer<Observable<StreamViewBinding>, Observable<State>> getBinder() {
+        return (views, state) -> {
+            intents.RefreshIntent = views.switchMap(view -> refreshes(view.refreshLayout));
+            views.subscribe(view -> {
                 RxAdapter.on(view.recyclerView, new RxListCallback<>(state.map(State::memes))).bind(R.layout.meme_view, (Meme meme, MemeViewBinding memeView) -> {
                     Picasso.with(getActivity()).load(meme.getImage()).into(memeView.image);
                     memeView.title.setText(meme.getTitle());
                     memeView.subtitle.setText(meme.getSubtitle());
-                    memeView.like.setOnClickListener(v -> {
-                        getIntents().LikeClickIntent.onNext(meme);
-                    });
-                    memeView.share.setOnClickListener(v -> {
-                        getIntents().ShareClickIntent.onNext(meme);
-                    });
-                    memeView.getRoot().setOnClickListener(v -> {
-                        getIntents().MemeClickIntent.onNext(meme);
-                    });
+
+                    memeView.like.setOnClickListener(v -> intents.LikeClickIntent.onNext(meme));
+                    memeView.share.setOnClickListener(v -> intents.ShareClickIntent.onNext(meme));
+                    memeView.getRoot().setOnClickListener(v -> intents.MemeClickIntent.onNext(meme));
                 }).footer(R.layout.stream_footer).showFooter(state.map(State::nextPageLoading));
 
                 view.recyclerView.addItemDecoration(new ItemOffsetDecoration(getActivity(), R.dimen.item_offset));
                 view.recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-                PaginationListener.on(view.recyclerView, state.map(State::nextPageLoading)).subscribe(t -> getIntents().LoadNextIntent.onNext(t));
 
-                state.map(state1 -> {
-                    return state1.refreshing();
-                }).subscribe(refreshing(view.refreshLayout));
-                state.map(state1 -> {
-                    return state1.firstPageLoading();
-                }).subscribe(visibility(view.progressBar));
+                PaginationListener.on(view.recyclerView, state.map(State::nextPageLoading)).subscribe(intents.LoadNextIntent::onNext);
+                state.subscribe(test -> {
+                    visibility(view.progressBar).accept(test.firstPageLoading);
+                    refreshing(view.refreshLayout).accept(test.refreshing);
+                });
+
             });
         };
     }
 
     @Override
     public Observable<State> getController() {
-        intents.RefreshIntent.subscribe(test -> {
-            System.out.println("test = " + test);
-        });
         return Observable.merge(
                 intents.LoadNextIntent
                         .flatMap(ignored -> memeStream.loadMemes(page++)
@@ -108,13 +90,7 @@ public class StreamController extends DatabindingBIVSCModule<StreamViewBinding, 
     @Override
     protected void onContextAvailable(@NonNull Context context) {
         memeStream = (MemeStream) getApplicationContext();
-    }
-
-    @Override
-    public Intents getIntents() {
-        if (intents == null)
-            intents = new Intents();
-        return intents;
+        super.onContextAvailable(context);
     }
 }
 
@@ -196,7 +172,6 @@ class Partial {
 class Intents {
     Observable<Object> RefreshIntent;
     Observable<Boolean> LoadFirstIntent = Observable.just(true);
-    //TODO I'm fairly sure all of these are signs of issues x)
     Subject<Boolean> LoadNextIntent = PublishSubject.create();
     Subject<Meme> MemeClickIntent = PublishSubject.create();
     Subject<Meme> LikeClickIntent = PublishSubject.create();
@@ -207,7 +182,7 @@ class State {
     public boolean refreshing = false;
     boolean nextPageLoading = false;
     boolean firstPageLoading = false;
-    Throwable error = new Throwable();
+    Throwable error = null;
     LinkedList<Meme> memes = new LinkedList<>();
 
     public boolean refreshing() {
