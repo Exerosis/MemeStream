@@ -14,7 +14,6 @@ import stream.meme.app.databinding.StreamContainerViewBinding;
 import stream.meme.app.profile.ProfileController;
 import stream.meme.app.stream.StreamController;
 
-
 public class StreamContainerController extends DatabindingBIVSCModule<StreamContainerViewBinding, State> {
     private final Intents intents = new Intents();
 
