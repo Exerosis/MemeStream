@@ -50,7 +50,6 @@ public class StreamController extends DatabindingBIVSCModule<StreamViewBinding, 
         return (views, state) -> {
             intents.RefreshIntent = views.switchMap(view -> refreshes(view.refreshLayout));
 
-
    /*         new RxAdapter<>(views.map(view -> view.recyclerView), new RxListCallback<>(state.map(State::memes))).bind(R.layout.meme_view, (Meme meme, MemeViewBinding memeView) -> {
                 Picasso.with(getActivity()).load(meme.getImage()).into(memeView.image);
                 memeView.title.setText(meme.getTitle());
