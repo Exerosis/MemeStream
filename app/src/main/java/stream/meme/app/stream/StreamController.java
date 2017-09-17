@@ -16,7 +16,7 @@ import io.reactivex.functions.Function;
 import io.reactivex.subjects.PublishSubject;
 import io.reactivex.subjects.Subject;
 import stream.meme.app.ItemOffsetDecoration;
-import stream.meme.app.MemeStream;
+import stream.meme.app.application.MemeStream;
 import stream.meme.app.PaginationListener;
 import stream.meme.app.R;
 import stream.meme.app.bisp.DatabindingBIVSCModule;
@@ -42,26 +42,24 @@ public class StreamController extends DatabindingBIVSCModule<StreamViewBinding, 
     public BiConsumer<Observable<StreamViewBinding>, Observable<State>> getBinder() {
         return (views, state) -> {
             intents.RefreshIntent = views.switchMap(view -> refreshes(view.refreshLayout));
+
+            new RxAdapter<>(views.map(view -> view.recyclerView), new RxListCallback<>(state.map(State::memes))).bind(R.layout.meme_view, (Meme meme, MemeViewBinding memeView) -> {
+                Picasso.with(getActivity()).load(meme.getImage()).into(memeView.image);
+                memeView.title.setText(meme.getTitle());
+                memeView.subtitle.setText(meme.getSubtitle());
+
+                memeView.like.setOnClickListener(v -> intents.LikeClickIntent.onNext(meme));
+                memeView.share.setOnClickListener(v -> intents.ShareClickIntent.onNext(meme));
+                memeView.getRoot().setOnClickListener(v -> intents.MemeClickIntent.onNext(meme));
+            }).footer(R.layout.stream_footer).showFooter(state.map(State::nextPageLoading).distinctUntilChanged());
+
             views.subscribe(view -> {
-                RxAdapter.on(view.recyclerView, new RxListCallback<>(state.map(State::memes))).bind(R.layout.meme_view, (Meme meme, MemeViewBinding memeView) -> {
-                    Picasso.with(getActivity()).load(meme.getImage()).into(memeView.image);
-                    memeView.title.setText(meme.getTitle());
-                    memeView.subtitle.setText(meme.getSubtitle());
-
-                    memeView.like.setOnClickListener(v -> intents.LikeClickIntent.onNext(meme));
-                    memeView.share.setOnClickListener(v -> intents.ShareClickIntent.onNext(meme));
-                    memeView.getRoot().setOnClickListener(v -> intents.MemeClickIntent.onNext(meme));
-                }).footer(R.layout.stream_footer).showFooter(state.map(State::nextPageLoading));
-
                 view.recyclerView.addItemDecoration(new ItemOffsetDecoration(getActivity(), R.dimen.item_offset));
                 view.recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
-                PaginationListener.on(view.recyclerView, state.map(State::nextPageLoading)).subscribe(intents.LoadNextIntent::onNext);
-                state.subscribe(test -> {
-                    visibility(view.progressBar).accept(test.firstPageLoading);
-                    refreshing(view.refreshLayout).accept(test.refreshing);
-                });
-
+                PaginationListener.on(view.recyclerView, state.map(State::nextPageLoading).distinctUntilChanged()).subscribe(intents.LoadNextIntent);
+                state.map(State::nextPageLoading).distinctUntilChanged().subscribe(visibility(view.progressBar));
+                state.map(State::refreshing).distinctUntilChanged().subscribe(refreshing(view.refreshLayout));
             });
         };
     }

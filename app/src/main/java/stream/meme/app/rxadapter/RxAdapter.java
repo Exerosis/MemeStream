@@ -18,6 +18,7 @@ import io.reactivex.Observable;
 import io.reactivex.functions.BiConsumer;
 import io.reactivex.functions.BiPredicate;
 import io.reactivex.functions.Consumer;
+import io.reactivex.schedulers.Schedulers;
 
 import static android.databinding.DataBindingUtil.inflate;
 import static android.view.LayoutInflater.from;
@@ -29,47 +30,37 @@ public class RxAdapter<Type> {
     private Consumer<ViewDataBinding> footerBinding;
     private boolean footerShowing = false;
     private List<Type> list = new ArrayList<>();
+    private RecyclerView.Adapter<RxViewHolder> adapter;
+    private final ListUpdateCallback callback;
 
-    public static <Type, Data extends Supplier<List<Type>> & Consumer<ListUpdateCallback>> RxAdapter<Type> on(RecyclerView view, Data data) {
-        return new RxAdapter<>(view, data);
-    }
+    public <Data extends Supplier<List<Type>> & Consumer<ListUpdateCallback>> RxAdapter(Observable<RecyclerView> views, Data data) {
+        callback = new ListUpdateCallback() {
+            @Override
+            public void onInserted(int position, int count) {
+                list = data.get();
+                getAdapter().notifyItemRangeInserted(position, count);
+            }
 
-    private <Data extends Supplier<List<Type>> & Consumer<ListUpdateCallback>> RxAdapter(RecyclerView view, Data data) {
-        try {
-            data.accept(new ListUpdateCallback() {
-                @Override
-                public void onInserted(int position, int count) {
-                    list = data.get();
-                    view.getAdapter().notifyItemRangeInserted(position, count);
-                }
+            @Override
+            public void onRemoved(int position, int count) {
+                list = data.get();
+                getAdapter().notifyItemRangeRemoved(position, count);
+            }
 
-                @Override
-                public void onRemoved(int position, int count) {
-                    list = data.get();
-                    view.getAdapter().notifyItemRangeRemoved(position, count);
-                }
+            @Override
+            public void onMoved(int fromPosition, int toPosition) {
+                list = data.get();
+                getAdapter().notifyItemMoved(fromPosition, toPosition);
+            }
 
-                @Override
-                public void onMoved(int fromPosition, int toPosition) {
-                    list = data.get();
-                    view.getAdapter().notifyItemMoved(fromPosition, toPosition);
-                }
+            @Override
+            public void onChanged(int position, int count, Object payload) {
+                list = data.get();
+                getAdapter().notifyItemRangeChanged(position, count, payload);
+            }
+        };
 
-                @Override
-                public void onChanged(int position, int count, Object payload) {
-                    list = data.get();
-                    view.getAdapter().notifyItemRangeChanged(position, count, payload);
-                }
-            });
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        view.setAdapter(getAdapter());
-    }
-
-    public RecyclerView.Adapter<RxViewHolder> getAdapter() {
-        return new RecyclerView.Adapter<RxViewHolder>() {
+        adapter = new RecyclerView.Adapter<RxViewHolder>() {
             @Override
             public RxViewHolder onCreateViewHolder(ViewGroup parent, int position) {
                 ViewDataBinding binding = null;
@@ -122,6 +113,19 @@ public class RxAdapter<Type> {
                 return list.size() + (footerShowing ? 1 : 0);
             }
         };
+
+        views.observeOn(Schedulers.computation()).subscribe(view -> {
+            view.setAdapter(getAdapter());
+            try {
+                data.accept(callback);
+            } catch (Exception exception) {
+                throw new RuntimeException(exception);
+            }
+        });
+    }
+
+    public RecyclerView.Adapter<RxViewHolder> getAdapter() {
+        return adapter;
     }
 
     public List<Type> getData() {
