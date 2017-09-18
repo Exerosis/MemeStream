@@ -18,11 +18,11 @@ import stream.meme.app.stream.container.StreamContainerController;
 
 import static com.jakewharton.rxbinding2.view.RxView.visibility;
 
-public class LoginController extends DatabindingBIVSCModule<LoginViewBinding, State> {
+public class LoginController extends DatabindingBIVSCModule<LoginViewBinding, Boolean> {
     private final Intents intents = new Intents();
     private MemeStream memeStream;
 
-    public LoginController() throws Exception {
+    public LoginController() {
         super(R.layout.login_view);
     }
 
@@ -33,9 +33,9 @@ public class LoginController extends DatabindingBIVSCModule<LoginViewBinding, St
     }
 
     @Override
-    public BiConsumer<Observable<LoginViewBinding>, Observable<State>> getBinder() {
+    public BiConsumer<Observable<LoginViewBinding>, Observable<Boolean>> getBinder() {
         return (views, states) -> views.subscribe(view -> {
-            states.map(State::authenticating).subscribe(authenticating -> {
+            states.distinctUntilChanged().subscribe(authenticating -> {
                 visibility(view.progressBar).accept(authenticating);
                 visibility(view.buttons).accept(!authenticating);
             });
@@ -44,15 +44,15 @@ public class LoginController extends DatabindingBIVSCModule<LoginViewBinding, St
     }
 
     @Override
-    public Observable<State> getController() {
+    public Observable<Boolean> getController() {
         return intents.LoginStartIntent
-                .flatMap(loginType -> memeStream.login(loginType)
+                .flatMap(loginType -> memeStream.login(loginType, getActivity())
                         .observeOn(AndroidSchedulers.mainThread())
                         .map(result -> {
                             if (result)
                                 getRouter().setRoot(RouterTransaction.with(new StreamContainerController()));
-                            return new State(false);
-                        }).startWith(new State(true)));
+                            return false;
+                        }));
     }
 
     public static class Intents {
@@ -61,18 +61,6 @@ public class LoginController extends DatabindingBIVSCModule<LoginViewBinding, St
         public void login(LoginType type) {
             LoginStartIntent.onNext(type);
         }
-    }
-}
-
-class State {
-    boolean authenticating = false;
-
-    State(boolean authenticating) {
-        this.authenticating = authenticating;
-    }
-
-    public boolean authenticating() {
-        return authenticating;
     }
 }
 

@@ -5,17 +5,27 @@ import android.app.Application;
 import android.content.SharedPreferences;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
+import stream.meme.app.application.login.FacebookLogin;
+import stream.meme.app.application.login.GoogleLogin;
+import stream.meme.app.application.login.Login;
+import stream.meme.app.application.login.TwitterLogin;
 import stream.meme.app.login.LoginType;
 import stream.meme.app.stream.Meme;
 
+import static stream.meme.app.login.LoginType.FACEBOOK;
+import static stream.meme.app.login.LoginType.GOOGLE;
+import static stream.meme.app.login.LoginType.TWITTER;
+
 public class MemeStream extends Application {
     public static final String KEY_TOKEN = "token";
-    private LoginManager loginManager;
+    private Map<LoginType, Login> logins = new HashMap<>();
     private SharedPreferences sharedPreferences;
 
     public Observable<List<Meme>> loadMemes(int page) {
@@ -29,30 +39,28 @@ public class MemeStream extends Application {
                 .delay(2, TimeUnit.SECONDS);
     }
 
-    public Observable<Boolean> isAuthenticated() {
-        return Observable.just(getSharedPreferences().contains(KEY_TOKEN));
+    public boolean isAuthenticated() {
+        return getSharedPreferences().contains(KEY_TOKEN);
     }
 
     public Observable<Boolean> login(LoginType type, Activity activity) {
-        return getLoginManager().startLogin(type, activity).flatMap(result -> loginInternal(type, result)).onErrorReturn(error -> false);
+        if (getLogins().containsKey(type))
+            return getLogins().get(type).login(activity)
+                    .toObservable()
+                    .map(token -> token != null && getSharedPreferences().edit().putString(KEY_TOKEN, token).commit())
+                    .onErrorReturn(error -> false);
+        else
+            return Observable.just(false);
     }
 
-    private Observable<Boolean> loginInternal(LoginType type, String token) {
-        return Observable.create(subscriber -> {
-            if (getSharedPreferences().contains(KEY_TOKEN))
-                subscriber.onNext(true);
-            else if (token == null)
-                subscriber.onNext(false);
-            else
-                subscriber.onNext(getSharedPreferences().edit().putString(KEY_TOKEN, token).commit());
-            subscriber.onComplete();
-        });
-    }
-
-    public LoginManager getLoginManager() {
-        if (loginManager == null)
-            loginManager = new LoginManager(this);
-        return loginManager;
+    public Map<LoginType, Login> getLogins() {
+        if (logins == null) {
+            logins = new HashMap<>();
+            logins.put(FACEBOOK, new FacebookLogin());
+            logins.put(TWITTER, new TwitterLogin(this));
+            logins.put(GOOGLE, new GoogleLogin(this));
+        }
+        return logins;
     }
 
     private SharedPreferences getSharedPreferences() {
