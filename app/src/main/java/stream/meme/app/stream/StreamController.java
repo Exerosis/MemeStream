@@ -85,6 +85,7 @@ public class StreamController extends DatabindingBIVSCModule<StreamViewBinding, 
                         return memes.size() + (footerShown ? 1 : 0);
                     }
                 };
+
                 state.map(State::memes).map(newMemes -> {
                     DiffUtil.DiffResult result = DiffUtil.calculateDiff(new DiffUtil.Callback() {
                         @Override
@@ -106,8 +107,9 @@ public class StreamController extends DatabindingBIVSCModule<StreamViewBinding, 
                         public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
                             return memes.get(oldItemPosition).equals(newMemes.get(newItemPosition));
                         }
-                    });
+                    }, true);
                     memes = newMemes;
+//                    adapter.notifyDataSetChanged();
                     return result;
                 }).subscribe(result -> result.dispatchUpdatesTo(adapter));
                 state.map(State::nextPageLoading).distinctUntilChanged().subscribe(loading -> {

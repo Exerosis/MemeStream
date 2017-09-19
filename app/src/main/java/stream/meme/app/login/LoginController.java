@@ -6,19 +6,16 @@ import android.support.annotation.NonNull;
 import com.bluelinelabs.conductor.RouterTransaction;
 
 import io.reactivex.Observable;
-import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.functions.BiConsumer;
 import io.reactivex.subjects.PublishSubject;
 import io.reactivex.subjects.Subject;
-import stream.meme.app.application.MemeStream;
 import stream.meme.app.R;
+import stream.meme.app.application.MemeStream;
 import stream.meme.app.bisp.DatabindingBIVSCModule;
 import stream.meme.app.databinding.LoginViewBinding;
 import stream.meme.app.stream.container.StreamContainerController;
 
-import static com.jakewharton.rxbinding2.view.RxView.visibility;
-
-public class LoginController extends DatabindingBIVSCModule<LoginViewBinding, Boolean> {
+public class LoginController extends DatabindingBIVSCModule<LoginViewBinding, Void> {
     private final Intents intents = new Intents();
     private MemeStream memeStream;
 
@@ -33,26 +30,24 @@ public class LoginController extends DatabindingBIVSCModule<LoginViewBinding, Bo
     }
 
     @Override
-    public BiConsumer<Observable<LoginViewBinding>, Observable<Boolean>> getBinder() {
+    public BiConsumer<Observable<LoginViewBinding>, Observable<Void>> getBinder() {
         return (views, states) -> views.subscribe(view -> {
-            states.distinctUntilChanged().subscribe(authenticating -> {
-                visibility(view.progressBar).accept(authenticating);
-                visibility(view.buttons).accept(!authenticating);
-            });
             view.setIntents(intents);
         });
     }
 
     @Override
-    public Observable<Boolean> getController() {
-        return intents.LoginStartIntent
-                .flatMap(loginType -> memeStream.login(loginType, getActivity())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .map(result -> {
-                            if (result)
-                                getRouter().setRoot(RouterTransaction.with(new StreamContainerController()));
-                            return false;
-                        }));
+    public Observable<Void> getController() {
+        intents.LoginStartIntent.subscribe(loginType -> {
+            if (!memeStream.isAuthenticated())
+                memeStream.login(loginType, getActivity()).subscribe(result -> {
+                    if (result)
+                        getRouter().setRoot(RouterTransaction.with(new StreamContainerController()));
+                });
+            else
+                getRouter().setRoot(RouterTransaction.with(new StreamContainerController()));
+        });
+        return Observable.empty();
     }
 
     public static class Intents {

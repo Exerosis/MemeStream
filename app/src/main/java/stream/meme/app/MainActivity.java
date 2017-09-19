@@ -9,10 +9,10 @@ import com.bluelinelabs.conductor.Conductor;
 import com.bluelinelabs.conductor.Router;
 import com.bluelinelabs.conductor.RouterTransaction;
 
-import stream.meme.app.application.login.Login;
 import stream.meme.app.application.MemeStream;
+import stream.meme.app.application.login.Login;
 import stream.meme.app.login.LoginController;
-import stream.meme.app.stream.StreamController;
+import stream.meme.app.stream.container.StreamContainerController;
 
 public class MainActivity extends AppCompatActivity {
     private Router router;
@@ -25,8 +25,7 @@ public class MainActivity extends AppCompatActivity {
         ChangeHandlerFrameLayout container = findViewById(R.id.container);
         router = Conductor.attachRouter(this, container, savedInstanceState);
         if (!router.hasRootController())
-            router.setRoot(RouterTransaction.with(((MemeStream) getApplicationContext()).isAuthenticated() ? new StreamController() : new LoginController()));
-        ;
+            router.setRoot(RouterTransaction.with(((MemeStream) getApplicationContext()).isAuthenticated() ? new StreamContainerController() : new LoginController()));
     }
 
     @Override

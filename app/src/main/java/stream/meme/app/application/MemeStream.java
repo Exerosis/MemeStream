@@ -25,7 +25,7 @@ import static stream.meme.app.login.LoginType.TWITTER;
 
 public class MemeStream extends Application {
     public static final String KEY_TOKEN = "token";
-    private Map<LoginType, Login> logins = new HashMap<>();
+    private Map<LoginType, Login> logins;
     private SharedPreferences sharedPreferences;
 
     public Observable<List<Meme>> loadMemes(int page) {
