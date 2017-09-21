@@ -12,14 +12,12 @@ import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.functions.BiPredicate;
 import io.reactivex.functions.Consumer;
+import io.reactivex.schedulers.Schedulers;
 
 public class RxListCallback<Type> implements Supplier<List<Type>>, Consumer<ListUpdateCallback> {
     private ListUpdateCallback callback;
     private List<Type> list = new ArrayList<>();
     private final Observable<List<Type>> data;
-    private final BiPredicate<Type, Type> contentsSame;
-    private final BiPredicate<Type, Type> itemsSame;
-    private boolean detectMoves;
 
     public RxListCallback(Observable<List<Type>> data, BiPredicate<Type, Type> contentsSame, BiPredicate<Type, Type> itemsSame) {
         this(data, contentsSame, itemsSame, false);
@@ -35,10 +33,7 @@ public class RxListCallback<Type> implements Supplier<List<Type>>, Consumer<List
 
     public RxListCallback(Observable<List<Type>> data, BiPredicate<Type, Type> contentsSame, BiPredicate<Type, Type> itemsSame, boolean detectMoves) {
         this.data = data;
-        this.contentsSame = contentsSame;
-        this.itemsSame = itemsSame;
-        this.detectMoves = detectMoves;
-        data.observeOn(AndroidSchedulers.mainThread()).subscribe(newList -> {
+        data.observeOn(Schedulers.computation()).filter(list -> !list.isEmpty()).map(newList -> {
             DiffUtil.DiffResult result = DiffUtil.calculateDiff(new DiffUtil.Callback() {
                 @Override
                 public int getOldListSize() {
@@ -71,6 +66,8 @@ public class RxListCallback<Type> implements Supplier<List<Type>>, Consumer<List
                 }
             }, detectMoves);
             list = newList;
+            return result;
+        }).observeOn(AndroidSchedulers.mainThread()).subscribe(result -> {
             if (callback != null)
                 result.dispatchUpdatesTo(callback);
         });
