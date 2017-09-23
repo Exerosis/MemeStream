@@ -17,6 +17,7 @@ import stream.meme.app.stream.container.StreamContainerController;
 public class MainActivity extends AppCompatActivity {
     private Router router;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -36,8 +37,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        for (Login login : ((MemeStream) getApplicationContext()).getLogins().values()) {
+        for (Login login : ((MemeStream) getApplicationContext()).getLogins().values())
             login.onActivityResult(requestCode, resultCode, data);
-        }
     }
 }

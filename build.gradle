@@ -20,5 +20,6 @@ allprojects {
         androidSupportVersion = '26.0.1'
         storeVersion = '2.0.4'
         retrofitVersion = '2.2.0'
+        rxBindingVersion = '2.0.0'
     }
 }

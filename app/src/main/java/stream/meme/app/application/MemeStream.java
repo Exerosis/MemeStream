@@ -36,7 +36,7 @@ public class MemeStream extends Application {
                 new Meme(UUID.randomUUID(), "test3", "page " + page, "https://i.vimeocdn.com/portrait/58832_300x300"),
                 new Meme(UUID.randomUUID(), "test4", "page " + page, "https://i.vimeocdn.com/portrait/58832_300x300"),
                 new Meme(UUID.randomUUID(), "test5", "page " + page, "https://i.vimeocdn.com/portrait/58832_300x300")))
-                .delay(1, TimeUnit.SECONDS);
+                .delay(5, TimeUnit.SECONDS);
     }
 
     public boolean isAuthenticated() {

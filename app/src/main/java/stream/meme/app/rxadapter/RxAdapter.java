@@ -27,6 +27,7 @@ import static android.view.LayoutInflater.from;
 public class RxAdapter<Type> {
     private final Map<BiPredicate<Type, Integer>, Pair<Integer, BiConsumer<Type, ViewDataBinding>>> binders = new HashMap<>();
     private int footerLayout;
+    private int footerPosition = 0;
     private Consumer<ViewDataBinding> footerBinding;
     private boolean footerShowing = false;
     private List<Type> list = new ArrayList<>();
@@ -161,9 +162,9 @@ public class RxAdapter<Type> {
             return this;
         footerShowing = visible;
         if (visible)
-            getAdapter().notifyItemInserted(list.size());
+            getAdapter().notifyItemInserted(footerPosition = list.size());
         else
-            getAdapter().notifyItemRemoved(list.size());
+            getAdapter().notifyItemRemoved(footerPosition);
         return this;
     }
 

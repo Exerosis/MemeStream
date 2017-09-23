@@ -1,14 +1,14 @@
 package stream.meme.app.stream;
 
 import android.content.Context;
-import android.databinding.ViewDataBinding;
+import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 
-import com.squareup.picasso.Picasso;
+import com.facebook.drawee.backends.pipeline.Fresco;
+import com.facebook.imagepipeline.request.ImageRequestBuilder;
+import com.google.common.collect.Lists;
 
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -17,6 +17,7 @@ import io.reactivex.functions.BiConsumer;
 import io.reactivex.functions.Function;
 import io.reactivex.subjects.PublishSubject;
 import io.reactivex.subjects.Subject;
+import jp.wasabeef.fresco.processors.BlurPostprocessor;
 import stream.meme.app.ItemOffsetDecoration;
 import stream.meme.app.PaginationListener;
 import stream.meme.app.R;
@@ -46,7 +47,15 @@ public class StreamController extends DatabindingBIVSCModule<StreamViewBinding, 
             intents.RefreshIntent = views.switchMap(view -> refreshes(view.refreshLayout));
 
             new RxAdapter<>(views.map(view -> view.recyclerView), new RxListCallback<>(state.map(State::memes))).bind(R.layout.meme_view, (Meme meme, MemeViewBinding memeView) -> {
-                Picasso.with(getActivity()).load(meme.getImage()).into(memeView.image);
+
+                memeView.image.setController(Fresco.newDraweeControllerBuilder()
+                        .setImageRequest(ImageRequestBuilder
+                                .newBuilderWithSource(Uri.parse(meme.getImage()))
+                                .setProgressiveRenderingEnabled(true)
+                                .setPostprocessor(new BlurPostprocessor(getActivity(), 50))
+                                .build())
+                        .setOldController(memeView.image.getController())
+                        .build());
                 memeView.title.setText(meme.getTitle());
                 memeView.subtitle.setText(meme.getSubtitle());
 
@@ -60,7 +69,7 @@ public class StreamController extends DatabindingBIVSCModule<StreamViewBinding, 
                 view.recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
                 PaginationListener.on(view.recyclerView, state.map(State::nextPageLoading).distinctUntilChanged()).subscribe(intents.LoadNextIntent);
-                state.map(State::nextPageLoading).distinctUntilChanged().subscribe(visibility(view.progressBar));
+                state.map(State::firstPageLoading).distinctUntilChanged().subscribe(visibility(view.progressBar));
                 state.map(State::refreshing).distinctUntilChanged().subscribe(refreshing(view.refreshLayout));
             });
         };
@@ -90,10 +99,47 @@ public class StreamController extends DatabindingBIVSCModule<StreamViewBinding, 
     @Override
     protected void onContextAvailable(@NonNull Context context) {
         memeStream = (MemeStream) getApplicationContext();
+        Fresco.initialize(context);
         super.onContextAvailable(context);
     }
 }
 
+class Intents {
+    Observable<Object> RefreshIntent;
+    Observable<Boolean> LoadFirstIntent = Observable.just(true);
+    Subject<Boolean> LoadNextIntent = PublishSubject.create();
+    Subject<Meme> MemeClickIntent = PublishSubject.create();
+    Subject<Meme> LikeClickIntent = PublishSubject.create();
+    Subject<Meme> ShareClickIntent = PublishSubject.create();
+}
+
+class State {
+    boolean refreshing = false;
+    boolean nextPageLoading = false;
+    boolean firstPageLoading = false;
+    Throwable error = null;
+    LinkedList<Meme> memes = new LinkedList<>();
+
+    public boolean refreshing() {
+        return refreshing;
+    }
+
+    public boolean nextPageLoading() {
+        return nextPageLoading;
+    }
+
+    public boolean firstPageLoading() {
+        return firstPageLoading;
+    }
+
+    public Throwable error() {
+        return error;
+    }
+
+    public LinkedList<Meme> memes() {
+        return memes;
+    }
+}
 
 class Partial {
     static Function<State, State> NextPageLoading() {
@@ -161,62 +207,10 @@ class Partial {
     static Function<State, State> Refreshed(List<Meme> memes) {
         return state -> {
             state.refreshing = false;
-     /*       for (Meme meme : Lists.reverse(memes))
+            for (Meme meme : Lists.reverse(memes))
                 if (!state.memes.contains(meme))
-                    state.memes.addFirst(meme);*/
-            state.memes.addAll(memes);
-            Collections.shuffle(state.memes);
+                    state.memes.addFirst(meme);
             return state;
         };
-    }
-}
-
-class Intents {
-    Observable<Object> RefreshIntent;
-    Observable<Boolean> LoadFirstIntent = Observable.just(true);
-    Subject<Boolean> LoadNextIntent = PublishSubject.create();
-    Subject<Meme> MemeClickIntent = PublishSubject.create();
-    Subject<Meme> LikeClickIntent = PublishSubject.create();
-    Subject<Meme> ShareClickIntent = PublishSubject.create();
-}
-
-class State {
-    public boolean refreshing = false;
-    boolean nextPageLoading = false;
-    boolean firstPageLoading = false;
-    Throwable error = null;
-    LinkedList<Meme> memes = new LinkedList<>();
-
-    public boolean refreshing() {
-        return refreshing;
-    }
-
-    public boolean nextPageLoading() {
-        return nextPageLoading;
-    }
-
-    public boolean firstPageLoading() {
-        return firstPageLoading;
-    }
-
-    public Throwable error() {
-        return error;
-    }
-
-    public LinkedList<Meme> memes() {
-        return memes;
-    }
-}
-
-class ViewHolder<Binding extends ViewDataBinding> extends RecyclerView.ViewHolder {
-    private Binding binding;
-
-    public ViewHolder(Binding binding) {
-        super(binding.getRoot());
-        this.binding = binding;
-    }
-
-    public Binding getBinding() {
-        return binding;
     }
 }

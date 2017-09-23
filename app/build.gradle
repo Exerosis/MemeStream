@@ -28,11 +28,15 @@ android {
 
 dependencies {
     compile 'com.bluelinelabs:conductor:2.1.4'
-    compile 'com.jakewharton.rxbinding2:rxbinding:2.0.0'
-    compile 'com.jakewharton.rxbinding2:rxbinding-support-v4:2.0.0'
-    compile 'com.jakewharton.rxbinding2:rxbinding-appcompat-v7:2.0.0'
-    compile 'com.jakewharton.rxbinding2:rxbinding-design:2.0.0'
-    compile 'com.jakewharton.rxbinding2:rxbinding-recyclerview-v7:2.0.0'
+    compile 'com.facebook.fresco:fresco:1.5.0'
+    compile 'jp.wasabeef:fresco-processors:2.1.0'
+
+    //--RxBinding--
+    compile "com.jakewharton.rxbinding2:rxbinding:$rxBindingVersion"
+    compile "com.jakewharton.rxbinding2:rxbinding-support-v4:$rxBindingVersion"
+    compile "com.jakewharton.rxbinding2:rxbinding-appcompat-v7:$rxBindingVersion"
+    compile "com.jakewharton.rxbinding2:rxbinding-design:$rxBindingVersion"
+    compile "com.jakewharton.rxbinding2:rxbinding-recyclerview-v7:$rxBindingVersion"
     compile('com.mikepenz:materialdrawer:5.9.5@aar') {
         transitive = true
     }
