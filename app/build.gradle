@@ -30,6 +30,7 @@ dependencies {
     compile 'com.bluelinelabs:conductor:2.1.4'
     compile 'com.facebook.fresco:fresco:1.5.0'
     compile 'jp.wasabeef:fresco-processors:2.1.0'
+    compile 'jp.wasabeef:blurry:2.1.1'
 
     //--RxBinding--
     compile "com.jakewharton.rxbinding2:rxbinding:$rxBindingVersion"

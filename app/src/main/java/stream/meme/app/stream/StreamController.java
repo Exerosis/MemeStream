@@ -1,11 +1,14 @@
 package stream.meme.app.stream;
 
 import android.content.Context;
+import android.graphics.drawable.Animatable;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.LinearLayoutManager;
 
 import com.facebook.drawee.backends.pipeline.Fresco;
+import com.facebook.drawee.controller.BaseControllerListener;
+import com.facebook.imagepipeline.image.ImageInfo;
 import com.facebook.imagepipeline.request.ImageRequestBuilder;
 import com.google.common.collect.Lists;
 
@@ -17,7 +20,6 @@ import io.reactivex.functions.BiConsumer;
 import io.reactivex.functions.Function;
 import io.reactivex.subjects.PublishSubject;
 import io.reactivex.subjects.Subject;
-import jp.wasabeef.fresco.processors.BlurPostprocessor;
 import stream.meme.app.ItemOffsetDecoration;
 import stream.meme.app.PaginationListener;
 import stream.meme.app.R;
@@ -52,9 +54,19 @@ public class StreamController extends DatabindingBIVSCModule<StreamViewBinding, 
                         .setImageRequest(ImageRequestBuilder
                                 .newBuilderWithSource(Uri.parse(meme.getImage()))
                                 .setProgressiveRenderingEnabled(true)
-                                .setPostprocessor(new BlurPostprocessor(getActivity(), 50))
                                 .build())
                         .setOldController(memeView.image.getController())
+                        .setControllerListener(new BaseControllerListener<ImageInfo>() {
+                            @Override
+                            public void onFinalImageSet(String id, ImageInfo imageInfo, Animatable animatable) {
+                                super.onFinalImageSet(id, imageInfo, animatable);
+                            }
+
+                            @Override
+                            public void onIntermediateImageSet(String id, ImageInfo imageInfo) {
+                                super.onIntermediateImageSet(id, imageInfo);
+                            }
+                        })
                         .build());
                 memeView.title.setText(meme.getTitle());
                 memeView.subtitle.setText(meme.getSubtitle());
