@@ -1,14 +1,11 @@
 package stream.meme.app.stream;
 
 import android.content.Context;
-import android.graphics.drawable.Animatable;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.LinearLayoutManager;
 
 import com.facebook.drawee.backends.pipeline.Fresco;
-import com.facebook.drawee.controller.BaseControllerListener;
-import com.facebook.imagepipeline.image.ImageInfo;
 import com.facebook.imagepipeline.request.ImageRequestBuilder;
 import com.google.common.collect.Lists;
 
@@ -20,6 +17,7 @@ import io.reactivex.functions.BiConsumer;
 import io.reactivex.functions.Function;
 import io.reactivex.subjects.PublishSubject;
 import io.reactivex.subjects.Subject;
+import jp.wasabeef.fresco.processors.BlurPostprocessor;
 import stream.meme.app.ItemOffsetDecoration;
 import stream.meme.app.PaginationListener;
 import stream.meme.app.R;
@@ -33,6 +31,7 @@ import stream.meme.app.rxadapter.RxListCallback;
 import static com.jakewharton.rxbinding2.support.v4.widget.RxSwipeRefreshLayout.refreshes;
 import static com.jakewharton.rxbinding2.support.v4.widget.RxSwipeRefreshLayout.refreshing;
 import static com.jakewharton.rxbinding2.view.RxView.visibility;
+import static stream.meme.app.stream.Partial.*;
 
 public class StreamController extends DatabindingBIVSCModule<StreamViewBinding, State> {
     private final Intents intents = new Intents();
@@ -53,20 +52,9 @@ public class StreamController extends DatabindingBIVSCModule<StreamViewBinding, 
                 memeView.image.setController(Fresco.newDraweeControllerBuilder()
                         .setImageRequest(ImageRequestBuilder
                                 .newBuilderWithSource(Uri.parse(meme.getImage()))
-                                .setProgressiveRenderingEnabled(true)
+                                .setPostprocessor(new BlurPostprocessor(getActivity(), 10))
                                 .build())
                         .setOldController(memeView.image.getController())
-                        .setControllerListener(new BaseControllerListener<ImageInfo>() {
-                            @Override
-                            public void onFinalImageSet(String id, ImageInfo imageInfo, Animatable animatable) {
-                                super.onFinalImageSet(id, imageInfo, animatable);
-                            }
-
-                            @Override
-                            public void onIntermediateImageSet(String id, ImageInfo imageInfo) {
-                                super.onIntermediateImageSet(id, imageInfo);
-                            }
-                        })
                         .build());
                 memeView.title.setText(meme.getTitle());
                 memeView.subtitle.setText(meme.getSubtitle());
@@ -93,17 +81,17 @@ public class StreamController extends DatabindingBIVSCModule<StreamViewBinding, 
                 intents.LoadNextIntent
                         .flatMap(ignored -> memeStream.loadMemes(page++)
                                 .map(Partial::NextPageLoaded)
-                                .startWith(Partial.NextPageLoading())
+                                .startWith(NextPageLoading())
                                 .onErrorReturn(Partial::NextPageError)),
                 intents.LoadFirstIntent
                         .flatMap(ignored -> memeStream.loadMemes(0)
                                 .map(Partial::FirstPageLoaded)
-                                .startWith(Partial.FirstPageLoading())
+                                .startWith(FirstPageLoading())
                                 .onErrorReturn(Partial::FirstPageError)),
                 intents.RefreshIntent
                         .flatMap(ignored -> memeStream.loadMemes(page++)
                                 .map(Partial::Refreshed)
-                                .startWith(Partial.Refreshing())
+                                .startWith(Refreshing())
                                 .onErrorReturn(Partial::RefreshError)))
                 .scan(new State(), (state, partial) -> partial.apply(state));
     }

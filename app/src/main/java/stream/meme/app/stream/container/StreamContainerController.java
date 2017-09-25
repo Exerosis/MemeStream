@@ -1,18 +1,29 @@
 package stream.meme.app.stream.container;
 
+import android.view.View;
+
 import com.bluelinelabs.conductor.Controller;
+import com.bluelinelabs.conductor.Router;
 import com.bluelinelabs.conductor.RouterTransaction;
+import com.mikepenz.materialdrawer.AccountHeader;
 import com.mikepenz.materialdrawer.AccountHeaderBuilder;
 import com.mikepenz.materialdrawer.DrawerBuilder;
 import com.mikepenz.materialdrawer.model.ProfileDrawerItem;
+import com.mikepenz.materialdrawer.model.interfaces.IProfile;
 
 import io.reactivex.Observable;
 import io.reactivex.functions.BiConsumer;
+import io.reactivex.functions.Function;
+import io.reactivex.subjects.PublishSubject;
+import io.reactivex.subjects.Subject;
+import stream.meme.app.CircularRevealChangeHandler;
 import stream.meme.app.R;
 import stream.meme.app.bisp.DatabindingBIVSCModule;
 import stream.meme.app.databinding.StreamContainerViewBinding;
-import stream.meme.app.profile.ProfileController;
 import stream.meme.app.stream.StreamController;
+
+import static stream.meme.app.stream.container.Partial.Navigate;
+import static stream.meme.app.stream.container.Partial.Open;
 
 public class StreamContainerController extends DatabindingBIVSCModule<StreamContainerViewBinding, State> {
     private final Intents intents = new Intents();
@@ -24,11 +35,24 @@ public class StreamContainerController extends DatabindingBIVSCModule<StreamCont
     @Override
     public BiConsumer<Observable<StreamContainerViewBinding>, Observable<State>> getBinder() {
         return (viewModel, state) -> {
-            intents.NavigateIntent = viewModel.switchMap(view -> Observable.create(subscriber -> {
+            viewModel.subscribe(view -> {
                 new DrawerBuilder(getActivity())
                         .inflateMenu(R.menu.home_navigation_menu)
                         .withAccountHeader(new AccountHeaderBuilder()
                                 .withActivity(getActivity())
+                                .withOnAccountHeaderProfileImageListener(new AccountHeader.OnAccountHeaderProfileImageListener() {
+                                    @Override
+                                    public boolean onProfileImageClick(View view, IProfile profile, boolean current) {
+                                        intents.ProfileClickedIntent.onNext(true);
+                                        return true;
+                                    }
+
+                                    @Override
+                                    public boolean onProfileImageLongClick(View view, IProfile profile, boolean current) {
+                                        return false;
+                                    }
+                                })
+                                .withSelectionListEnabled(false)
                                 .addProfiles(new ProfileDrawerItem()
                                         .withEmail("exerosis@gmail.com")
                                         .withName("Exerosis")
@@ -36,12 +60,11 @@ public class StreamContainerController extends DatabindingBIVSCModule<StreamCont
                                         .withIdentifier(0L))
                                 .build())
                         .withOnDrawerItemClickListener((v, position, drawerItem) -> {
-                            subscriber.onNext(((int) drawerItem.getIdentifier()));
+                            intents.NavigateIntent.onNext(((int) drawerItem.getIdentifier()));
                             return true;
                         })
                         .build();
-            }));
-            intents.ProfileClickedIntent = intents.NavigateIntent.filter(id -> id.equals(0)).map(id -> null);
+            });
 
             viewModel.subscribe(view -> {
                 state.map(State::stream).map(RouterTransaction::with).subscribe(getChildRouter(view.container)::setRoot);
@@ -51,29 +74,34 @@ public class StreamContainerController extends DatabindingBIVSCModule<StreamCont
 
     @Override
     public Observable<State> getController() {
-        return Observable.merge(intents.ProfileClickedIntent.map(test -> {
-            StreamContainerController.this.getRouter().setRoot(RouterTransaction.with(new ProfileController()));
-            return new State();
-        }), intents.NavigateIntent.map(id -> {
-            State state = new State();
-            //TODO push tags into controller
-            switch (id) {
-                case R.id.navigation_home: {
-                    state.Stream = new StreamController();
-                    break;
-                }
-                case R.id.navigation_top: {
-                    state.Stream = new StreamController();
-                }
-            }
-            return state;
-        }));
+        return Observable.merge(
+                intents.ProfileClickedIntent.map(test ->
+                        Open(getRouter(), new StreamController())),
+                intents.NavigateIntent.map(id ->
+                        Navigate(id == R.id.navigation_home ? new StreamController() : new StreamController())))
+                .scan(new State(new StreamController()), (state, partial) -> partial.apply(state));
     }
 }
 
 class Intents {
-    Observable<Integer> NavigateIntent;
-    Observable<Void> ProfileClickedIntent;
+    Subject<Integer> NavigateIntent = PublishSubject.create();
+    Subject<Boolean> ProfileClickedIntent = PublishSubject.create();
+}
+
+interface Partial {
+    static Function<State, State> Navigate(Controller controller) {
+        return state -> {
+            state.Stream = controller;
+            return state;
+        };
+    }
+
+    static Function<State, State> Open(Router router, Controller controller) {
+        return state -> {
+            router.pushController(RouterTransaction.with(controller).pushChangeHandler(new CircularRevealChangeHandler()));
+            return state;
+        };
+    }
 }
 
 class State {
@@ -81,5 +109,9 @@ class State {
 
     Controller stream() {
         return Stream;
+    }
+
+    State(Controller stream) {
+        Stream = stream;
     }
 }
