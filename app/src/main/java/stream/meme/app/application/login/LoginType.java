@@ -1,4 +1,4 @@
-package stream.meme.app.login;
+package stream.meme.app.application.login;
 
 public enum LoginType {
     FACEBOOK, TWITTER, GOOGLE, LINKEDIN, GITHUB, PINTEREST, REDDIT;

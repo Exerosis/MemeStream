@@ -1,4 +1,4 @@
-package stream.meme.app.bisp;
+package stream.meme.app.util.bivsc;
 
 import io.reactivex.Observable;
 import io.reactivex.functions.BiConsumer;

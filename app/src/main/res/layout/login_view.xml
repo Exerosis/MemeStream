@@ -3,11 +3,11 @@
 
     <data>
 
-        <import type="stream.meme.app.login.LoginType" />
+        <import type="stream.meme.app.application.login.LoginType" />
 
         <variable
             name="intents"
-            type="stream.meme.app.login.LoginController.Intents" />
+            type="stream.meme.app.controller.LoginController.Intents" />
     </data>
 
     <FrameLayout

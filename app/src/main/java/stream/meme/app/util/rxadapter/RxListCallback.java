@@ -1,4 +1,4 @@
-package stream.meme.app.rxadapter;
+package stream.meme.app.util.rxadapter;
 
 import android.support.v7.util.DiffUtil;
 import android.support.v7.util.ListUpdateCallback;

@@ -1,4 +1,4 @@
-package stream.meme.app.stream;
+package stream.meme.app.application.meme;
 
 import java.util.UUID;
 

@@ -1,4 +1,4 @@
-package stream.meme.app.login;
+package stream.meme.app.controller;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
@@ -11,9 +11,9 @@ import io.reactivex.subjects.PublishSubject;
 import io.reactivex.subjects.Subject;
 import stream.meme.app.R;
 import stream.meme.app.application.MemeStream;
-import stream.meme.app.bisp.DatabindingBIVSCModule;
+import stream.meme.app.application.login.LoginType;
+import stream.meme.app.util.bivsc.DatabindingBIVSCModule;
 import stream.meme.app.databinding.LoginViewBinding;
-import stream.meme.app.stream.container.StreamContainerController;
 
 public class LoginController extends DatabindingBIVSCModule<LoginViewBinding, Void> {
     private final Intents intents = new Intents();
@@ -50,7 +50,7 @@ public class LoginController extends DatabindingBIVSCModule<LoginViewBinding, Vo
         return Observable.empty();
     }
 
-    public static class Intents {
+   class Intents {
         Subject<LoginType> LoginStartIntent = PublishSubject.create();
 
         public void login(LoginType type) {

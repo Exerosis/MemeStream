@@ -1,4 +1,4 @@
-package stream.meme.app.rxadapter;
+package stream.meme.app.util.rxadapter;
 
 public interface StableId {
     long getStableId();

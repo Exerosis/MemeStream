@@ -1,4 +1,4 @@
-package stream.meme.app;
+package stream.meme.app.util;
 
 import android.animation.Animator;
 import android.support.annotation.NonNull;
@@ -17,6 +17,8 @@ public class CircularRevealChangeHandler extends AnimatorChangeHandler {
         int y = container.getTop();
         int startRadius = 0;
         int endRadius = (int) Math.hypot(container.getWidth(), container.getHeight());
+        if (from != null)
+            from.setVisibility(View.INVISIBLE);
         if (isPush)
             return ViewAnimationUtils.createCircularReveal(to, x, y, startRadius, endRadius).setDuration(500);
         else
@@ -25,6 +27,5 @@ public class CircularRevealChangeHandler extends AnimatorChangeHandler {
 
     @Override
     protected void resetFromView(@NonNull View from) {
-
     }
 }

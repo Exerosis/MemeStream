@@ -1,4 +1,4 @@
-package stream.meme.app.rxadapter;
+package stream.meme.app.util.rxadapter;
 
 import android.databinding.ViewDataBinding;
 import android.support.annotation.LayoutRes;

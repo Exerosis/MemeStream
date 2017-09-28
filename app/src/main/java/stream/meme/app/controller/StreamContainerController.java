@@ -1,5 +1,7 @@
-package stream.meme.app.stream.container;
+package stream.meme.app.controller;
 
+import android.app.Activity;
+import android.support.v4.app.ActivityOptionsCompat;
 import android.view.View;
 
 import com.bluelinelabs.conductor.Controller;
@@ -16,16 +18,12 @@ import io.reactivex.functions.BiConsumer;
 import io.reactivex.functions.Function;
 import io.reactivex.subjects.PublishSubject;
 import io.reactivex.subjects.Subject;
-import stream.meme.app.CircularRevealChangeHandler;
 import stream.meme.app.R;
-import stream.meme.app.bisp.DatabindingBIVSCModule;
 import stream.meme.app.databinding.StreamContainerViewBinding;
-import stream.meme.app.stream.StreamController;
+import stream.meme.app.util.CircularRevealChangeHandler;
+import stream.meme.app.util.bivsc.DatabindingBIVSCModule;
 
-import static stream.meme.app.stream.container.Partial.Navigate;
-import static stream.meme.app.stream.container.Partial.Open;
-
-public class StreamContainerController extends DatabindingBIVSCModule<StreamContainerViewBinding, State> {
+public class StreamContainerController extends DatabindingBIVSCModule<StreamContainerViewBinding, StreamContainerController.State> {
     private final Intents intents = new Intents();
 
     public StreamContainerController() {
@@ -76,42 +74,43 @@ public class StreamContainerController extends DatabindingBIVSCModule<StreamCont
     public Observable<State> getController() {
         return Observable.merge(
                 intents.ProfileClickedIntent.map(test ->
-                        Open(getRouter(), new StreamController())),
+                        Partial.Open(getRouter(), new StreamController())),
                 intents.NavigateIntent.map(id ->
-                        Navigate(id == R.id.navigation_home ? new StreamController() : new StreamController())))
+                        Partial.Navigate(id == R.id.navigation_home ? new StreamController() : new StreamController())))
                 .scan(new State(new StreamController()), (state, partial) -> partial.apply(state));
     }
-}
 
-class Intents {
-    Subject<Integer> NavigateIntent = PublishSubject.create();
-    Subject<Boolean> ProfileClickedIntent = PublishSubject.create();
-}
-
-interface Partial {
-    static Function<State, State> Navigate(Controller controller) {
-        return state -> {
-            state.Stream = controller;
-            return state;
-        };
+    static class Intents {
+        Subject<Integer> NavigateIntent = PublishSubject.create();
+        Subject<Boolean> ProfileClickedIntent = PublishSubject.create();
     }
 
-    static Function<State, State> Open(Router router, Controller controller) {
-        return state -> {
-            router.pushController(RouterTransaction.with(controller).pushChangeHandler(new CircularRevealChangeHandler()));
-            return state;
-        };
+    interface Partial {
+        static Function<State, State> Navigate(Controller controller) {
+            return state -> {
+                state.Stream = controller;
+                return state;
+            };
+        }
+
+        static Function<State, State> Open(Activity activity, Controller controller) {
+            return state -> {
+                ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(activity, )
+                router.pushController(RouterTransaction.with(controller).pushChangeHandler(new CircularRevealChangeHandler()));
+                return state;
+            };
+        }
     }
-}
 
-class State {
-    Controller Stream;
+    static class State {
+        Controller Stream;
 
-    Controller stream() {
-        return Stream;
-    }
+        Controller stream() {
+            return Stream;
+        }
 
-    State(Controller stream) {
-        Stream = stream;
+        State(Controller stream) {
+            Stream = stream;
+        }
     }
 }

@@ -1,4 +1,4 @@
-package stream.meme.app.bisp;
+package stream.meme.app.util.bivsc;
 
 import android.content.Context;
 import android.support.annotation.NonNull;

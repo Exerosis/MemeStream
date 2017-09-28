@@ -16,12 +16,12 @@ import stream.meme.app.application.login.FacebookLogin;
 import stream.meme.app.application.login.GoogleLogin;
 import stream.meme.app.application.login.Login;
 import stream.meme.app.application.login.TwitterLogin;
-import stream.meme.app.login.LoginType;
-import stream.meme.app.stream.Meme;
+import stream.meme.app.application.login.LoginType;
+import stream.meme.app.application.meme.Meme;
 
-import static stream.meme.app.login.LoginType.FACEBOOK;
-import static stream.meme.app.login.LoginType.GOOGLE;
-import static stream.meme.app.login.LoginType.TWITTER;
+import static stream.meme.app.application.login.LoginType.FACEBOOK;
+import static stream.meme.app.application.login.LoginType.GOOGLE;
+import static stream.meme.app.application.login.LoginType.TWITTER;
 
 public class MemeStream extends Application {
     public static final String KEY_TOKEN = "token";
