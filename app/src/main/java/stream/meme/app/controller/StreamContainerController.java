@@ -1,7 +1,5 @@
 package stream.meme.app.controller;
 
-import android.app.Activity;
-import android.support.v4.app.ActivityOptionsCompat;
 import android.view.View;
 
 import com.bluelinelabs.conductor.Controller;
@@ -20,7 +18,6 @@ import io.reactivex.subjects.PublishSubject;
 import io.reactivex.subjects.Subject;
 import stream.meme.app.R;
 import stream.meme.app.databinding.StreamContainerViewBinding;
-import stream.meme.app.util.CircularRevealChangeHandler;
 import stream.meme.app.util.bivsc.DatabindingBIVSCModule;
 
 public class StreamContainerController extends DatabindingBIVSCModule<StreamContainerViewBinding, StreamContainerController.State> {
@@ -93,10 +90,10 @@ public class StreamContainerController extends DatabindingBIVSCModule<StreamCont
             };
         }
 
-        static Function<State, State> Open(Activity activity, Controller controller) {
+        static Function<State, State> Open(Router activity, Controller controller) {
             return state -> {
-                ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(activity, )
-                router.pushController(RouterTransaction.with(controller).pushChangeHandler(new CircularRevealChangeHandler()));
+//                ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(activity, )
+//                router.pushController(RouterTransaction.with(controller).pushChangeHandler(new CircularRevealChangeHandler()));
                 return state;
             };
         }
