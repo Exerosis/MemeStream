@@ -31,6 +31,7 @@ dependencies {
     compile 'com.facebook.fresco:fresco:1.5.0'
     compile 'jp.wasabeef:fresco-processors:2.1.0'
     compile 'jp.wasabeef:blurry:2.1.1'
+    compile 'com.github.nirhart:parallaxscroll:1.0'
 
     //--RxBinding--
     compile "com.jakewharton.rxbinding2:rxbinding:$rxBindingVersion"

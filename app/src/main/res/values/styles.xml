@@ -12,7 +12,10 @@
         <item name="android:divider">@color/disabled_text</item>
         <item name="android:icon">@color/icon</item>
 
-        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:statusBarColor">@color/primary_dark</item>
+
+        <item name="android:windowTranslucentStatus">true</item>
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
     </style>
 
     <style name="AppTheme.SocialButton" parent="Widget.AppCompat.Button.Colored">
@@ -21,6 +24,13 @@
         <item name="android:fontFamily">sans-serif-medium</item>
         <item name="android:textAllCaps">false</item>
         <item name="android:textColor">@android:color/white</item>
+    </style>
+
+    <style name="AppTheme.SocialButton.Mini" parent="Widget.AppCompat.Button.Colored">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">64dp</item>
+        <item name="android:layout_margin">4dp</item>
+        <item name="android:layout_weight">1</item>
     </style>
 
     <style name="AppTheme.ProfileNode" parent="android:TextAppearance.Material.Small">
@@ -36,7 +46,9 @@
         <item name="android:textSize">13sp</item>
     </style>
 
-    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar">
+
+    </style>
 
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 </resources>

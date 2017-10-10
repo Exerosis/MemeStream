@@ -12,13 +12,15 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
 import stream.meme.app.application.login.FacebookLogin;
 import stream.meme.app.application.login.GoogleLogin;
 import stream.meme.app.application.login.Login;
 import stream.meme.app.application.login.TwitterLogin;
 import stream.meme.app.application.login.LoginType;
-import stream.meme.app.application.meme.Meme;
 
+import static io.reactivex.Observable.*;
 import static stream.meme.app.application.login.LoginType.FACEBOOK;
 import static stream.meme.app.application.login.LoginType.GOOGLE;
 import static stream.meme.app.application.login.LoginType.TWITTER;
@@ -27,9 +29,10 @@ public class MemeStream extends Application {
     public static final String KEY_TOKEN = "token";
     private Map<LoginType, Login> logins;
     private SharedPreferences sharedPreferences;
+    private Profile profile;
 
     public Observable<List<Meme>> loadMemes(int page) {
-        return Observable.just(Arrays.asList(
+        return just(Arrays.asList(
                 new Meme(UUID.randomUUID(), "test0", "page " + page, "https://i.vimeocdn.com/portrait/58832_300x300"),
                 new Meme(UUID.randomUUID(), "test1", "page " + page, "https://i.vimeocdn.com/portrait/58832_300x300"),
                 new Meme(UUID.randomUUID(), "test2", "page " + page, "https://i.vimeocdn.com/portrait/58832_300x300"),
@@ -50,7 +53,7 @@ public class MemeStream extends Application {
                     .map(token -> token != null && getSharedPreferences().edit().putString(KEY_TOKEN, token).commit())
                     .onErrorReturn(error -> false);
         else
-            return Observable.just(false);
+            return just(false);
     }
 
     public Map<LoginType, Login> getLogins() {
@@ -67,5 +70,20 @@ public class MemeStream extends Application {
         if (sharedPreferences == null)
             sharedPreferences = getSharedPreferences(getPackageName() + "authentication", MODE_PRIVATE);
         return sharedPreferences;
+    }
+
+    public Observable<Profile> getProfile() {
+        return !isAuthenticated() ? empty() : fromCallable(() -> {
+            if (profile == null) {
+                profile = new Profile(
+                        this,
+                        "Exerosis",
+                        "exerosis@gmail.com",
+                        UUID.randomUUID(),
+                        LoginType.FACEBOOK,
+                        LoginType.TWITTER);
+            }
+            return profile;
+        }).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread());
     }
 }

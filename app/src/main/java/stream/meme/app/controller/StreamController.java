@@ -18,7 +18,7 @@ import io.reactivex.functions.Function;
 import io.reactivex.subjects.PublishSubject;
 import io.reactivex.subjects.Subject;
 import jp.wasabeef.fresco.processors.BlurPostprocessor;
-import stream.meme.app.application.meme.Meme;
+import stream.meme.app.application.Meme;
 import stream.meme.app.util.ItemOffsetDecoration;
 import stream.meme.app.util.rxadapter.RxPagination;
 import stream.meme.app.R;
@@ -140,7 +140,7 @@ public class StreamController extends DatabindingBIVSCModule<StreamViewBinding, 
         }
     }
 
-    static class Partial {
+    interface Partial {
         static Function<State, State> NextPageLoading() {
             return state -> {
                 state.nextPageLoading = true;

@@ -1,6 +1,7 @@
 package stream.meme.app.util.bivsc;
 
 import android.content.Context;
+import android.support.annotation.CallSuper;
 import android.support.annotation.NonNull;
 import android.view.View;
 
@@ -26,6 +27,7 @@ public abstract class BIVSCModule<ViewModel, State> extends Controller implement
 
     //TODO move this else where, and stop main thread mapping maybe?
     @Override
+    @CallSuper
     protected void onContextAvailable(@NonNull Context context) {
         if (state != null)
             return;

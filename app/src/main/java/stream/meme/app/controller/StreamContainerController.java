@@ -1,113 +1,85 @@
 package stream.meme.app.controller;
 
+import android.content.Context;
+import android.content.Intent;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityOptionsCompat;
+import android.support.v4.util.Pair;
+import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+import android.view.ViewGroup;
 
-import com.bluelinelabs.conductor.Controller;
-import com.bluelinelabs.conductor.Router;
-import com.bluelinelabs.conductor.RouterTransaction;
-import com.mikepenz.materialdrawer.AccountHeader;
-import com.mikepenz.materialdrawer.AccountHeaderBuilder;
-import com.mikepenz.materialdrawer.DrawerBuilder;
-import com.mikepenz.materialdrawer.model.ProfileDrawerItem;
-import com.mikepenz.materialdrawer.model.interfaces.IProfile;
+import com.google.common.base.Supplier;
+import com.jakewharton.rxbinding2.view.RxView;
 
 import io.reactivex.Observable;
 import io.reactivex.functions.BiConsumer;
-import io.reactivex.functions.Function;
 import io.reactivex.subjects.PublishSubject;
 import io.reactivex.subjects.Subject;
 import stream.meme.app.R;
+import stream.meme.app.activity.ProfileActivity;
+import stream.meme.app.application.MemeStream;
 import stream.meme.app.databinding.StreamContainerViewBinding;
 import stream.meme.app.util.bivsc.DatabindingBIVSCModule;
 
-public class StreamContainerController extends DatabindingBIVSCModule<StreamContainerViewBinding, StreamContainerController.State> {
+import static android.support.v4.app.ActivityOptionsCompat.makeSceneTransitionAnimation;
+import static com.bluelinelabs.conductor.RouterTransaction.with;
+
+public class StreamContainerController extends DatabindingBIVSCModule<StreamContainerViewBinding, Supplier<StreamController>> {
     private final Intents intents = new Intents();
+    private MemeStream memeStream;
 
     public StreamContainerController() {
         super(R.layout.stream_container_view);
     }
 
     @Override
-    public BiConsumer<Observable<StreamContainerViewBinding>, Observable<State>> getBinder() {
-        return (viewModel, state) -> {
-            viewModel.subscribe(view -> {
-                new DrawerBuilder(getActivity())
-                        .inflateMenu(R.menu.home_navigation_menu)
-                        .withAccountHeader(new AccountHeaderBuilder()
-                                .withActivity(getActivity())
-                                .withOnAccountHeaderProfileImageListener(new AccountHeader.OnAccountHeaderProfileImageListener() {
-                                    @Override
-                                    public boolean onProfileImageClick(View view, IProfile profile, boolean current) {
-                                        intents.ProfileClickedIntent.onNext(true);
-                                        return true;
-                                    }
+    protected void onContextAvailable(@NonNull Context context) {
+        memeStream = (MemeStream) getApplicationContext();
+        super.onContextAvailable(context);
+    }
 
-                                    @Override
-                                    public boolean onProfileImageLongClick(View view, IProfile profile, boolean current) {
-                                        return false;
-                                    }
-                                })
-                                .withSelectionListEnabled(false)
-                                .addProfiles(new ProfileDrawerItem()
-                                        .withEmail("exerosis@gmail.com")
-                                        .withName("Exerosis")
-                                        .withIcon("")
-                                        .withIdentifier(0L))
-                                .build())
-                        .withOnDrawerItemClickListener((v, position, drawerItem) -> {
-                            intents.NavigateIntent.onNext(((int) drawerItem.getIdentifier()));
-                            return true;
-                        })
-                        .build();
-            });
+    @SuppressWarnings("unchecked")
+    @Override
+    public BiConsumer<Observable<StreamContainerViewBinding>, Observable<Supplier<StreamController>>> getBinder() {
+        return (viewModel, state) -> viewModel.subscribe(view -> {
+            ((AppCompatActivity) getActivity()).setSupportActionBar(view.toolbar);
+            ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(getActivity(), view.drawerLayout, view.toolbar, R.string.description_open, R.string.description_close);
+            view.drawerLayout.addDrawerListener(toggle);
+            ViewGroup header = (ViewGroup) view.feedContainerViewNavigation.getHeaderView(0);
+            View backgroundImage = header.findViewById(R.id.background_image);
+            View profileImage = header.findViewById(R.id.profile_image);
+            RxView.clicks(profileImage).subscribe(intents.ProfileClickedIntent);
 
-            viewModel.subscribe(view -> {
-                state.map(State::stream).map(RouterTransaction::with).subscribe(getChildRouter(view.container)::setRoot);
+            state.subscribe(provider -> {
+                StreamController controller = provider.get();
+                if (controller != null)
+                    getChildRouter(view.container).setRoot(with(controller));
+                else {
+                    ActivityOptionsCompat options = makeSceneTransitionAnimation(getActivity(),
+                            new Pair<>(backgroundImage, "background_image"),
+                            new Pair<>(profileImage, "profile_image"));
+                    getActivity().startActivity(new Intent(getActivity(), ProfileActivity.class), options.toBundle());
+                }
             });
-        };
+        });
     }
 
     @Override
-    public Observable<State> getController() {
-        return Observable.merge(
+    public Observable<Supplier<StreamController>> getController() {
+        return Observable.<Supplier<StreamController>>merge(
                 intents.ProfileClickedIntent.map(test ->
-                        Partial.Open(getRouter(), new StreamController())),
+                        () -> null),
                 intents.NavigateIntent.map(id ->
-                        Partial.Navigate(id == R.id.navigation_home ? new StreamController() : new StreamController())))
-                .scan(new State(new StreamController()), (state, partial) -> partial.apply(state));
+                        () -> id == R.id.navigation_home ? new StreamController() : new StreamController()),
+                memeStream.getProfile().map(StreamController))
+                .startWith(StreamController::new);
     }
 
     static class Intents {
         Subject<Integer> NavigateIntent = PublishSubject.create();
-        Subject<Boolean> ProfileClickedIntent = PublishSubject.create();
-    }
-
-    interface Partial {
-        static Function<State, State> Navigate(Controller controller) {
-            return state -> {
-                state.Stream = controller;
-                return state;
-            };
-        }
-
-        static Function<State, State> Open(Router activity, Controller controller) {
-            return state -> {
-//                ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(activity, )
-//                router.pushController(RouterTransaction.with(controller).pushChangeHandler(new CircularRevealChangeHandler()));
-                return state;
-            };
-        }
-    }
-
-    static class State {
-        Controller Stream;
-
-        Controller stream() {
-            return Stream;
-        }
-
-        State(Controller stream) {
-            Stream = stream;
-        }
+        Subject<Object> ProfileClickedIntent = PublishSubject.create();
     }
 }

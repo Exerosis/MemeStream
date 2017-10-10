@@ -50,7 +50,7 @@ public class LoginController extends DatabindingBIVSCModule<LoginViewBinding, Vo
         return Observable.empty();
     }
 
-   class Intents {
+   public class Intents {
         Subject<LoginType> LoginStartIntent = PublishSubject.create();
 
         public void login(LoginType type) {

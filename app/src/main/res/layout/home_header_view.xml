@@ -1,22 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <data>
-
-
-    </data>
-
     <LinearLayout
+        android:id="@+id/background_image"
         android:layout_width="match_parent"
         android:layout_height="160dp"
         android:background="@drawable/home_header_background"
         android:gravity="bottom|start"
         android:orientation="vertical"
+        android:transitionName="background_image"
         tools:layout_marginEnd="56dp">
 
-      <!--  <de.hdodenhof.circleimageview.CircleImageView
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/profile_image"
             android:layout_width="56dp"
             android:layout_height="56dp"
             android:layout_marginBottom="8dp"
@@ -24,8 +21,8 @@
             android:layout_marginStart="16dp"
             android:layout_marginTop="46dp"
             android:scaleType="centerCrop"
-            app:image="@{controller.getAccount().getPicture()}"
-            tools:src="@drawable/home_header_background" />
+            android:transitionName="profile_image"
+            android:src="@drawable/home_header_background" />
 
         <TextView
             android:layout_width="match_parent"
@@ -34,7 +31,6 @@
             android:layout_marginEnd="16dp"
             android:layout_marginStart="16dp"
             android:fontFamily="sans-serif-medium"
-            android:text="@{controller.getAccount().getName()}"
             android:textColor="#FFF"
             tools:text="Exerosis" />
 
@@ -44,8 +40,7 @@
             android:layout_marginBottom="8dp"
             android:layout_marginEnd="16dp"
             android:layout_marginStart="16dp"
-            android:text="@{controller.getAccount().getEmail()}"
             android:textColor="#FFF"
-            tools:text="exerosis@gmail.com" />-->
+            tools:text="exerosis@gmail.com" />
     </LinearLayout>
 </layout>
