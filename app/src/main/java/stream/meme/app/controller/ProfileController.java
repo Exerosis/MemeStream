@@ -1,7 +1,6 @@
 package stream.meme.app.controller;
 
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.graphics.drawable.ColorDrawable;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
@@ -10,18 +9,19 @@ import com.google.common.base.Optional;
 
 import io.reactivex.Observable;
 import io.reactivex.functions.BiConsumer;
+import jp.wasabeef.blurry.Blurry;
 import stream.meme.app.R;
 import stream.meme.app.application.MemeStream;
 import stream.meme.app.application.Profile;
 import stream.meme.app.application.login.LoginType;
 import stream.meme.app.databinding.ProfileViewBinding;
-import stream.meme.app.util.Optionals;
 import stream.meme.app.util.bivsc.DatabindingBIVSCModule;
 
 import static android.support.v4.content.ContextCompat.getColor;
 import static com.google.common.base.Optional.fromNullable;
 import static com.jakewharton.rxbinding2.view.RxView.clicks;
 import static com.jakewharton.rxbinding2.view.RxView.visibility;
+import static stream.meme.app.util.Optionals.ifPresent;
 
 public class ProfileController extends DatabindingBIVSCModule<ProfileViewBinding, ProfileController.State> {
     private MemeStream memeStream;
@@ -50,14 +50,14 @@ public class ProfileController extends DatabindingBIVSCModule<ProfileViewBinding
 
                 states.map(State::loading).subscribe(visibility(view.progressBar));
 
-                Optionals.ifPresent(states.map(State::profile), profile -> {
+                ifPresent(states.map(State::profile), profile -> {
+                    ifPresent(profile.getImage(), image -> {
+                        view.profileImage.setImageBitmap(image);
+                        Blurry.with(getActivity()).from(image).into(view.backgroundImage);
+                    });
                     view.name.setText(profile.getName());
                     view.email.setText(profile.getEmail());
-                    Optional<Bitmap> profilePicture = profile.getProfilePicture();
-                    if (profilePicture.isPresent()) {
-                        view.profileImage.setImageBitmap(profilePicture.get());
-                        view.backgroundImage.setImageBitmap(profilePicture.get());
-                    }
+
                     intents.EditProfile = clicks(view.editProfile);
 
                     for (LoginType type : profile.getLogins())
@@ -78,6 +78,7 @@ public class ProfileController extends DatabindingBIVSCModule<ProfileViewBinding
                 });
             });
         };
+        //TODO remove loading... it doesn't make much sense.
     }
 
     @Override

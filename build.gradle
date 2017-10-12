@@ -18,7 +18,7 @@ allprojects {
     }
     ext {
         androidSupportVersion = '26.0.1'
-        storeVersion = '2.0.4'
+        storeVersion = '3.0.0-beta'
         retrofitVersion = '2.2.0'
         rxBindingVersion = '2.0.0'
     }

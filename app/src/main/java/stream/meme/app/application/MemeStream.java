@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.app.Application;
 import android.content.SharedPreferences;
 
+import com.nytimes.android.external.store3.base.impl.Store;
+
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -32,6 +34,7 @@ public class MemeStream extends Application {
     private Profile profile;
 
     public Observable<List<Meme>> loadMemes(int page) {
+        Store<String, Integer> store = null;
         return just(Arrays.asList(
                 new Meme(UUID.randomUUID(), "test0", "page " + page, "https://i.vimeocdn.com/portrait/58832_300x300"),
                 new Meme(UUID.randomUUID(), "test1", "page " + page, "https://i.vimeocdn.com/portrait/58832_300x300"),

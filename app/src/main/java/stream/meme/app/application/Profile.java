@@ -25,7 +25,7 @@ public class Profile {
         this.logins = logins;
         Bitmap picture = null;
         try {
-            picture = Picasso.with(context).load("https://cdna.artstation.com/p/assets/images/images/004/421/584/large/gimins-draws-117-2b.jpg?1483624834").get();
+            picture = Picasso.with(context).load("https://img00.deviantart.net/23aa/i/2017/060/5/3/2b_by_johnsonting-db0takw.jpg").get();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -40,7 +40,7 @@ public class Profile {
         return email;
     }
 
-    public Optional<Bitmap> getProfilePicture() {
+    public Optional<Bitmap> getImage() {
         return profilePicture;
     }
 

@@ -55,9 +55,10 @@ dependencies {
     compile "com.android.support:design:$androidSupportVersion"
 
     //--Store Libraries--
-/*    compile "com.nytimes.android:store:$storeVersion"
-    compile "com.nytimes.android:cache:$storeVersion"
-    compile "com.nytimes.android:filesystem:$storeVersion"*/
+    compile "com.nytimes.android:store3:$storeVersion"
+    compile "com.nytimes.android:cache3:$storeVersion"
+    compile "com.nytimes.android:filesystem3:$storeVersion"
+    compile "com.nytimes.android:middleware3:$storeVersion"
 
     //--Butter Knife--
     compile 'com.jakewharton:butterknife:8.5.1'
@@ -74,8 +75,7 @@ dependencies {
     compile 'com.google.code.gson:gson:2.8.1'
     compile 'com.squareup.okhttp3:okhttp:3.7.0'
     compile 'com.squareup.picasso:picasso:2.5.2'
-//    compile 'io.reactivex:rxandroid:1.2.1'
-    compile 'com.google.guava:guava:20.0'
+    compile 'com.google.guava:guava:21.0'
     compile 'net.cachapa.expandablelayout:expandablelayout:2.9.1'
     compile 'de.hdodenhof:circleimageview:2.1.0'
 

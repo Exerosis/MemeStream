@@ -18,7 +18,6 @@ import io.reactivex.Observable;
 import io.reactivex.functions.BiConsumer;
 import io.reactivex.functions.BiPredicate;
 import io.reactivex.functions.Consumer;
-import io.reactivex.schedulers.Schedulers;
 
 import static android.databinding.DataBindingUtil.inflate;
 import static android.view.LayoutInflater.from;
@@ -115,7 +114,7 @@ public class RxAdapter<Type> {
             }
         };
 
-        views.observeOn(Schedulers.computation()).subscribe(view -> {
+        views.subscribe(view -> {
             view.setAdapter(getAdapter());
             try {
                 data.accept(callback);

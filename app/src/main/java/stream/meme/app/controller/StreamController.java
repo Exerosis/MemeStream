@@ -1,13 +1,12 @@
 package stream.meme.app.controller;
 
 import android.content.Context;
-import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.LinearLayoutManager;
 
 import com.facebook.drawee.backends.pipeline.Fresco;
-import com.facebook.imagepipeline.request.ImageRequestBuilder;
 import com.google.common.collect.Lists;
+import com.squareup.picasso.Picasso;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -17,17 +16,16 @@ import io.reactivex.functions.BiConsumer;
 import io.reactivex.functions.Function;
 import io.reactivex.subjects.PublishSubject;
 import io.reactivex.subjects.Subject;
-import jp.wasabeef.fresco.processors.BlurPostprocessor;
-import stream.meme.app.application.Meme;
-import stream.meme.app.util.ItemOffsetDecoration;
-import stream.meme.app.util.rxadapter.RxPagination;
 import stream.meme.app.R;
+import stream.meme.app.application.Meme;
 import stream.meme.app.application.MemeStream;
-import stream.meme.app.util.bivsc.DatabindingBIVSCModule;
 import stream.meme.app.databinding.MemeViewBinding;
 import stream.meme.app.databinding.StreamViewBinding;
+import stream.meme.app.util.ItemOffsetDecoration;
+import stream.meme.app.util.bivsc.DatabindingBIVSCModule;
 import stream.meme.app.util.rxadapter.RxAdapter;
 import stream.meme.app.util.rxadapter.RxListCallback;
+import stream.meme.app.util.rxadapter.RxPagination;
 
 import static com.jakewharton.rxbinding2.support.v4.widget.RxSwipeRefreshLayout.refreshes;
 import static com.jakewharton.rxbinding2.support.v4.widget.RxSwipeRefreshLayout.refreshing;
@@ -47,22 +45,17 @@ public class StreamController extends DatabindingBIVSCModule<StreamViewBinding, 
         return (views, state) -> {
             intents.RefreshIntent = views.switchMap(view -> refreshes(view.refreshLayout));
 
-            new RxAdapter<>(views.map(view -> view.recyclerView), new RxListCallback<>(state.map(State::memes))).bind(R.layout.meme_view, (Meme meme, MemeViewBinding memeView) -> {
+            new RxAdapter<>(views.map(view -> view.recyclerView),
+                    new RxListCallback<>(state.map(State::memes)))
+                    .bind(R.layout.meme_view, (Meme meme, MemeViewBinding memeView) -> {
+                        Picasso.with(getActivity()).load(meme.getImage()).into(memeView.image);
+                        memeView.title.setText(meme.getTitle());
+                        memeView.subtitle.setText(meme.getSubtitle());
 
-                memeView.image.setController(Fresco.newDraweeControllerBuilder()
-                        .setImageRequest(ImageRequestBuilder
-                                .newBuilderWithSource(Uri.parse(meme.getImage()))
-                                .setPostprocessor(new BlurPostprocessor(getActivity(), 10))
-                                .build())
-                        .setOldController(memeView.image.getController())
-                        .build());
-                memeView.title.setText(meme.getTitle());
-                memeView.subtitle.setText(meme.getSubtitle());
-
-                memeView.like.setOnClickListener(v -> intents.LikeClickIntent.onNext(meme));
-                memeView.share.setOnClickListener(v -> intents.ShareClickIntent.onNext(meme));
-                memeView.getRoot().setOnClickListener(v -> intents.MemeClickIntent.onNext(meme));
-            }).footer(R.layout.stream_footer).showFooter(state.map(State::nextPageLoading).distinctUntilChanged());
+                        memeView.like.setOnClickListener(v -> intents.LikeClickIntent.onNext(meme));
+                        memeView.share.setOnClickListener(v -> intents.ShareClickIntent.onNext(meme));
+                        memeView.getRoot().setOnClickListener(v -> intents.MemeClickIntent.onNext(meme));
+                    }).footer(R.layout.stream_footer).showFooter(state.map(State::nextPageLoading).distinctUntilChanged());
 
             views.subscribe(view -> {
                 view.recyclerView.addItemDecoration(new ItemOffsetDecoration(getActivity(), R.dimen.item_offset));

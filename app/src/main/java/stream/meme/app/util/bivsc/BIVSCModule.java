@@ -33,7 +33,7 @@ public abstract class BIVSCModule<ViewModel, State> extends Controller implement
             return;
         List<Observer<? super State>> earlySubscribers = new ArrayList<>();
         try {
-            getBinder().accept(viewModel, Observable.unsafeCreate(observer -> {
+            getBinder().accept(viewModel.observeOn(AndroidSchedulers.mainThread()), Observable.unsafeCreate(observer -> {
                 if (state == null)
                     earlySubscribers.add(observer);
                 else
@@ -45,13 +45,17 @@ public abstract class BIVSCModule<ViewModel, State> extends Controller implement
         state = getController().observeOn(AndroidSchedulers.mainThread()).replay(1);
         for (Observer<? super State> subscriber : earlySubscribers)
             state.subscribe(subscriber);
-        state.connect(disposables::add);
     }
 
     @Override
     protected void onDetach(@NonNull View view) {
         for (Disposable disposable : disposables)
             disposable.dispose();
+    }
+
+    @Override
+    protected void onAttach(@NonNull View view) {
+        state.connect(disposables::add);
     }
 
     @Override
