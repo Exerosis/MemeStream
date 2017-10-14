@@ -39,7 +39,7 @@ public class LoginController extends DatabindingBIVSCModule<LoginViewBinding, Vo
     @Override
     public Observable<Void> getController() {
         intents.LoginStartIntent.subscribe(loginType -> {
-            if (!memeStream.isAuthenticated())
+            if (memeStream.isAuthenticated())
                 memeStream.login(loginType, getActivity()).subscribe(result -> {
                     if (result)
                         getRouter().setRoot(RouterTransaction.with(new StreamContainerController()));

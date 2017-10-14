@@ -32,6 +32,9 @@ dependencies {
     compile 'jp.wasabeef:fresco-processors:2.1.0'
     compile 'jp.wasabeef:blurry:2.1.1'
     compile 'com.github.nirhart:parallaxscroll:1.0'
+    annotationProcessor "org.projectlombok:lombok:1.16.18"
+    provided "org.projectlombok:lombok:1.16.18"
+    compile 'com.squareup.retrofit2:adapter-rxjava2:2.3.0'
 
     //--RxBinding--
     compile "com.jakewharton.rxbinding2:rxbinding:$rxBindingVersion"
@@ -75,7 +78,7 @@ dependencies {
     compile 'com.google.code.gson:gson:2.8.1'
     compile 'com.squareup.okhttp3:okhttp:3.7.0'
     compile 'com.squareup.picasso:picasso:2.5.2'
-    compile 'com.google.guava:guava:21.0'
+    compile 'com.google.guava:guava:20.0'
     compile 'net.cachapa.expandablelayout:expandablelayout:2.9.1'
     compile 'de.hdodenhof:circleimageview:2.1.0'
 

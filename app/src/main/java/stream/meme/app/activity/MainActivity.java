@@ -13,7 +13,7 @@ import stream.meme.app.controller.StreamContainerController;
 public class MainActivity extends RouterActivity {
     @Override
     protected RouterTransaction onRouterTransaction() {
-        return RouterTransaction.with(((MemeStream) getApplicationContext()).isAuthenticated() ? new StreamContainerController() : new LoginController());
+        return RouterTransaction.with(!((MemeStream) getApplicationContext()).isAuthenticated() ? new StreamContainerController() : new LoginController());
     }
 
     @Override
