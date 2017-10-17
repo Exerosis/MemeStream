@@ -23,9 +23,12 @@ public abstract class BIVSCModule<ViewModel, State> extends Controller implement
     private final List<Disposable> disposables = new ArrayList<>();
     private ConnectableObservable<State> state = null;
     Subject<ViewModel> viewModel = PublishSubject.create();
+    private boolean fresh = true;
 
+    public BIVSCModule() {
 
-    //TODO move this else where, and stop main thread mapping maybe?
+    }
+
     @Override
     @CallSuper
     protected void onContextAvailable(@NonNull Context context) {
@@ -42,20 +45,23 @@ public abstract class BIVSCModule<ViewModel, State> extends Controller implement
         } catch (Exception exception) {
             throw new RuntimeException(exception);
         }
-        state = getController().observeOn(AndroidSchedulers.mainThread()).replay(1);
+        state = getController().observeOn(AndroidSchedulers.mainThread()).publish();
         for (Observer<? super State> subscriber : earlySubscribers)
             state.subscribe(subscriber);
     }
 
     @Override
-    protected void onDetach(@NonNull View view) {
-        for (Disposable disposable : disposables)
-            disposable.dispose();
+    protected void onAttach(@NonNull View view) {
+        if (fresh)
+            state.connect(disposables::add);
+        fresh = false;
     }
 
     @Override
-    protected void onAttach(@NonNull View view) {
-        state.connect(disposables::add);
+    protected void onDestroyView(@NonNull View view) {
+        for (Disposable disposable : disposables)
+            disposable.dispose();
+        fresh = true;
     }
 
     @Override

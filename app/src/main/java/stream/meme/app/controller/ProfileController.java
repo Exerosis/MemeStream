@@ -35,6 +35,7 @@ public class ProfileController extends DatabindingBIVSCModule<ProfileViewBinding
     @Override
     protected void onContextAvailable(@NonNull Context context) {
         memeStream = (MemeStream) getApplicationContext();
+
         super.onContextAvailable(context);
     }
 

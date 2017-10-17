@@ -3,6 +3,7 @@ package stream.meme.app.application;
 import android.app.Activity;
 import android.app.Application;
 import android.content.SharedPreferences;
+import android.util.SparseArray;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -40,7 +41,7 @@ public class MemeStream extends Application {
     private SharedPreferences sharedPreferences;
     private Profile profile;
     private MemeService memeService;
-
+    private final SparseArray<Observable<List<Meme>>> streams = new SparseArray<>();
 
     private MemeService getService() {
         if (memeService == null) {
@@ -56,14 +57,20 @@ public class MemeStream extends Application {
     }
 
     public Observable<List<Meme>> loadMemes(int page) {
-        return just(asList(
-                new Meme(randomUUID(), "test0", "page " + page, "https://i.vimeocdn.com/portrait/58832_300x300"),
-                new Meme(randomUUID(), "test1", "page " + page, "https://i.vimeocdn.com/portrait/58832_300x300"),
-                new Meme(randomUUID(), "test2", "page " + page, "https://i.vimeocdn.com/portrait/58832_300x300"),
-                new Meme(randomUUID(), "test3", "page " + page, "https://i.vimeocdn.com/portrait/58832_300x300"),
-                new Meme(randomUUID(), "test4", "page " + page, "https://i.vimeocdn.com/portrait/58832_300x300"),
-                new Meme(randomUUID(), "test5", "page " + page, "https://i.vimeocdn.com/portrait/58832_300x300")))
-                .delay(1, SECONDS);
+        Observable<List<Meme>> memes;
+        if ((memes = streams.get(page)) == null) {
+            memes = just(asList(
+                    new Meme(randomUUID(), "test0", "page " + page, "https://i.vimeocdn.com/portrait/58832_300x300"),
+                    new Meme(randomUUID(), "test1", "page " + page, "https://i.vimeocdn.com/portrait/58832_300x300"),
+                    new Meme(randomUUID(), "test2", "page " + page, "https://i.vimeocdn.com/portrait/58832_300x300"),
+                    new Meme(randomUUID(), "test3", "page " + page, "https://i.vimeocdn.com/portrait/58832_300x300"),
+                    new Meme(randomUUID(), "test4", "page " + page, "https://i.vimeocdn.com/portrait/58832_300x300"),
+                    new Meme(randomUUID(), "test5", "page " + page, "https://i.vimeocdn.com/portrait/58832_300x300")))
+                    .delay(1, SECONDS).replay(1).autoConnect();
+            streams.put(page, memes);
+        }
+        return memes;
+
     }
 
     public boolean isAuthenticated() {

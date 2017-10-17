@@ -15,4 +15,7 @@
     <string name="com.twitter.sdk.android.CONSUMER_KEY">ynYXFlQhJ0PExWRqiceKI3Mmd</string>
     <string name="com.twitter.sdk.android.CONSUMER_SECRET">j3yPY3y5zxylyimkXq5kXPPGadU35LDA1efD5xmd9i21BbTdvh</string>
     <string name="content_description_header_background">Header background</string>
+    <string name="menu_home">Home</string>
+    <string name="menu_top">Top</string>
+    <string name="menu_settings">Settings</string>
 </resources>
