@@ -2,7 +2,7 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 26
-    buildToolsVersion "26.0.1"
+    buildToolsVersion "26.0.2"
 
     defaultConfig {
         applicationId "stream.meme.app"
@@ -29,6 +29,7 @@ android {
 dependencies {
     compile 'com.bluelinelabs:conductor:2.1.4'
     compile 'com.facebook.fresco:fresco:1.5.0'
+    compile 'com.jakewharton.retrofit:retrofit2-rxjava2-adapter:1.0.0'
     compile 'jp.wasabeef:fresco-processors:2.1.0'
     compile 'jp.wasabeef:blurry:2.1.1'
     compile 'com.github.nirhart:parallaxscroll:1.0'
