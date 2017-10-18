@@ -3,6 +3,21 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <data>
+
+        <variable
+            name="shown"
+            type="android.databinding.ObservableBoolean" />
+
+        <variable
+            name="rating"
+            type="android.databinding.ObservableByte" />
+
+        <variable
+            name="comments"
+            type="java.util.List&lt;stream.meme.app.application.Comment>" />
+    </data>
+
     <android.support.v7.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
@@ -58,58 +73,52 @@
                 android:layout_marginStart="16dp"
                 app:el_duration="500"
                 app:el_expanded="false"
-                app:el_parallax="1">
+                app:el_parallax="1"
+                app:expanded="@{shown}">
 
-                <TextView
+                <LinearLayout
                     android:id="@+id/comments"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    android:minHeight="50dp"
-                    tools:text="blah blah blah blah blah blah blah blah blah blah blah blalhblah blah blah blah blah blah blah blah blah blah blah" />
+                    android:entries="@{comments}"
+                    android:layout="@{@layout/comment_view}"
+                    android:orientation="vertical" />
 
             </net.cachapa.expandablelayout.ExpandableLayout>
 
             <RelativeLayout
                 android:layout_width="match_parent"
-                android:layout_height="48dp">
+                android:layout_height="48dp"
+                android:paddingEnd="4dp"
+                android:paddingStart="4dp">
+
+                <ToggleButton
+                    android:id="@+id/toggle"
+                    style="@style/AppTheme.CardButton"
+                    android:layout_alignParentEnd="true"
+                    android:layout_gravity="center_vertical|end"
+                    android:background="@drawable/ic_toggle" />
+
+                <ToggleButton
+                    android:id="@+id/dislike"
+                    style="@style/AppTheme.CardButton"
+                    android:layout_toStartOf="@id/toggle"
+                    android:background="@drawable/ic_dislike_toggle"
+                    android:checked="@{rating == -1}" />
+
+                <ToggleButton
+                    android:id="@+id/like"
+                    style="@style/AppTheme.CardButton"
+                    android:layout_toStartOf="@id/dislike"
+                    android:background="@drawable/ic_like_toggle"
+                    android:checked="@{rating == 1}" />
 
                 <Button
                     android:id="@+id/share"
-                    style="@android:style/Widget.DeviceDefault.Button.Borderless.Small"
-                    android:layout_width="32dp"
-                    android:layout_height="32dp"
+                    style="@style/AppTheme.CardButton"
                     android:layout_alignParentStart="true"
-                    android:layout_centerVertical="true"
-                    android:layout_marginEnd="8dp"
-                    android:layout_marginStart="8dp"
-                    android:background="@drawable/ic_bookmark" />
-
-                <Button
-                    android:id="@+id/like"
-                    style="@android:style/Widget.Material.Light.Button.Small"
-                    android:layout_width="32dp"
-                    android:layout_height="32dp"
-                    android:layout_centerVertical="true"
-                    android:layout_marginEnd="8dp"
-                    android:layout_toEndOf="@id/share"
-                    android:background="@drawable/ic_share"
-                    android:paddingEnd="8dp"
-                    android:paddingStart="8dp" />
-
-                <!--                <ToggleButton
-                                    android:id="@+id/feed_entry_toggle"
-                                    style="@android:style/Widget.DeviceDefault.Button.Borderless.Small"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:layout_alignParentEnd="true"
-                                    android:layout_marginEnd="8dp"
-                                    android:layout_marginStart="8dp"
-                                    android:background="@drawable/ic_toggle"
-                                    android:paddingEnd="8dp"
-                                    android:paddingStart="8dp"
-                                    android:textOff=""
-                                    android:textOn="" />-->
+                    android:background="@drawable/ic_share" />
             </RelativeLayout>
 
         </LinearLayout>

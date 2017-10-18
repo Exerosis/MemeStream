@@ -1,13 +1,17 @@
 package stream.meme.app.controller;
 
 import android.content.Context;
+import android.databinding.ObservableBoolean;
+import android.databinding.ObservableByte;
 import android.support.annotation.NonNull;
+import android.support.v4.util.Pair;
 import android.support.v7.widget.LinearLayoutManager;
 
 import com.facebook.drawee.backends.pipeline.Fresco;
 import com.google.common.collect.Lists;
 import com.squareup.picasso.Picasso;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -17,6 +21,7 @@ import io.reactivex.functions.Function;
 import io.reactivex.subjects.PublishSubject;
 import io.reactivex.subjects.Subject;
 import stream.meme.app.R;
+import stream.meme.app.application.Comment;
 import stream.meme.app.application.Meme;
 import stream.meme.app.application.MemeStream;
 import stream.meme.app.databinding.MemeViewBinding;
@@ -27,8 +32,10 @@ import stream.meme.app.util.rxadapter.RxAdapter;
 import stream.meme.app.util.rxadapter.RxListCallback;
 import stream.meme.app.util.rxadapter.RxPagination;
 
+import static android.support.v4.util.Pair.create;
 import static com.jakewharton.rxbinding2.support.v4.widget.RxSwipeRefreshLayout.refreshes;
 import static com.jakewharton.rxbinding2.support.v4.widget.RxSwipeRefreshLayout.refreshing;
+import static com.jakewharton.rxbinding2.view.RxView.clicks;
 import static com.jakewharton.rxbinding2.view.RxView.visibility;
 
 public class StreamController extends DatabindingBIVSCModule<StreamViewBinding, StreamController.State> {
@@ -48,12 +55,33 @@ public class StreamController extends DatabindingBIVSCModule<StreamViewBinding, 
             new RxAdapter<>(views.map(view -> view.recyclerView),
                     new RxListCallback<>(state.map(State::memes)))
                     .bind(R.layout.meme_view, (Meme meme, MemeViewBinding memeView) -> {
+                        //Add a shown observable if there isn't already one.
+                        if (memeView.getShown() == null)
+                            memeView.setShown(new ObservableBoolean(false));
+                        if (memeView.getRating() == null)
+                            memeView.setRating(new ObservableByte((byte) 0));
+
+                        List<Comment> comments = new ArrayList<>();
+                        comments.add(new Comment("Exerosis", "10/17/2017", "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam sit amet odio felis. Sed et bibendum mauris. Ut commodo elit nisi, non luctus metus gravida non. Donec at est vel libero pretium sollicitudin. Maecenas a ultricies libero. Donec sed scelerisque lectus. Aenean viverra hendrerit laoreet. Vivamus ullamcorper risus ut nibh sodales accumsan. Cras est diam, mattis in pulvinar ac, imperdiet sit amet elit. Ut a erat viverra, gravida velit at, rutrum nulla. In fermentum nulla vel urna bibendum malesuada. "));
+                        comments.add(new Comment("Exerosis", "10/17/2017", "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam sit amet odio felis. Sed et bibendum mauris. Ut commodo elit nisi, non luctus metus gravida non. Donec at est vel libero pretium sollicitudin. Maecenas a ultricies libero. Donec sed scelerisque lectus. Aenean viverra hendrerit laoreet. Vivamus ullamcorper risus ut nibh sodales accumsan. Cras est diam, mattis in pulvinar ac, imperdiet sit amet elit. Ut a erat viverra, gravida velit at, rutrum nulla. In fermentum nulla vel urna bibendum malesuada. "));
+                        comments.add(new Comment("Exerosis", "10/17/2017", "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam sit amet odio felis. Sed et bibendum mauris. Ut commodo elit nisi, non luctus metus gravida non. Donec at est vel libero pretium sollicitudin. Maecenas a ultricies libero. Donec sed scelerisque lectus. Aenean viverra hendrerit laoreet. Vivamus ullamcorper risus ut nibh sodales accumsan. Cras est diam, mattis in pulvinar ac, imperdiet sit amet elit. Ut a erat viverra, gravida velit at, rutrum nulla. In fermentum nulla vel urna bibendum malesuada. "));
+                        memeView.setComments(comments);
+
+                        //Add meme information.
                         Picasso.with(getActivity()).load(meme.getImage()).into(memeView.image);
                         memeView.title.setText(meme.getTitle());
                         memeView.subtitle.setText(meme.getSubtitle());
 
-                        memeView.like.setOnClickListener(v -> intents.LikeClickIntent.onNext(meme));
-                        memeView.share.setOnClickListener(v -> intents.ShareClickIntent.onNext(meme));
+                        //Setup ratings intents
+                        clicks(memeView.like).map(ignored -> 1).mergeWith(clicks(memeView.dislike).map(ignored -> -1)).doOnNext(rating ->
+                                memeView.getRating().set(rating.byteValue())).subscribe(rating ->
+                                intents.RatedIntent.onNext(create(meme, rating.byteValue())));
+
+                        //Bind expanding layout to toggle.
+                        clicks(memeView.toggle).subscribe(ignored ->
+                                memeView.expandableLayout.setExpanded(memeView.toggle.isChecked()));
+
+                        //Add view click listener.
                         memeView.getRoot().setOnClickListener(v -> intents.MemeClickIntent.onNext(meme));
                     }).footer(R.layout.stream_footer).showFooter(state.map(State::nextPageLoading).distinctUntilChanged());
 
@@ -101,7 +129,7 @@ public class StreamController extends DatabindingBIVSCModule<StreamViewBinding, 
         Observable<Boolean> LoadFirstIntent = Observable.just(true);
         Subject<Boolean> LoadNextIntent = PublishSubject.create();
         Subject<Meme> MemeClickIntent = PublishSubject.create();
-        Subject<Meme> LikeClickIntent = PublishSubject.create();
+        Subject<Pair<Meme, Byte>> RatedIntent = PublishSubject.create();
         Subject<Meme> ShareClickIntent = PublishSubject.create();
     }
 

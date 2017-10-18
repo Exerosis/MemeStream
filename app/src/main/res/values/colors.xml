@@ -14,6 +14,9 @@
     <color name="icon">#FFFFFF</color>
     <color name="icon_dark">#8a000000</color>
 
+    <color name="green">#66BB6A</color>
+    <color name="red">#EF5350</color>
+
     <color name="facebook">#415dae</color>
     <color name="twitter">#00B0FF</color>
     <color name="google">#fff</color>

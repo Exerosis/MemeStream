@@ -18,6 +18,18 @@
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
     </style>
 
+    <style name="AppTheme.CardButton" parent="@android:style/Widget.DeviceDefault.Button.Borderless.Small">
+        <item name="android:layout_width">32dp</item>
+        <item name="android:layout_height">32dp</item>
+        <item name="android:layout_centerVertical">true</item>
+        <item name="android:foreground">?selectableItemBackgroundBorderless</item>
+        <item name="android:layout_marginEnd">4dp</item>
+        <item name="android:layout_marginStart">4dp</item>
+        <item name="android:layout_gravity">center_vertical|start</item>
+        <item name="android:textOn">""</item>
+        <item name="android:textOff">""</item>
+    </style>
+
     <style name="AppTheme.Transparent" parent="AppTheme">
         <item name="android:statusBarColor">@color/primary_dark</item>
         <item name="android:windowTranslucentStatus">true</item>
