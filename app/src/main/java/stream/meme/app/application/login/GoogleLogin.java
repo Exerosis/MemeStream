@@ -41,7 +41,7 @@ public class GoogleLogin implements Login {
             GoogleSignInResult result = GoogleSignInApi.getSignInResultFromIntent(data);
             if (result.isSuccess())
                 loginResults.onNext(result.getSignInAccount().getServerAuthCode());
-            else
+            else if (loginResults.getThrowable() != null)
                 loginResults.onError(loginResults.getThrowable());
         }
     }

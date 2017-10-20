@@ -10,7 +10,7 @@ import lombok.Data;
  */
 @Data
 public class Comment {
-    final String author;
+    final User author;
     final String date;
     final String content;
     final List<Comment> replies = new ArrayList<>();

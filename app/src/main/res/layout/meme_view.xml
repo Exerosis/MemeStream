@@ -14,7 +14,7 @@
             type="android.databinding.ObservableByte" />
 
         <variable
-            name="comments"
+            name="commentList"
             type="java.util.List&lt;stream.meme.app.application.Comment>" />
     </data>
 
@@ -69,8 +69,6 @@
                 android:id="@+id/expandableLayout"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_marginEnd="16dp"
-                android:layout_marginStart="16dp"
                 app:el_duration="500"
                 app:el_expanded="false"
                 app:el_parallax="1"
@@ -81,9 +79,9 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    android:entries="@{comments}"
-                    android:layout="@{@layout/comment_view}"
-                    android:orientation="vertical" />
+                    android:orientation="vertical"
+                    app:entries="@{commentList}"
+                    app:layout="@{@layout/comment_view}" />
 
             </net.cachapa.expandablelayout.ExpandableLayout>
 

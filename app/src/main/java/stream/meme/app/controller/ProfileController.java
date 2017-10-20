@@ -52,10 +52,8 @@ public class ProfileController extends DatabindingBIVSCModule<ProfileViewBinding
                 states.map(State::loading).subscribe(visibility(view.progressBar));
 
                 ifPresent(states.map(State::profile), profile -> {
-                    ifPresent(profile.getImage(), image -> {
-                        view.profileImage.setImageBitmap(image);
-                        Blurry.with(getActivity()).from(image).into(view.backgroundImage);
-                    });
+                    view.profileImage.setImageBitmap(profile.getImage());
+                    Blurry.with(getActivity()).from(profile.getImage()).into(view.backgroundImage);
                     view.name.setText(profile.getName());
                     view.email.setText(profile.getEmail());
 

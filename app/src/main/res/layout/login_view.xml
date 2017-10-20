@@ -1,5 +1,4 @@
-<layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
 
     <data>
 
@@ -8,6 +7,10 @@
         <variable
             name="intents"
             type="stream.meme.app.controller.LoginController.Intents" />
+
+        <variable
+            name="locked"
+            type="java.lang.Boolean" />
     </data>
 
     <FrameLayout
@@ -33,6 +36,7 @@
                 style="@style/AppTheme.SocialButton"
                 android:backgroundTint="@color/facebook"
                 android:drawableStart="@drawable/ic_facebook"
+                android:enabled="@{locked}"
                 android:onClick="@{view -> intents.login(LoginType.FACEBOOK)}"
                 android:text="@string/facebook" />
 
@@ -40,6 +44,7 @@
                 style="@style/AppTheme.SocialButton"
                 android:backgroundTint="@color/twitter"
                 android:drawableStart="@drawable/ic_twitter"
+                android:enabled="@{locked}"
                 android:onClick="@{view -> intents.login(LoginType.TWITTER)}"
                 android:text="@string/twitter" />
 
@@ -47,6 +52,7 @@
                 style="@style/AppTheme.SocialButton"
                 android:backgroundTint="@color/github"
                 android:drawableStart="@drawable/ic_github"
+                android:enabled="@{locked}"
                 android:onClick="@{view -> intents.login(LoginType.GITHUB)}"
                 android:text="@string/github" />
 
@@ -54,6 +60,7 @@
                 style="@style/AppTheme.SocialButton"
                 android:backgroundTint="@color/google"
                 android:drawableStart="@drawable/ic_google"
+                android:enabled="@{locked}"
                 android:onClick="@{view -> intents.login(LoginType.GOOGLE)}"
                 android:text="@string/google"
                 android:textColor="@color/secondary_text" />
@@ -62,6 +69,7 @@
                 style="@style/AppTheme.SocialButton"
                 android:backgroundTint="@color/reddit"
                 android:drawableStart="@drawable/ic_reddit"
+                android:enabled="@{locked}"
                 android:onClick="@{view -> intents.login(LoginType.PINTEREST)}"
                 android:text="@string/reddit" />
 
@@ -69,6 +77,7 @@
                 style="@style/AppTheme.SocialButton"
                 android:backgroundTint="@color/linkedin"
                 android:drawableStart="@drawable/ic_linkedin"
+                android:enabled="@{locked}"
                 android:onClick="@{view -> intents.login(LoginType.LINKEDIN)}"
                 android:text="@string/linkedin" />
 
@@ -76,6 +85,7 @@
                 style="@style/AppTheme.SocialButton"
                 android:backgroundTint="@color/pinterest"
                 android:drawableStart="@drawable/ic_pinterest"
+                android:enabled="@{locked}"
                 android:onClick="@{view -> intents.login(LoginType.REDDIT)}"
                 android:text="@string/pinterest" />
         </LinearLayout>

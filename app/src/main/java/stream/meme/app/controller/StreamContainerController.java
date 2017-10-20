@@ -78,10 +78,8 @@ public class StreamContainerController extends DatabindingBIVSCModule<StreamCont
             clicks(header).subscribe(intents.ProfileClickedIntent);
 
             ifPresent(states.map(State::profile), profile -> {
-                ifPresent(profile.getImage(), image -> {
-                    Blurry.with(getActivity()).from(image).into(backgroundImage);
-                    profileImage.setImageBitmap(image);
-                });
+                Blurry.with(getActivity()).from(profile.getImage()).into(backgroundImage);
+                profileImage.setImageBitmap(profile.getImage());
                 name.setText(profile.getName());
                 email.setText(profile.getEmail());
             });

@@ -6,9 +6,9 @@ import com.bluelinelabs.conductor.RouterTransaction;
 
 import stream.meme.app.application.MemeStream;
 import stream.meme.app.application.login.Login;
-import stream.meme.app.util.RouterActivity;
 import stream.meme.app.controller.LoginController;
 import stream.meme.app.controller.StreamContainerController;
+import stream.meme.app.util.RouterActivity;
 
 public class MainActivity extends RouterActivity {
     @Override

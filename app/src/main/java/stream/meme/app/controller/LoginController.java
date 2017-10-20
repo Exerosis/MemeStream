@@ -6,6 +6,7 @@ import android.support.annotation.NonNull;
 import com.bluelinelabs.conductor.RouterTransaction;
 
 import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.functions.BiConsumer;
 import io.reactivex.subjects.PublishSubject;
 import io.reactivex.subjects.Subject;
@@ -39,18 +40,18 @@ public class LoginController extends DatabindingBIVSCModule<LoginViewBinding, Vo
     @Override
     public Observable<Void> getController() {
         intents.LoginStartIntent.subscribe(loginType -> {
-            if (memeStream.isAuthenticated())
-                memeStream.login(loginType, getActivity()).subscribe(result -> {
+            if (!memeStream.isAuthenticated())
+                memeStream.login(loginType, getActivity()).observeOn(AndroidSchedulers.mainThread()).subscribe(result -> {
                     if (result)
                         getRouter().setRoot(RouterTransaction.with(new StreamContainerController()));
-                });
+                }, Throwable::printStackTrace);
             else
                 getRouter().setRoot(RouterTransaction.with(new StreamContainerController()));
         });
         return Observable.empty();
     }
 
-   public class Intents {
+    public class Intents {
         Subject<LoginType> LoginStartIntent = PublishSubject.create();
 
         public void login(LoginType type) {

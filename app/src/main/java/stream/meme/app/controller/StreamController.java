@@ -61,11 +61,13 @@ public class StreamController extends DatabindingBIVSCModule<StreamViewBinding, 
                         if (memeView.getRating() == null)
                             memeView.setRating(new ObservableByte((byte) 0));
 
-                        List<Comment> comments = new ArrayList<>();
-                        comments.add(new Comment("Exerosis", "10/17/2017", "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam sit amet odio felis. Sed et bibendum mauris. Ut commodo elit nisi, non luctus metus gravida non. Donec at est vel libero pretium sollicitudin. Maecenas a ultricies libero. Donec sed scelerisque lectus. Aenean viverra hendrerit laoreet. Vivamus ullamcorper risus ut nibh sodales accumsan. Cras est diam, mattis in pulvinar ac, imperdiet sit amet elit. Ut a erat viverra, gravida velit at, rutrum nulla. In fermentum nulla vel urna bibendum malesuada. "));
-                        comments.add(new Comment("Exerosis", "10/17/2017", "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam sit amet odio felis. Sed et bibendum mauris. Ut commodo elit nisi, non luctus metus gravida non. Donec at est vel libero pretium sollicitudin. Maecenas a ultricies libero. Donec sed scelerisque lectus. Aenean viverra hendrerit laoreet. Vivamus ullamcorper risus ut nibh sodales accumsan. Cras est diam, mattis in pulvinar ac, imperdiet sit amet elit. Ut a erat viverra, gravida velit at, rutrum nulla. In fermentum nulla vel urna bibendum malesuada. "));
-                        comments.add(new Comment("Exerosis", "10/17/2017", "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam sit amet odio felis. Sed et bibendum mauris. Ut commodo elit nisi, non luctus metus gravida non. Donec at est vel libero pretium sollicitudin. Maecenas a ultricies libero. Donec sed scelerisque lectus. Aenean viverra hendrerit laoreet. Vivamus ullamcorper risus ut nibh sodales accumsan. Cras est diam, mattis in pulvinar ac, imperdiet sit amet elit. Ut a erat viverra, gravida velit at, rutrum nulla. In fermentum nulla vel urna bibendum malesuada. "));
-                        memeView.setComments(comments);
+                        memeStream.getProfile().subscribe(profile -> {
+                            List<Comment> comments = new ArrayList<>();
+                            comments.add(new Comment(profile, "1d", "Ut commodo elit nisi, non luctus metus gravida non. Donec at est vel libero pretium sollicitudin. Maecenas a ultric "));
+                            comments.add(new Comment(profile, "1d", "Ut commodo elit nisi, non luctus metus gravida non. Donec at est vel libero pretium sollicitudin. Maecenas a ultric "));
+                            comments.add(new Comment(profile, "1d", "Ut commodo elit nisi, non luctus metus gravida non. Donec at est vel libero pretium sollicitudin. Maecenas a ultric "));
+                            memeView.setCommentList(comments);
+                        });
 
                         //Add meme information.
                         Picasso.with(getActivity()).load(meme.getImage()).into(memeView.image);
