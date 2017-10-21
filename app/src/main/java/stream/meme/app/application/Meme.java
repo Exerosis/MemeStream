@@ -1,33 +1,16 @@
 package stream.meme.app.application;
 
+import android.graphics.Bitmap;
+
 import java.util.UUID;
 
+import lombok.Data;
+
+@Data
 public class Meme {
-    private UUID uuid;
-    private String title;
-    private String subtitle;
-    private String image;
-
-    public Meme(UUID uuid, String title, String subtitle, String image) {
-        this.uuid = uuid;
-        this.title = title;
-        this.subtitle = subtitle;
-        this.image = image;
-    }
-
-    public String getImage() {
-        return image;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public String getSubtitle() {
-        return subtitle;
-    }
-
-    public UUID getUuid() {
-        return uuid;
-    }
+    private final UUID uuid;
+    private final String title;
+    private final String subtitle;
+    private final String image;
+    private final Bitmap thumbnail;
 }

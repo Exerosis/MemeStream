@@ -9,7 +9,7 @@
         <item name="android:textColorSecondary">@color/secondary_text</item>
         <item name="android:textColorPrimaryDisableOnly">@color/disabled_text</item>
 
-        <item name="android:divider">@color/disabled_text</item>
+        <item name="android:divider">#1f000000</item>
         <item name="android:icon">@color/icon</item>
 
         <item name="android:windowContentTransitions">true</item>

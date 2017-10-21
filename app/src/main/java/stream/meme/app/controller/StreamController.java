@@ -70,6 +70,7 @@ public class StreamController extends DatabindingBIVSCModule<StreamViewBinding, 
                         });
 
                         //Add meme information.
+                        memeView.image.setImageBitmap(meme.getThumbnail());
                         Picasso.with(getActivity()).load(meme.getImage()).into(memeView.image);
                         memeView.title.setText(meme.getTitle());
                         memeView.subtitle.setText(meme.getSubtitle());
