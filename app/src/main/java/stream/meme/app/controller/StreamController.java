@@ -29,6 +29,7 @@ import stream.meme.app.databinding.StreamViewBinding;
 import stream.meme.app.util.ItemOffsetDecoration;
 import stream.meme.app.util.bivsc.DatabindingBIVSCModule;
 import stream.meme.app.util.rxadapter.RxAdapter;
+import stream.meme.app.util.rxadapter.RxAdapterAlpha;
 import stream.meme.app.util.rxadapter.RxListCallback;
 import stream.meme.app.util.rxadapter.RxPagination;
 
@@ -52,6 +53,18 @@ public class StreamController extends DatabindingBIVSCModule<StreamViewBinding, 
         return (views, state) -> {
             intents.RefreshIntent = views.switchMap(view -> refreshes(view.refreshLayout));
 
+            new RxAdapterAlpha<>(views.map(view -> view.recyclerView), new RxListCallback<>(state.map(State::memes)))
+                    .bind(R.layout.meme_view, (memeView, memes) -> {
+                        new RxAdapterAlpha<>(memeView.test, new RxListCallback<>(memes.map(Meme::getComments)))
+                                .bind(R.layout.comment_view, (commentView, comments) -> {
+                                    comments.subscribe(comment -> {
+
+                                    });
+                                });
+                        memes.subscribe(meme -> {
+
+                        });
+                    });
             new RxAdapter<>(views.map(view -> view.recyclerView),
                     new RxListCallback<>(state.map(State::memes)))
                     .bind(R.layout.meme_view, (Meme meme, MemeViewBinding memeView) -> {
@@ -134,6 +147,8 @@ public class StreamController extends DatabindingBIVSCModule<StreamViewBinding, 
         Subject<Meme> MemeClickIntent = PublishSubject.create();
         Subject<Pair<Meme, Byte>> RatedIntent = PublishSubject.create();
         Subject<Meme> ShareClickIntent = PublishSubject.create();
+        Subject<Comment> ReplyIntent = PublishSubject.create();
+        Subject<Object> CommentsIntent = PublishSubject.create();
     }
 
     class State {
