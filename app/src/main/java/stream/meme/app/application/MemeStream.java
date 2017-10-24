@@ -9,6 +9,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.squareup.picasso.Picasso;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,7 +32,6 @@ import stream.meme.app.application.services.MemeService;
 import static com.google.gson.FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES;
 import static io.reactivex.Observable.empty;
 import static io.reactivex.Observable.fromCallable;
-import static io.reactivex.Observable.just;
 import static java.util.Arrays.asList;
 import static java.util.UUID.randomUUID;
 import static java.util.concurrent.TimeUnit.SECONDS;
@@ -63,14 +63,92 @@ public class MemeStream extends Application {
     public Observable<List<Meme>> loadMemes(int page) {
         Observable<List<Meme>> memes;
         if ((memes = streams.get(page)) == null) {
-            memes = just(asList(
-                    new Meme(randomUUID(), "test0", "page " + page, "https://i.vimeocdn.com/portrait/58832_300x300"),
-                    new Meme(randomUUID(), "test1", "page " + page, "https://i.vimeocdn.com/portrait/58832_300x300"),
-                    new Meme(randomUUID(), "test2", "page " + page, "https://i.vimeocdn.com/portrait/58832_300x300"),
-                    new Meme(randomUUID(), "test3", "page " + page, "https://i.vimeocdn.com/portrait/58832_300x300"),
-                    new Meme(randomUUID(), "test4", "page " + page, "https://i.vimeocdn.com/portrait/58832_300x300"),
-                    new Meme(randomUUID(), "test5", "page " + page, "https://i.vimeocdn.com/portrait/58832_300x300")))
-                    .delay(1, SECONDS).replay(1).autoConnect();
+            memes = fromCallable(() -> asList(
+                    new Meme(randomUUID(),
+                            "test0",
+                            "page " + page,
+                            "https://i.vimeocdn.com/portrait/58832_300x300",
+                            Picasso.with(this).load("https://i.vimeocdn.com/portrait/58832_300x300").get(),
+                            Arrays.asList(new Comment(getProfile().blockingFirst(),
+                                            "1d",
+                                            "Ut commodo elit nisi, non luctus metus gravida non. Donec at est vel libero pretium sollicitudin. Maecenas a ultric "),
+                                    new Comment(getProfile().blockingFirst(),
+                                            "1d",
+                                            "Ut commodo elit nisi, non luctus metus gravida non. Donec at est vel libero pretium sollicitudin. Maecenas a ultric "),
+                                    new Comment(getProfile().blockingFirst(),
+                                            "1d",
+                                            "Ut commodo elit nisi, non luctus metus gravida non. Donec at est vel libero pretium sollicitudin. Maecenas a ultric "))),
+                    new Meme(randomUUID(),
+                            "test1",
+                            "page " + page,
+                            "https://i.vimeocdn.com/portrait/58832_300x300",
+                            Picasso.with(this).load("https://i.vimeocdn.com/portrait/58832_300x300").get(),
+                            Arrays.asList(new Comment(getProfile().blockingFirst(),
+                                            "1d",
+                                            "Ut commodo elit nisi, non luctus metus gravida non. Donec at est vel libero pretium sollicitudin. Maecenas a ultric "),
+                                    new Comment(getProfile().blockingFirst(),
+                                            "1d",
+                                            "Ut commodo elit nisi, non luctus metus gravida non. Donec at est vel libero pretium sollicitudin. Maecenas a ultric "),
+                                    new Comment(getProfile().blockingFirst(),
+                                            "1d",
+                                            "Ut commodo elit nisi, non luctus metus gravida non. Donec at est vel libero pretium sollicitudin. Maecenas a ultric "))),
+                    new Meme(randomUUID(),
+                            "test2",
+                            "page " + page,
+                            "https://i.vimeocdn.com/portrait/58832_300x300",
+                            Picasso.with(this).load("https://i.vimeocdn.com/portrait/58832_300x300").get(),
+                            Arrays.asList(new Comment(getProfile().blockingFirst(),
+                                            "1d",
+                                            "Ut commodo elit nisi, non luctus metus gravida non. Donec at est vel libero pretium sollicitudin. Maecenas a ultric "),
+                                    new Comment(getProfile().blockingFirst(),
+                                            "1d",
+                                            "Ut commodo elit nisi, non luctus metus gravida non. Donec at est vel libero pretium sollicitudin. Maecenas a ultric "),
+                                    new Comment(getProfile().blockingFirst(),
+                                            "1d",
+                                            "Ut commodo elit nisi, non luctus metus gravida non. Donec at est vel libero pretium sollicitudin. Maecenas a ultric "))),
+                    new Meme(randomUUID(),
+                            "test3",
+                            "page " + page,
+                            "https://i.vimeocdn.com/portrait/58832_300x300",
+                            Picasso.with(this).load("https://i.vimeocdn.com/portrait/58832_300x300").get(),
+                            Arrays.asList(new Comment(getProfile().blockingFirst(),
+                                            "1d",
+                                            "Ut commodo elit nisi, non luctus metus gravida non. Donec at est vel libero pretium sollicitudin. Maecenas a ultric "),
+                                    new Comment(getProfile().blockingFirst(),
+                                            "1d",
+                                            "Ut commodo elit nisi, non luctus metus gravida non. Donec at est vel libero pretium sollicitudin. Maecenas a ultric "),
+                                    new Comment(getProfile().blockingFirst(),
+                                            "1d",
+                                            "Ut commodo elit nisi, non luctus metus gravida non. Donec at est vel libero pretium sollicitudin. Maecenas a ultric "))),
+                    new Meme(randomUUID(),
+                            "test4",
+                            "page " + page,
+                            "https://i.vimeocdn.com/portrait/58832_300x300",
+                            Picasso.with(this).load("https://i.vimeocdn.com/portrait/58832_300x300").get(),
+                            Arrays.asList(new Comment(getProfile().blockingFirst(),
+                                            "1d",
+                                            "Ut commodo elit nisi, non luctus metus gravida non. Donec at est vel libero pretium sollicitudin. Maecenas a ultric "),
+                                    new Comment(getProfile().blockingFirst(),
+                                            "1d",
+                                            "Ut commodo elit nisi, non luctus metus gravida non. Donec at est vel libero pretium sollicitudin. Maecenas a ultric "),
+                                    new Comment(getProfile().blockingFirst(),
+                                            "1d",
+                                            "Ut commodo elit nisi, non luctus metus gravida non. Donec at est vel libero pretium sollicitudin. Maecenas a ultric "))),
+                    new Meme(randomUUID(),
+                            "test5",
+                            "page " + page,
+                            "https://i.vimeocdn.com/portrait/58832_300x300",
+                            Picasso.with(this).load("https://i.vimeocdn.com/portrait/58832_300x300").get(),
+                            Arrays.asList(new Comment(getProfile().blockingFirst(),
+                                            "1d",
+                                            "Ut commodo elit nisi, non luctus metus gravida non. Donec at est vel libero pretium sollicitudin. Maecenas a ultric "),
+                                    new Comment(getProfile().blockingFirst(),
+                                            "1d",
+                                            "Ut commodo elit nisi, non luctus metus gravida non. Donec at est vel libero pretium sollicitudin. Maecenas a ultric "),
+                                    new Comment(getProfile().blockingFirst(),
+                                            "1d",
+                                            "Ut commodo elit nisi, non luctus metus gravida non. Donec at est vel libero pretium sollicitudin. Maecenas a ultric ")))))
+                    .delay(1, SECONDS).replay(1).autoConnect().subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread());
             streams.put(page, memes);
         }
         return memes;

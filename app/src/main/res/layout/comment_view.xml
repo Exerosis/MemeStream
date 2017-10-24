@@ -4,21 +4,14 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:background="#F5F5F5">
 
-    <data>
-
-        <variable
-            name="data"
-            type="stream.meme.app.application.Comment" />
-    </data>
-
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:orientation="vertical">
 
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:padding="16dp">
 
             <de.hdodenhof.circleimageview.CircleImageView
@@ -28,9 +21,7 @@
                 android:layout_alignParentStart="true"
                 android:layout_marginEnd="8dp"
                 android:scaleType="centerCrop"
-                app:src="@{data.getAuthor().getImage()}"
                 tools:src="@drawable/home_header_background" />
-
 
             <TextView
                 android:id="@+id/date"
@@ -38,11 +29,11 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentEnd="true"
                 android:layout_marginStart="8dp"
-                android:text="@{data.getDate()}"
                 android:textColor="@color/secondary_text"
                 tools:text="1d" />
 
             <LinearLayout
+                android:id="@+id/main"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentTop="true"
@@ -53,26 +44,36 @@
                 android:orientation="vertical">
 
                 <TextView
+                    android:id="@+id/author"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="4dp"
                     android:layout_marginTop="4dp"
-                    android:text="@{data.getAuthor().getName()}"
                     android:textColor="@color/primary_text"
                     android:textSize="16sp"
                     android:textStyle="bold"
-                    tools:text="Aaron N. Brock" />
+                    tools:text="Exerosis" />
 
                 <TextView
+                    android:id="@+id/content"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:ellipsize="end"
                     android:maxHeight="200dp"
-                    android:text="@{data.getContent()}"
                     android:textColor="@color/primary_text"
                     android:textSize="16sp"
                     tools:text="Ut commodo elit nisi, non luctus metus gravida non. Donec at est vel libero pretium sollicitudin. Maecenas a ultric " />
             </LinearLayout>
+
+            <Button
+                style="@android:style/Widget.DeviceDefault.Button.Borderless.Small"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_alignBottom="@id/main"
+                android:layout_alignParentEnd="true"
+                android:layout_marginStart="16dp"
+                android:background="@drawable/ic_reply"
+                android:foreground="?selectableItemBackgroundBorderless" />
 
         </RelativeLayout>
 

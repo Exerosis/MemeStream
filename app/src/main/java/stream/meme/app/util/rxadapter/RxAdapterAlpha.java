@@ -38,6 +38,7 @@ public class RxAdapterAlpha<Type> {
     private final Map<Function<Integer, Optional<Integer>>, BiConsumer<ViewDataBinding, Observable<Type>>> bindings = new HashMap<>();
     private List<Type> list = new ArrayList<>();
     private Function<Integer, Integer> type = justFunction(0);
+    private RecyclerView.Adapter<RxViewHolder> adapter;
 
     public <Data extends Supplier<List<Type>> & Consumer<ListUpdateCallback>> RxAdapterAlpha(RecyclerView view, Data data) {
         this(just(view), data);
@@ -50,36 +51,40 @@ public class RxAdapterAlpha<Type> {
             data.accept(new ListUpdateCallback() {
                 @Override
                 public void onInserted(int position, int count) {
-                    list = data.get();
+                    setData(data.get());
                     adapter.notifyItemRangeInserted(position, count);
                 }
 
                 @Override
                 public void onRemoved(int position, int count) {
-                    list = data.get();
+                    setData(data.get());
                     adapter.notifyItemRangeRemoved(position, count);
                 }
 
                 @Override
                 public void onMoved(int fromPosition, int toPosition) {
-                    list = data.get();
+                    setData(data.get());
                     adapter.notifyItemMoved(fromPosition, toPosition);
                 }
 
                 @Override
                 public void onChanged(int position, int count, Object payload) {
-                    list = data.get();
+                    setData(data.get());
                     adapter.notifyItemRangeChanged(position, count, payload);
                 }
             });
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
 
+    private void setData(List<Type> data) {
+        list.clear();
+        list.addAll(data);
     }
 
     public <View extends ViewDataBinding> RxAdapterAlpha<Type> bind(@LayoutRes int layout, BiConsumer<View, Observable<Type>> binding) {
-        return bind(0, binding);
+        return bind(0, layout, binding);
     }
 
     public <View extends ViewDataBinding> RxAdapterAlpha<Type> bind(int type, @LayoutRes int layout, BiConsumer<View, Observable<Type>> binding) {
@@ -97,50 +102,59 @@ public class RxAdapterAlpha<Type> {
         return this;
     }
 
+    public Function<Integer, Integer> getType() {
+        return type;
+    }
 
-    private RecyclerView.Adapter<RxViewHolder> getAdapter() {
-        return new RecyclerView.Adapter<RxViewHolder>() {
-            @Override
-            public RxViewHolder onCreateViewHolder(ViewGroup parent, int type) {
-                try {
-                    for (Map.Entry<Function<Integer, Optional<Integer>>, BiConsumer<ViewDataBinding, Observable<Type>>> entry : bindings.entrySet())
-                        if (entry.getKey().apply(type).isPresent()) {
-                            ViewDataBinding view = inflate(from(parent.getContext()), entry.getKey().apply(type).get(), parent, false);
-                            RxViewHolder viewHolder = new RxViewHolder(view.getRoot());
-                            entry.getValue().accept(view, viewHolder.getObservable());
-                            return viewHolder;
-                        }
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
+    public List<Type> getList() {
+        return list;
+    }
+
+    public RecyclerView.Adapter<RxViewHolder> getAdapter() {
+        if (adapter == null)
+            adapter = new RecyclerView.Adapter<RxViewHolder>() {
+                @Override
+                public RxViewHolder onCreateViewHolder(ViewGroup parent, int type) {
+                    try {
+                        for (Map.Entry<Function<Integer, Optional<Integer>>, BiConsumer<ViewDataBinding, Observable<Type>>> entry : bindings.entrySet())
+                            if (entry.getKey().apply(type).isPresent()) {
+                                ViewDataBinding view = inflate(from(parent.getContext()), entry.getKey().apply(type).get(), parent, false);
+                                RxViewHolder viewHolder = new RxViewHolder(view.getRoot());
+                                entry.getValue().accept(view, viewHolder.getObservable());
+                                return viewHolder;
+                            }
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                    throw new IllegalStateException("Could not find a layout for type " + type);
                 }
-                throw new IllegalStateException("Could not find a layout for type " + type);
-            }
 
-            @Override
-            public void onBindViewHolder(RxViewHolder holder, int position) {
-                holder.subject.onNext(list.get(position));
-            }
-
-            @Override
-            public void onViewRecycled(RxViewHolder holder) {
-                for (Disposable disposable : holder.disposables)
-                    disposable.dispose();
-            }
-
-            @Override
-            public int getItemViewType(int position) {
-                try {
-                    return type.apply(position);
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
+                @Override
+                public void onBindViewHolder(RxViewHolder holder, int position) {
+                    holder.subject.onNext(list.get(position));
                 }
-            }
 
-            @Override
-            public int getItemCount() {
-                return list.size();
-            }
-        };
+                @Override
+                public void onViewRecycled(RxViewHolder holder) {
+                    for (Disposable disposable : holder.disposables)
+                        disposable.dispose();
+                }
+
+                @Override
+                public int getItemViewType(int position) {
+                    try {
+                        return type.apply(position);
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+
+                @Override
+                public int getItemCount() {
+                    return list.size();
+                }
+            };
+        return adapter;
     }
 
 

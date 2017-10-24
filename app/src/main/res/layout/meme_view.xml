@@ -74,14 +74,12 @@
                 app:el_parallax="1"
                 app:expanded="@{shown}">
 
-                <LinearLayout
+                <android.support.v7.widget.RecyclerView
                     android:id="@+id/comments"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    android:orientation="vertical"
-                    app:entries="@{commentList}"
-                    app:layout="@{@layout/comment_view}" />
+                    tools:listitem="@layout/comment_view" />
 
             </net.cachapa.expandablelayout.ExpandableLayout>
 

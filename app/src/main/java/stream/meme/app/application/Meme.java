@@ -14,5 +14,5 @@ public class Meme {
     private final String subtitle;
     private final String image;
     private final Bitmap thumbnail;
-    private final List<Comment> comments
+    private final List<Comment> comments;
 }
