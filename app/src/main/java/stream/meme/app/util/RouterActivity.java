@@ -2,6 +2,7 @@ package stream.meme.app.util;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.view.MenuItem;
 
 import com.bluelinelabs.conductor.ChangeHandlerFrameLayout;
 import com.bluelinelabs.conductor.Conductor;
@@ -24,6 +25,14 @@ public abstract class RouterActivity extends AppCompatActivity {
         router = Conductor.attachRouter(this, container, state);
         if (!router.hasRootController())
             router.setRoot(onRouterTransaction());
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() != android.R.id.home)
+            return super.onOptionsItemSelected(item);
+        onBackPressed();
+        return true;
     }
 
 

@@ -3,6 +3,7 @@ package stream.meme.app.controller;
 import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.util.Pair;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -24,16 +25,18 @@ import io.reactivex.subjects.PublishSubject;
 import io.reactivex.subjects.Subject;
 import jp.wasabeef.blurry.Blurry;
 import stream.meme.app.R;
-import stream.meme.app.activity.ProfileActivity;
 import stream.meme.app.application.MemeStream;
 import stream.meme.app.application.Profile;
+import stream.meme.app.application.login.Login;
 import stream.meme.app.databinding.StreamContainerViewBinding;
+import stream.meme.app.util.ControllerActivity;
 import stream.meme.app.util.bivsc.DatabindingBIVSCModule;
 import stream.meme.app.util.bivsc.Reducer;
 
 import static android.support.v4.app.ActivityOptionsCompat.makeSceneTransitionAnimation;
 import static com.jakewharton.rxbinding2.support.design.widget.RxNavigationView.itemSelections;
 import static com.jakewharton.rxbinding2.view.RxView.clicks;
+import static stream.meme.app.util.ControllerActivity.*;
 import static stream.meme.app.util.Optionals.ifPresent;
 import static stream.meme.app.util.bivsc.Reducer.controller;
 
@@ -47,6 +50,12 @@ public class StreamContainerController extends DatabindingBIVSCModule<StreamCont
         super(R.layout.stream_container_view);
         streams.put(R.id.navigation_home, StreamController::new);
         streams.put(R.id.navigation_top, StreamController::new);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        for (Login login : ((MemeStream) getApplicationContext()).getLogins().values())
+            login.onActivityResult(requestCode, resultCode, data);
     }
 
     @Override
@@ -97,7 +106,9 @@ public class StreamContainerController extends DatabindingBIVSCModule<StreamCont
                                 new Pair<>(backgroundImage, "background_image"),
                                 new Pair<>(profileImage, "profile_image"),
                                 new Pair<>(view.toolbar, "toolbar"));
-                        getActivity().startActivity(new Intent(getActivity(), ProfileActivity.class), options.toBundle());
+                        Intent intent = new Intent(getActivity(), ControllerActivity.class);
+                        intent.putExtra(EXTRA_CONTROLLER, ProfileController.class.getName());
+                        getActivity().startActivity(intent, options.toBundle());
                         intents.SettingsOpenedIntent.onNext(false);
                     });
         });

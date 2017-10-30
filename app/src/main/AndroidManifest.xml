@@ -17,16 +17,16 @@
             android:value="@string/facebook_app_id" />
 
         <activity
-            android:name=".activity.MainActivity"
+            android:name=".util.ControllerActivity"
             android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+            <meta-data
+                android:name="CONTROLLER"
+                android:value="stream.meme.app.controller" />
         </activity>
-        <activity
-            android:name=".activity.ProfileActivity"
-            android:theme="@style/AppTheme.Transparent" />
     </application>
 
 </manifest>
