@@ -22,7 +22,10 @@ public final class Optionals {
             }
     }
 
+    public static <T> Observable<T> ifPresent(Observable<Optional<T>> observable) {
+        return observable.filter(Optional::isPresent).map(Optional::get);
+    }
     public static <T> Disposable ifPresent(Observable<Optional<T>> observable, Consumer<T> subscriber) {
-        return observable.filter(Optional::isPresent).map(Optional::get).subscribe(subscriber);
+        return ifPresent(observable).subscribe(subscriber);
     }
 }

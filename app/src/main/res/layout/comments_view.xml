@@ -28,16 +28,24 @@
             app:layout_behavior="@string/appbar_scrolling_view_behavior"
             tools:listitem="@layout/comment_view" />
 
-        <EditText
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="?actionBarSize"
-            android:layout_gravity="bottom"
-            android:elevation="8dp"
-            android:hint="@string/comment"
-            android:inputType="textCapSentences|textMultiLine"
-            android:maxLength="2000"
-            android:maxLines="4"
-            android:scrollHorizontally="false" />
+            android:layout_height="wrap_content">
+
+            <EditText
+                android:id="@+id/reply"
+                android:drawableStart="@drawable/home_header_background"
+                android:drawableEnd="@drawable/ic_send"
+                android:layout_width="match_parent"
+                android:layout_height="?actionBarSize"
+                android:layout_gravity="bottom"
+                android:elevation="8dp"
+                android:hint="@string/comment"
+                android:inputType="textCapSentences|textMultiLine"
+                android:maxLength="2000"
+                android:maxLines="4"
+                android:scrollHorizontally="false" />
+        </LinearLayout>
 
     </android.support.design.widget.CoordinatorLayout>
 </layout>
