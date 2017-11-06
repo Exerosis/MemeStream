@@ -14,7 +14,7 @@ public class Comment {
     final User author;
     final String date;
     final String content;
-    final Boolean sent;
+    final Boolean sent = false;
 
     public Optional<Boolean> isSent() {
         return fromNullable(sent);

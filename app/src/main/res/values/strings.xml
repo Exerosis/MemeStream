@@ -18,5 +18,7 @@
     <string name="menu_home">Home</string>
     <string name="menu_top">Top</string>
     <string name="menu_settings">Settings</string>
-    <string name="comment">Write a reply...</string>
+    <string name="comment">Reply...</string>
+    <string name="content_description_send">Send</string>
+    <string name="content_description_profile">Profile Picture</string>
 </resources>

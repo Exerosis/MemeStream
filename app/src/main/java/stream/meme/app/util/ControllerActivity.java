@@ -1,13 +1,14 @@
 package stream.meme.app.util;
 
-import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.os.Bundle;
 
 import com.bluelinelabs.conductor.Controller;
 import com.bluelinelabs.conductor.RouterTransaction;
 
+import static android.content.pm.PackageManager.GET_ACTIVITIES;
 import static android.content.pm.PackageManager.GET_META_DATA;
+import static android.content.pm.PackageManager.NameNotFoundException;
 
 public class ControllerActivity extends RouterActivity {
     public static final String EXTRA_CONTROLLER = "CONTROLLER";
@@ -19,11 +20,11 @@ public class ControllerActivity extends RouterActivity {
         int theme = getIntent().getIntExtra(EXTRA_THEME, 0);
         if (controller == null) {
             try {
-                Bundle metaData = getPackageManager().getApplicationInfo(this.getPackageName(), GET_META_DATA).metaData;
+                Bundle metaData = getPackageManager().getActivityInfo(getComponentName(), GET_ACTIVITIES | GET_META_DATA).metaData;
                 controller = metaData.getString(EXTRA_CONTROLLER);
                 if (metaData.containsKey("THEME") && theme == 0)
                     setTheme(metaData.getInt(EXTRA_THEME));
-            } catch (PackageManager.NameNotFoundException e) {
+            } catch (NameNotFoundException e) {
                 e.printStackTrace();
             }
         }

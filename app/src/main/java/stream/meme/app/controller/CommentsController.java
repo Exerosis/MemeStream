@@ -1,13 +1,17 @@
 package stream.meme.app.controller;
 
+import android.content.Context;
+import android.support.annotation.NonNull;
+
 import com.google.common.base.Optional;
-import com.jakewharton.rxbinding2.view.RxView;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import io.reactivex.Observable;
 import io.reactivex.functions.BiConsumer;
+import io.reactivex.subjects.PublishSubject;
+import io.reactivex.subjects.Subject;
 import stream.meme.app.R;
 import stream.meme.app.application.Comment;
 import stream.meme.app.application.User;
@@ -19,8 +23,10 @@ import stream.meme.app.util.bivsc.Reducer;
 import stream.meme.app.util.rxadapter.RxAdapterAlpha;
 import stream.meme.app.util.rxadapter.RxListCallback;
 
+import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN;
 import static com.google.common.base.Optional.fromNullable;
 import static com.jakewharton.rxbinding2.view.RxView.clicks;
+import static com.jakewharton.rxbinding2.view.RxView.visibility;
 import static com.jakewharton.rxbinding2.widget.RxTextView.color;
 import static com.jakewharton.rxbinding2.widget.RxTextView.text;
 import static com.jakewharton.rxbinding2.widget.RxTextView.textChanges;
@@ -37,11 +43,16 @@ public class CommentsController extends DatabindingBIVSCModule<CommentsViewBindi
     }
 
     static class Intents {
-        Observable<User> ReplyIntent;
+        Subject<User> ReplyIntent = PublishSubject.create();
         Observable<String> RepliedIntent;
         Observable<Nothing> RefreshIntent;
     }
 
+    @Override
+    protected void onContextAvailable(@NonNull Context context) {
+        getActivity().getWindow().setSoftInputMode(SOFT_INPUT_ADJUST_PAN);
+        super.onContextAvailable(context);
+    }
 
     class State {
         List<Comment> comments = new ArrayList<>();
@@ -105,7 +116,7 @@ public class CommentsController extends DatabindingBIVSCModule<CommentsViewBindi
                     .<CommentViewBinding>bind(R.layout.comment_view, (commentView, comments) -> {
                         Observable<User> author = comments
                                 .map(Comment::getAuthor)
-                                .distinctUntilChanged(User::hashCode);
+                                .distinctUntilChanged();
 
                         //--Author--
                         author.subscribe(user -> {
@@ -114,14 +125,12 @@ public class CommentsController extends DatabindingBIVSCModule<CommentsViewBindi
                         });
 
                         //--Reply--
-                        intents.ReplyIntent = author
-                                .switchMap(user ->
-                                        always(user, clicks(commentView.reply))
-                                );
+                        author.switchMap(user ->
+                                always(user, clicks(commentView.reply)))
+                                .subscribe(intents.ReplyIntent);
 
                         //--Content--
-                        comments
-                                .map(Comment::getContent)
+                        comments.map(Comment::getContent)
                                 .distinctUntilChanged()
                                 .subscribe(text(commentView.content));
 
@@ -132,28 +141,34 @@ public class CommentsController extends DatabindingBIVSCModule<CommentsViewBindi
                                 .subscribe(color(commentView.content));
 
                         //--Date--
-                        comments
-                                .map(Comment::getDate)
-                                .distinctUntilChanged(String::hashCode)
+                        comments.map(Comment::getDate)
+                                .distinctUntilChanged()
                                 .subscribe(text(commentView.date));
                     });
 
+            intents.RepliedIntent = views
+                    .switchMap(view -> clicks(view.send)
+                            .map(ignored -> view.reply.getText().toString()));
+
             views.subscribe(view -> {
+                view.reply.requestFocus();
+
                 //--Reply Hint--
                 ifPresent(states
                         .map(State::replying)
                         .distinctUntilChanged())
                         .map(User::getName)
-                        .filter(ignored -> view.reply.getText().length() == 0)
                         .subscribe(name -> {
-                            view.reply.setText('@' + name);
+                            view.reply.append("@" + name);
                             view.reply.requestFocus();
                         });
 
+                //--Send Visibility--
                 textChanges(view.reply)
                         .debounce(1, SECONDS)
                         .map(text -> text.length() > MIN_LENGTH)
-                        .subscribe(RxView.visibility(view.reply));
+                        .startWith(false)
+                        .subscribe(visibility(view.send));
             });
         };
     }
@@ -161,11 +176,7 @@ public class CommentsController extends DatabindingBIVSCModule<CommentsViewBindi
     @Override
     public Observable<State> getController() {
         return Reducer.controller(new State(),
-                intents.ReplyIntent.map(Partials::PartialReply),
-                //-- PartialComments--
-                intents.ReplyIntent
-                        .map(user -> Partials.PartialError(null))
-
+                intents.ReplyIntent.map(Partials::PartialReply)
         );
     }
 

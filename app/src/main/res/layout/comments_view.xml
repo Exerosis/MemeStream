@@ -24,28 +24,58 @@
         <android.support.v7.widget.RecyclerView
             android:id="@+id/comments"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             app:layout_behavior="@string/appbar_scrolling_view_behavior"
             tools:listitem="@layout/comment_view" />
 
-        <LinearLayout
+        <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:background="@color/cardview_light_background"
+            android:elevation="8dp"
+            android:fitsSystemWindows="true">
+
+            <de.hdodenhof.circleimageview.CircleImageView
+                android:id="@+id/image"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_alignParentStart="true"
+                android:layout_margin="4dp"
+                android:contentDescription="@string/content_description_profile"
+                android:scaleType="centerCrop"
+                android:src="@drawable/home_header_background" />
+
+            <ImageButton
+                android:id="@+id/send"
+                style="@android:style/Widget.DeviceDefault.Button.Borderless.Small"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_alignParentEnd="true"
+                android:layout_margin="4dp"
+                android:contentDescription="@string/content_description_send"
+                android:foreground="?selectableItemBackgroundBorderless"
+                android:src="@drawable/ic_send" />
 
             <EditText
                 android:id="@+id/reply"
-                android:drawableStart="@drawable/home_header_background"
-                android:drawableEnd="@drawable/ic_send"
                 android:layout_width="match_parent"
-                android:layout_height="?actionBarSize"
-                android:layout_gravity="bottom"
-                android:elevation="8dp"
+                android:layout_height="wrap_content"
+                android:layout_margin="4dp"
+                android:layout_toEndOf="@id/image"
+                android:layout_toStartOf="@id/send"
+                android:background="@android:color/transparent"
                 android:hint="@string/comment"
                 android:inputType="textCapSentences|textMultiLine"
                 android:maxLength="2000"
                 android:maxLines="4"
-                android:scrollHorizontally="false" />
-        </LinearLayout>
+                android:minHeight="24dp"
+                android:scrollHorizontally="false"
+                android:scrollbars="vertical"
+                android:textSize="12sp" />
+        </RelativeLayout>
 
     </android.support.design.widget.CoordinatorLayout>
 </layout>
+
+
