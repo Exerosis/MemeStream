@@ -1,10 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="24dp"
-    android:height="24dp"
-    android:viewportHeight="24"
-    android:viewportWidth="24">
-    <path
-        android:fillColor="@color/secondary_text"
-        android:pathData="M2,21L23,12L2,3V10L17,12L2,14V21Z" />
-</vector>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@drawable/ic_send_enabled" android:state_enabled="true" />
+
+    <item android:drawable="@drawable/ic_send_disabled" android:state_enabled="false" />
+</selector>

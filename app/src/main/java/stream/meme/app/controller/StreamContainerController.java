@@ -27,7 +27,7 @@ import jp.wasabeef.blurry.Blurry;
 import stream.meme.app.R;
 import stream.meme.app.application.MemeStream;
 import stream.meme.app.application.Profile;
-import stream.meme.app.application.login.Login;
+import stream.meme.app.application.login.Provider;
 import stream.meme.app.databinding.StreamContainerViewBinding;
 import stream.meme.app.util.ControllerActivity;
 import stream.meme.app.util.bivsc.DatabindingBIVSCModule;
@@ -54,8 +54,8 @@ public class StreamContainerController extends DatabindingBIVSCModule<StreamCont
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        for (Login login : ((MemeStream) getApplicationContext()).getLogins().values())
-            login.onActivityResult(requestCode, resultCode, data);
+        for (Provider provider : ((MemeStream) getApplicationContext()).getProviders().values())
+            provider.onActivityResult(requestCode, resultCode, data);
     }
 
     @Override
@@ -122,11 +122,17 @@ public class StreamContainerController extends DatabindingBIVSCModule<StreamCont
     @Override
     public Observable<State> getController() {
         return controller(new State(streams.get(R.id.navigation_home).get()),
-                intents.NavigateIntent.map(streams::get).map(Supplier::get).map(Partial::Navigated),
-                intents.ProfileClickedIntent.map(ignored ->
-                        Partial.SettingsOpen()),
-                intents.SettingsOpenedIntent.map(ignored ->
-                        Partial.SettingsClose()),
+                intents.NavigateIntent
+                        .map(streams::get)
+                        .map(Supplier::get)
+                        .map(Partial::Navigated),
+
+                intents.ProfileClickedIntent
+                        .map(ignored -> Partial.SettingsOpen()),
+
+                intents.SettingsOpenedIntent
+                        .map(ignored -> Partial.SettingsClose()),
+
                 memeStream.getProfile().map(Partial::Loaded)
         );
     }

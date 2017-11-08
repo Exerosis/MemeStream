@@ -21,4 +21,6 @@
     <string name="comment">Reply...</string>
     <string name="content_description_send">Send</string>
     <string name="content_description_profile">Profile Picture</string>
+    <string name="content_description_share">Share</string>
+    <string name="content_description_reply">Reply</string>
 </resources>

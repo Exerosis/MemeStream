@@ -14,10 +14,10 @@ import static com.facebook.CallbackManager.Factory.create;
 import static com.facebook.login.LoginManager.getInstance;
 import static java.util.Collections.singletonList;
 
-public class FacebookLogin implements Login {
+public class FacebookProvider implements Provider {
     private final CallbackManager callbackManager;
 
-    public FacebookLogin() {
+    public FacebookProvider() {
         callbackManager = create();
     }
 
@@ -32,7 +32,7 @@ public class FacebookLogin implements Login {
 
                 @Override
                 public void onCancel() {
-                    subscriber.onError(new FacebookException("Login attempt was canceled."));
+                    subscriber.onError(new FacebookException("Provider attempt was canceled."));
                 }
 
                 @Override

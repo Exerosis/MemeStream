@@ -2,7 +2,7 @@
 
     <data>
 
-        <import type="stream.meme.app.application.login.LoginType" />
+        <import type="stream.meme.app.application.login.ProviderType" />
 
         <variable
             name="intents"
@@ -37,7 +37,7 @@
                 android:backgroundTint="@color/facebook"
                 android:drawableStart="@drawable/ic_facebook"
                 android:enabled="@{locked}"
-                android:onClick="@{view -> intents.login(LoginType.FACEBOOK)}"
+                android:onClick="@{view -> intents.login(ProviderType.FACEBOOK)}"
                 android:text="@string/facebook" />
 
             <Button
@@ -45,7 +45,7 @@
                 android:backgroundTint="@color/twitter"
                 android:drawableStart="@drawable/ic_twitter"
                 android:enabled="@{locked}"
-                android:onClick="@{view -> intents.login(LoginType.TWITTER)}"
+                android:onClick="@{view -> intents.login(ProviderType.TWITTER)}"
                 android:text="@string/twitter" />
 
             <Button
@@ -53,7 +53,7 @@
                 android:backgroundTint="@color/github"
                 android:drawableStart="@drawable/ic_github"
                 android:enabled="@{locked}"
-                android:onClick="@{view -> intents.login(LoginType.GITHUB)}"
+                android:onClick="@{view -> intents.login(ProviderType.GITHUB)}"
                 android:text="@string/github" />
 
             <Button
@@ -61,7 +61,7 @@
                 android:backgroundTint="@color/google"
                 android:drawableStart="@drawable/ic_google"
                 android:enabled="@{locked}"
-                android:onClick="@{view -> intents.login(LoginType.GOOGLE)}"
+                android:onClick="@{view -> intents.login(ProviderType.GOOGLE)}"
                 android:text="@string/google"
                 android:textColor="@color/secondary_text" />
 
@@ -70,7 +70,7 @@
                 android:backgroundTint="@color/reddit"
                 android:drawableStart="@drawable/ic_reddit"
                 android:enabled="@{locked}"
-                android:onClick="@{view -> intents.login(LoginType.PINTEREST)}"
+                android:onClick="@{view -> intents.login(ProviderType.PINTEREST)}"
                 android:text="@string/reddit" />
 
             <Button
@@ -78,7 +78,7 @@
                 android:backgroundTint="@color/linkedin"
                 android:drawableStart="@drawable/ic_linkedin"
                 android:enabled="@{locked}"
-                android:onClick="@{view -> intents.login(LoginType.LINKEDIN)}"
+                android:onClick="@{view -> intents.login(ProviderType.LINKEDIN)}"
                 android:text="@string/linkedin" />
 
             <Button
@@ -86,7 +86,7 @@
                 android:backgroundTint="@color/pinterest"
                 android:drawableStart="@drawable/ic_pinterest"
                 android:enabled="@{locked}"
-                android:onClick="@{view -> intents.login(LoginType.REDDIT)}"
+                android:onClick="@{view -> intents.login(ProviderType.REDDIT)}"
                 android:text="@string/pinterest" />
         </LinearLayout>
     </FrameLayout>

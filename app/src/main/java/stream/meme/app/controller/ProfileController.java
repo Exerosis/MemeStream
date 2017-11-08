@@ -13,7 +13,7 @@ import jp.wasabeef.blurry.Blurry;
 import stream.meme.app.R;
 import stream.meme.app.application.MemeStream;
 import stream.meme.app.application.Profile;
-import stream.meme.app.application.login.LoginType;
+import stream.meme.app.application.login.ProviderType;
 import stream.meme.app.databinding.ProfileViewBinding;
 import stream.meme.app.util.bivsc.DatabindingBIVSCModule;
 
@@ -59,7 +59,7 @@ public class ProfileController extends DatabindingBIVSCModule<ProfileViewBinding
 
                     intents.EditProfile = clicks(view.editProfile);
 
-                    for (LoginType type : profile.getLogins())
+                    for (ProviderType type : profile.getLogins())
                         switch (type) {
                             case FACEBOOK: {
                                 view.facebook.setEnabled(false);
@@ -82,7 +82,9 @@ public class ProfileController extends DatabindingBIVSCModule<ProfileViewBinding
 
     @Override
     public Observable<State> getController() {
-        return memeStream.getProfile().map(State::new).startWith(new State());
+        return memeStream.getProfile()
+                .map(State::new)
+                .startWith(new State());
     }
 
     class Intents {

@@ -13,6 +13,10 @@ public final class Optionals {
 
     }
 
+    public static <T> Disposable ifPresent(Observable<Optional<T>> observable, Consumer<T> subscriber) {
+        return observable.compose(Operators.ifPresent()).subscribe(subscriber);
+    }
+
     public static <T> void ifPresent(Optional<T> optional, Consumer<T> callback) {
         if (optional.isPresent())
             try {
@@ -20,12 +24,5 @@ public final class Optionals {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-    }
-
-    public static <T> Observable<T> ifPresent(Observable<Optional<T>> observable) {
-        return observable.filter(Optional::isPresent).map(Optional::get);
-    }
-    public static <T> Disposable ifPresent(Observable<Optional<T>> observable, Consumer<T> subscriber) {
-        return ifPresent(observable).subscribe(subscriber);
     }
 }

@@ -14,16 +14,14 @@ import io.reactivex.Observable;
 import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
-import io.reactivex.observables.ConnectableObservable;
 import io.reactivex.subjects.PublishSubject;
 import io.reactivex.subjects.Subject;
 
 
 public abstract class BIVSCModule<ViewModel, State> extends Controller implements BIVSC<ViewModel, State> {
     private final List<Disposable> disposables = new ArrayList<>();
-    private ConnectableObservable<State> state = null;
-    Subject<ViewModel> viewModel = PublishSubject.create();
-    private boolean fresh = true;
+    private Observable<State> state = null;
+    final Subject<ViewModel> viewModel = PublishSubject.create();
 
     public BIVSCModule() {
 
@@ -45,27 +43,22 @@ public abstract class BIVSCModule<ViewModel, State> extends Controller implement
         } catch (Exception exception) {
             throw new RuntimeException(exception);
         }
-        state = getController().observeOn(AndroidSchedulers.mainThread()).publish();
+        state = getController().observeOn(AndroidSchedulers.mainThread()).replay(1);
+        state.doOnSubscribe(disposables::add);
         for (Observer<? super State> subscriber : earlySubscribers)
             state.subscribe(subscriber);
-    }
-
-    @Override
-    protected void onAttach(@NonNull View view) {
-        if (fresh)
-            state.connect(disposables::add);
-        fresh = false;
     }
 
     @Override
     protected void onDestroyView(@NonNull View view) {
         for (Disposable disposable : disposables)
             disposable.dispose();
-        fresh = true;
+        disposables.clear();
     }
 
     @Override
     protected void onDestroy() {
         viewModel.onComplete();
+        state = null;
     }
 }

@@ -16,12 +16,12 @@ import static com.google.android.gms.auth.api.Auth.GOOGLE_SIGN_IN_API;
 import static com.google.android.gms.auth.api.Auth.GoogleSignInApi;
 import static com.google.android.gms.auth.api.signin.GoogleSignInOptions.DEFAULT_SIGN_IN;
 
-public class GoogleLogin implements Login {
+public class GoogleProvider implements Provider {
     private static final int REQUEST_SIGN_IN = 1;
     private final GoogleApiClient googleApiClient;
     private Subject<String> loginResults = PublishSubject.create();
 
-    public GoogleLogin(Context context) {
+    public GoogleProvider(Context context) {
         googleApiClient = new GoogleApiClient.Builder(context)
                 .addApi(GOOGLE_SIGN_IN_API, new GoogleSignInOptions.Builder(DEFAULT_SIGN_IN).requestProfile().build())
                 .build();

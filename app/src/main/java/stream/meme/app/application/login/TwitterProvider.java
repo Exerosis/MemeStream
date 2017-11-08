@@ -13,10 +13,10 @@ import com.twitter.sdk.android.core.identity.TwitterAuthClient;
 
 import io.reactivex.Maybe;
 
-public class TwitterLogin implements Login {
+public class TwitterProvider implements Provider {
     private final TwitterAuthClient twitterAuthClient;
 
-    public TwitterLogin(Context context) {
+    public TwitterProvider(Context context) {
         Twitter.initialize(context);
         twitterAuthClient = new TwitterAuthClient();
     }

@@ -65,16 +65,18 @@
                     tools:text="Ut commodo elit nisi, non luctus metus gravida non. Donec at est vel libero pretium sollicitudin. Maecenas a ultric " />
             </LinearLayout>
 
-            <Button
+            <ImageButton
                 android:id="@+id/reply"
-                style="@android:style/Widget.DeviceDefault.Button.Borderless.Small"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:layout_alignBottom="@id/main"
                 android:layout_alignParentEnd="true"
                 android:layout_marginStart="16dp"
-                android:background="@drawable/ic_reply"
-                android:foreground="?selectableItemBackgroundBorderless" />
+                android:background="?selectableItemBackgroundBorderless"
+                android:clickable="true"
+                android:contentDescription="@string/content_description_reply"
+                android:focusable="true"
+                android:src="@drawable/ic_reply" />
 
         </RelativeLayout>
 

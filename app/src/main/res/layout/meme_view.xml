@@ -110,11 +110,12 @@
                     android:background="@drawable/ic_like_toggle"
                     android:checked="@{rating == 1}" />
 
-                <Button
+                <ImageView
                     android:id="@+id/share"
                     style="@style/AppTheme.CardButton"
                     android:layout_alignParentStart="true"
-                    android:background="@drawable/ic_share" />
+                    android:contentDescription="@string/content_description_share"
+                    android:src="@drawable/ic_share" />
             </RelativeLayout>
 
         </LinearLayout>

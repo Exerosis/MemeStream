@@ -12,7 +12,7 @@ import io.reactivex.subjects.PublishSubject;
 import io.reactivex.subjects.Subject;
 import stream.meme.app.R;
 import stream.meme.app.application.MemeStream;
-import stream.meme.app.application.login.LoginType;
+import stream.meme.app.application.login.ProviderType;
 import stream.meme.app.util.bivsc.DatabindingBIVSCModule;
 import stream.meme.app.databinding.LoginViewBinding;
 
@@ -41,7 +41,7 @@ public class LoginController extends DatabindingBIVSCModule<LoginViewBinding, Vo
     public Observable<Void> getController() {
         intents.LoginStartIntent.subscribe(loginType -> {
             if (!memeStream.isAuthenticated())
-                memeStream.login(loginType, getActivity()).observeOn(AndroidSchedulers.mainThread()).subscribe(result -> {
+                memeStream.authenticate(loginType, getActivity()).observeOn(AndroidSchedulers.mainThread()).subscribe(result -> {
                     if (result)
                         getRouter().setRoot(RouterTransaction.with(new StreamContainerController()));
                 }, Throwable::printStackTrace);
@@ -52,9 +52,9 @@ public class LoginController extends DatabindingBIVSCModule<LoginViewBinding, Vo
     }
 
     public class Intents {
-        Subject<LoginType> LoginStartIntent = PublishSubject.create();
+        Subject<ProviderType> LoginStartIntent = PublishSubject.create();
 
-        public void login(LoginType type) {
+        public void login(ProviderType type) {
             LoginStartIntent.onNext(type);
         }
     }

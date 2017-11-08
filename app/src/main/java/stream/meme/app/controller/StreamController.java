@@ -7,11 +7,11 @@ import android.support.annotation.NonNull;
 import android.support.v4.util.Pair;
 import android.support.v7.widget.LinearLayoutManager;
 
-import com.facebook.drawee.backends.pipeline.Fresco;
 import com.google.common.collect.Lists;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.UUID;
 
 import io.reactivex.Observable;
 import io.reactivex.functions.BiConsumer;
@@ -20,8 +20,8 @@ import io.reactivex.subjects.PublishSubject;
 import io.reactivex.subjects.Subject;
 import stream.meme.app.R;
 import stream.meme.app.application.Comment;
-import stream.meme.app.application.Meme;
 import stream.meme.app.application.MemeStream;
+import stream.meme.app.application.Post;
 import stream.meme.app.databinding.CommentViewBinding;
 import stream.meme.app.databinding.MemeViewBinding;
 import stream.meme.app.databinding.StreamViewBinding;
@@ -43,7 +43,7 @@ import static stream.meme.app.util.rxadapter.RxPagination.on;
 public class StreamController extends DatabindingBIVSCModule<StreamViewBinding, StreamController.State> {
     private final Intents intents = new Intents();
     private MemeStream memeStream;
-    private int page = 1;
+    private UUID last;
 
     public StreamController() {
         super(R.layout.stream_view);
@@ -56,7 +56,7 @@ public class StreamController extends DatabindingBIVSCModule<StreamViewBinding, 
 
             new RxFooter(1, new RxAdapterAlpha<>(views.map(view -> view.recyclerView), new RxListCallback<>(state.map(State::memes)))
                     .<MemeViewBinding>bind(0, R.layout.meme_view, (memeView, memes) -> {
-                        new RxAdapterAlpha<>(memeView.comments, new RxListCallback<>(memes.map(Meme::getComments)))
+                        new RxAdapterAlpha<>(memeView.comments, new RxListCallback<>(memes.map(Post::getPreviewComments)))
                                 .<CommentViewBinding>bind(R.layout.comment_view, (commentView, comments) -> {
                                     clicks(commentView.getRoot()).flatMap(ignored -> comments).subscribe(intents.ReplyIntent);
                                     comments.subscribe(comment -> {
@@ -77,20 +77,20 @@ public class StreamController extends DatabindingBIVSCModule<StreamViewBinding, 
                                 memeView.expandableLayout.setExpanded(memeView.toggle.isChecked()));
                         memeView.comments.setLayoutManager(new LinearLayoutManager(getActivity()));
 
-                        memes.subscribe(meme -> {
-                            //Add meme information.
-                            memeView.image.setImageBitmap(meme.getThumbnail());
-                            with(getActivity()).load(meme.getImage()).into(memeView.image);
-                            memeView.title.setText(meme.getTitle());
-                            memeView.subtitle.setText(meme.getSubtitle());
+                        memes.subscribe(post -> {
+                            //Add post information.
+                            memeView.image.setImageBitmap(post.getThumbnail());
+                            with(getActivity()).load(post.getImage()).into(memeView.image);
+                            memeView.title.setText(post.getTitle());
+                            memeView.subtitle.setText(post.getSubtitle());
 
                             //Setup ratings intents
                             clicks(memeView.like).map(ignored -> 1).mergeWith(clicks(memeView.dislike).map(ignored -> -1)).doOnNext(rating ->
                                     memeView.getRating().set(rating.byteValue())).subscribe(rating ->
-                                    intents.RatedIntent.onNext(create(meme, rating.byteValue())));
+                                    intents.RatedIntent.onNext(create(post, rating.byteValue())));
 
                             //Add view click listener.
-                            memeView.getRoot().setOnClickListener(v -> intents.MemeClickIntent.onNext(meme));
+                            memeView.getRoot().setOnClickListener(v -> intents.MemeClickIntent.onNext(post));
                         });
                     })
                     .bind(1, R.layout.stream_footer, (footerView, ignored) -> {
@@ -111,17 +111,18 @@ public class StreamController extends DatabindingBIVSCModule<StreamViewBinding, 
     public Observable<State> getController() {
         return Observable.merge(
                 intents.LoadNextIntent
-                        .flatMap(ignored -> memeStream.loadMemes(page++)
+                        .flatMap(ignored -> memeStream.loadPosts(last)
+                                .doOnNext(posts -> last = posts.get(posts.size() - 1).getId())
                                 .map(Partial::NextPageLoaded)
                                 .startWith(Partial.NextPageLoading())
                                 .onErrorReturn(Partial::NextPageError)),
                 intents.LoadFirstIntent
-                        .flatMap(ignored -> memeStream.loadMemes(0)
+                        .flatMap(ignored -> memeStream.loadPosts(last)
                                 .map(Partial::FirstPageLoaded)
                                 .startWith(Partial.FirstPageLoading())
                                 .onErrorReturn(Partial::FirstPageError)),
                 intents.RefreshIntent
-                        .flatMap(ignored -> memeStream.loadMemes(page++)
+                        .flatMap(ignored -> memeStream.loadPosts(last)
                                 .map(Partial::Refreshed)
                                 .startWith(Partial.Refreshing())
                                 .onErrorReturn(Partial::RefreshError)))
@@ -131,7 +132,6 @@ public class StreamController extends DatabindingBIVSCModule<StreamViewBinding, 
     @Override
     protected void onContextAvailable(@NonNull Context context) {
         memeStream = (MemeStream) getApplicationContext();
-        Fresco.initialize(context);
         super.onContextAvailable(context);
     }
 
@@ -139,9 +139,9 @@ public class StreamController extends DatabindingBIVSCModule<StreamViewBinding, 
         Observable<Object> RefreshIntent;
         Observable<Boolean> LoadFirstIntent = Observable.just(true);
         Subject<Boolean> LoadNextIntent = PublishSubject.create();
-        Subject<Meme> MemeClickIntent = PublishSubject.create();
-        Subject<Pair<Meme, Byte>> RatedIntent = PublishSubject.create();
-        Subject<Meme> ShareClickIntent = PublishSubject.create();
+        Subject<Post> MemeClickIntent = PublishSubject.create();
+        Subject<Pair<Post, Byte>> RatedIntent = PublishSubject.create();
+        Subject<Post> ShareClickIntent = PublishSubject.create();
         Subject<Comment> ReplyIntent = PublishSubject.create();
         Subject<Object> CommentsIntent = PublishSubject.create();
     }
@@ -151,7 +151,7 @@ public class StreamController extends DatabindingBIVSCModule<StreamViewBinding, 
         boolean nextPageLoading = false;
         boolean firstPageLoading = false;
         Throwable error = null;
-        LinkedList<Meme> memes = new LinkedList<>();
+        LinkedList<Post> posts = new LinkedList<>();
 
         public boolean refreshing() {
             return refreshing;
@@ -169,8 +169,8 @@ public class StreamController extends DatabindingBIVSCModule<StreamViewBinding, 
             return error;
         }
 
-        public LinkedList<Meme> memes() {
-            return memes;
+        public LinkedList<Post> memes() {
+            return posts;
         }
     }
 
@@ -190,11 +190,11 @@ public class StreamController extends DatabindingBIVSCModule<StreamViewBinding, 
             };
         }
 
-        static Function<State, State> NextPageLoaded(List<Meme> memes) {
+        static Function<State, State> NextPageLoaded(List<Post> posts) {
             return state -> {
                 state.nextPageLoading = false;
-                for (Meme meme : memes)
-                    state.memes.addLast(meme);
+                for (Post post : posts)
+                    state.posts.addLast(post);
                 return state;
             };
         }
@@ -214,10 +214,10 @@ public class StreamController extends DatabindingBIVSCModule<StreamViewBinding, 
             };
         }
 
-        static Function<State, State> FirstPageLoaded(List<Meme> memes) {
+        static Function<State, State> FirstPageLoaded(List<Post> posts) {
             return state -> {
                 state.firstPageLoading = false;
-                state.memes.addAll(memes);
+                state.posts.addAll(posts);
                 return state;
             };
         }
@@ -237,12 +237,12 @@ public class StreamController extends DatabindingBIVSCModule<StreamViewBinding, 
             };
         }
 
-        static Function<State, State> Refreshed(List<Meme> memes) {
+        static Function<State, State> Refreshed(List<Post> posts) {
             return state -> {
                 state.refreshing = false;
-                for (Meme meme : Lists.reverse(memes))
-                    if (!state.memes.contains(meme))
-                        state.memes.addFirst(meme);
+                for (Post post : Lists.reverse(posts))
+                    if (!state.posts.contains(post))
+                        state.posts.addFirst(post);
                 return state;
             };
         }
