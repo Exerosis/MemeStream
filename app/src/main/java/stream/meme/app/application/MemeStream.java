@@ -147,7 +147,7 @@ public class MemeStream extends Application {
 
     //--Profile--
     public Observable<Profile> getProfile() {
-        return !isAuthenticated() ? empty() :  Observable.fromCallable(() -> new Profile(
+        return !isAuthenticated() ? empty() : Observable.fromCallable(() -> new Profile(
                 "Exerosis",
                 with(this).load("http://gameplaying.info/wp-content/uploads/2017/05/nier-automata-2b-type-art-by-GoddessMechanic.jpg").get(),
                 "exerosis@gmail.com",
@@ -166,13 +166,11 @@ public class MemeStream extends Application {
     public Observable<List<Comment>> addComment(UUID post, String comment) {
         return Observable.<List<Comment>>empty()
                 .onErrorResumeNext(newComment(comment, ERROR))
-                .mergeWith(newComment(comment, SENDING)).doOnNext(test -> {
-                    System.out.println(test);
-                });
+                .mergeWith(newComment(comment, SENDING));
     }
 
     private Observable<List<Comment>> newComment(String comment, Boolean status) {
-        return getProfile().map(user -> singletonList(new Comment(user, "sender", comment, status)));
+        return getProfile().map(user -> singletonList(new Comment(user, "sending", comment, status)));
     }
 
 

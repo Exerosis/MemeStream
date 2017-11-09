@@ -1,6 +1,7 @@
 package stream.meme.app.util;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Supplier;
 
 import io.reactivex.Observable;
 import io.reactivex.ObservableTransformer;
@@ -24,6 +25,10 @@ public class Operators {
     //--Always--
     public static <Type> Observable<Type> always(Type value, Observable<Object> observable) {
         return observable.compose(always(value));
+    }
+
+    public static <Type> ObservableTransformer<Object, Type> always(Supplier<Type> value) {
+        return upstream -> upstream.map(ignored -> value.get());
     }
 
     public static <Type> ObservableTransformer<Object, Type> always(Type value) {

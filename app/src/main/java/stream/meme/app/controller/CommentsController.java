@@ -3,6 +3,7 @@ package stream.meme.app.controller;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 
 import com.google.common.base.Optional;
 
@@ -11,7 +12,6 @@ import java.util.List;
 import java.util.UUID;
 
 import io.reactivex.Observable;
-import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.functions.BiConsumer;
 import io.reactivex.subjects.PublishSubject;
 import io.reactivex.subjects.Subject;
@@ -137,15 +137,13 @@ public class CommentsController extends DatabindingBIVSCModule<CommentsViewBindi
                         .addComment(post, comment)
                         .map(Partials::Refreshed)
                 )
-        ).doOnSubscribe(state -> {
-            System.out.println(state);
-        });
+        );
     }
 
     @Override
     public BiConsumer<Observable<CommentsViewBinding>, Observable<State>> getBinder() {
         return (views, states) -> {
-            new RxAdapterAlpha<>(views.map(view -> view.comments), new RxListCallback<>(states.map(State::comments)))
+            RxAdapterAlpha<Comment> adapter = new RxAdapterAlpha<>(views.map(view -> view.comments), new RxListCallback<>(states.map(State::comments)))
                     .<CommentViewBinding>bind(0, R.layout.comment_view, (commentView, comments) -> {
                         Observable<User> author = comments
                                 .map(Comment::getAuthor)
@@ -167,11 +165,13 @@ public class CommentsController extends DatabindingBIVSCModule<CommentsViewBindi
                                 .distinctUntilChanged()
                                 .subscribe(text(commentView.content));
 
+                        //TODO color whole view all nicely.
                         //--Sent--
                         comments
                                 .map(Comment::getStatus)
                                 .compose(ifPresent())
                                 .map(sending -> getResources().getColor(sending ? R.color.disabled_text : R.color.red))
+                                .doOnNext(color(commentView.author))
                                 .subscribe(color(commentView.content));
 
                         //--Date--
@@ -180,25 +180,42 @@ public class CommentsController extends DatabindingBIVSCModule<CommentsViewBindi
                                 .subscribe(text(commentView.date));
                     });
 
+            //Notify the controller when a user refreshes or the activity first loads.
             intents.RefreshIntent = views
                     .switchMap(view -> refreshes(view.refreshLayout).map(ignored -> NONE))
                     .startWith(NONE);
 
+            //Notify the controller when
             intents.RepliedIntent = views
                     .switchMap(view -> clicks(view.send)
-                            .map(ignored -> view.reply.getText().toString()));
+                            .doOnNext(ignored -> view.reply.getText().clear())
+                            .compose(always(view.reply.getText().toString())));
 
             views.subscribe(view -> {
                 //Setup Recycler view and reply view.
                 view.comments.setLayoutManager(new LinearLayoutManager(getActivity()));
                 view.reply.requestFocus();
+                adapter.getAdapter().registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
+                    @Override
+                    public void onItemRangeInserted(int positionStart, int itemCount) {
+                        boolean scroll = false;
+                        for (int i = positionStart; i < (positionStart + itemCount) - 1; i++) {
+                            if (!adapter.getList().get(i).getStatus().isPresent())
+                                continue;
+                            scroll = true;
+                            break;
+                        }
+                        if (scroll)
+                            view.comments.smoothScrollToPosition(adapter.getList().size() - 1);
+                    }
+                });
 
                 //Stop refresh layout from refreshing when state isn't loading.
                 states.map(State::loading).distinctUntilChanged().subscribe(refreshing(view.refreshLayout));
 
                 //Append mention when a user clicks reply.
-                ifPresent(states
-                        .map(State::replying))
+                states.map(State::replying)
+                        .compose(ifPresent())
                         .map(User::getName)
                         .distinctUntilChanged()
                         .subscribe(name -> {
@@ -210,7 +227,7 @@ public class CommentsController extends DatabindingBIVSCModule<CommentsViewBindi
                 textChanges(view.reply)
                         .map(text -> text.length() >= MIN_LENGTH)
                         .startWith(false)
-                        .observeOn(AndroidSchedulers.mainThread())
+                        .distinctUntilChanged()
                         .subscribe(enabled(view.send));
             });
         };

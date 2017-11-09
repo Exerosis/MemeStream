@@ -43,7 +43,10 @@ public abstract class BIVSCModule<ViewModel, State> extends Controller implement
         } catch (Exception exception) {
             throw new RuntimeException(exception);
         }
-        state = getController().observeOn(AndroidSchedulers.mainThread()).replay(1);
+        state = getController()
+                .observeOn(AndroidSchedulers.mainThread())
+                .replay(1)
+                .autoConnect();
         state.doOnSubscribe(disposables::add);
         for (Observer<? super State> subscriber : earlySubscribers)
             state.subscribe(subscriber);

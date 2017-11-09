@@ -65,7 +65,8 @@ public class RxListCallback<Type> implements Supplier<List<Type>>, Consumer<List
                     return false;
                 }
             }, detectMoves);
-            list = newList;
+            list.clear();
+            list.addAll(newList);
             return result;
         }).observeOn(AndroidSchedulers.mainThread()).subscribe(result -> {
             if (callback != null)
