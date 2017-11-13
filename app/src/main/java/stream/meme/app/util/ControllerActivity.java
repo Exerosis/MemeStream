@@ -6,6 +6,8 @@ import android.os.Bundle;
 import com.bluelinelabs.conductor.Controller;
 import com.bluelinelabs.conductor.RouterTransaction;
 
+import java.lang.reflect.Constructor;
+
 import static android.content.pm.PackageManager.GET_ACTIVITIES;
 import static android.content.pm.PackageManager.GET_META_DATA;
 import static android.content.pm.PackageManager.NameNotFoundException;
@@ -31,7 +33,14 @@ public class ControllerActivity extends RouterActivity {
         if (theme != 0)
             setTheme(theme);
         try {
-            return RouterTransaction.with((Controller) Class.forName(controller).newInstance());
+            Class<?> controllerClass = Class.forName(controller);
+            Object instance;
+            try {
+                instance = controllerClass.getDeclaredConstructor(Bundle.class).newInstance(getIntent().getExtras());
+            } catch (NoSuchMethodException e) {
+                instance = controllerClass.newInstance();
+            }
+            return RouterTransaction.with((Controller) instance);
         } catch (ClassNotFoundException e) {
             throw new Resources.NotFoundException("Could not find a controller at: " + controller);
         } catch (Exception e) {

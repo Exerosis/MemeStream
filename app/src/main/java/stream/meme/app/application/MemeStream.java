@@ -31,9 +31,11 @@ import static io.reactivex.Observable.empty;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
+import static java.util.concurrent.ThreadLocalRandom.current;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static stream.meme.app.application.Comment.ERROR;
 import static stream.meme.app.application.Comment.SENDING;
+import static stream.meme.app.application.Comment.SUCCESS;
 import static stream.meme.app.application.login.ProviderType.FACEBOOK;
 import static stream.meme.app.application.login.ProviderType.GOOGLE;
 import static stream.meme.app.application.login.ProviderType.TWITTER;
@@ -69,7 +71,7 @@ public class MemeStream extends Application {
                         "1d",
                         "Ut commodo elit nisi, non luctus metus gravida non. Donec at est vel libero pretium sollicitudin. Maecenas a ultric ")));
 
-        posts = comments.map(comments -> asList(
+        posts = getComments(null).map(comments -> asList(
                 new Post(randomUUID(),
                         "test0",
                         "page " + 0,
@@ -166,11 +168,12 @@ public class MemeStream extends Application {
     public Observable<List<Comment>> addComment(UUID post, String comment) {
         return Observable.<List<Comment>>empty()
                 .onErrorResumeNext(newComment(comment, ERROR))
-                .mergeWith(newComment(comment, SENDING));
+                .mergeWith(newComment(comment, SENDING))
+                .mergeWith(newComment(comment, current().nextBoolean() ? ERROR : SUCCESS).delay(1, SECONDS));
     }
 
     private Observable<List<Comment>> newComment(String comment, Boolean status) {
-        return getProfile().map(user -> singletonList(new Comment(user, "sending", comment, status)));
+        return getProfile().map(user -> singletonList(new Comment(user, status == null ? "now" : status ? "sending" : "error", comment, status)));
     }
 
 

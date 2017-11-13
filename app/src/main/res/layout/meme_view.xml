@@ -74,12 +74,11 @@
                 app:el_parallax="1"
                 app:expanded="@{shown}">
 
-                <android.support.v7.widget.RecyclerView
+                <com.bluelinelabs.conductor.ChangeHandlerFrameLayout
                     android:id="@+id/comments"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    tools:listitem="@layout/comment_view" />
+                    android:layout_marginTop="8dp" />
 
             </net.cachapa.expandablelayout.ExpandableLayout>
 
@@ -112,9 +111,16 @@
 
                 <ImageView
                     android:id="@+id/share"
-                    style="@style/AppTheme.CardButton"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
                     android:layout_alignParentStart="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginEnd="4dp"
+                    android:layout_marginStart="4dp"
+                    android:background="?selectableItemBackgroundBorderless"
+                    android:clickable="true"
                     android:contentDescription="@string/content_description_share"
+                    android:focusable="true"
                     android:src="@drawable/ic_share" />
             </RelativeLayout>
 

@@ -26,7 +26,7 @@
             </intent-filter>
             <meta-data
                 android:name="CONTROLLER"
-                android:value="stream.meme.app.controller.CommentsController" />
+                android:value="stream.meme.app.controller.StreamContainerController" />
         </activity>
     </application>
 

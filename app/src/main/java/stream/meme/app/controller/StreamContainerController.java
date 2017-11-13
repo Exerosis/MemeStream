@@ -19,6 +19,8 @@ import com.bluelinelabs.conductor.RouterTransaction;
 import com.google.common.base.Optional;
 import com.google.common.base.Supplier;
 
+import java.util.UUID;
+
 import io.reactivex.Observable;
 import io.reactivex.functions.BiConsumer;
 import io.reactivex.subjects.PublishSubject;
@@ -36,7 +38,8 @@ import stream.meme.app.util.bivsc.Reducer;
 import static android.support.v4.app.ActivityOptionsCompat.makeSceneTransitionAnimation;
 import static com.jakewharton.rxbinding2.support.design.widget.RxNavigationView.itemSelections;
 import static com.jakewharton.rxbinding2.view.RxView.clicks;
-import static stream.meme.app.util.ControllerActivity.*;
+import static stream.meme.app.controller.CommentsController.EXTRA_POST;
+import static stream.meme.app.util.ControllerActivity.EXTRA_CONTROLLER;
 import static stream.meme.app.util.Optionals.ifPresent;
 import static stream.meme.app.util.bivsc.Reducer.controller;
 

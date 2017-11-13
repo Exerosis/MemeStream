@@ -5,6 +5,7 @@ import com.google.common.base.Optional;
 import lombok.Getter;
 
 import static com.google.common.base.Optional.fromNullable;
+import static java.util.Objects.hash;
 
 @Getter
 public class Comment {
@@ -29,5 +30,15 @@ public class Comment {
 
     public Optional<Boolean> getStatus() {
         return fromNullable(status);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof Comment && ((Comment) obj).author.equals(author) && ((Comment) obj).content.equals(content);
+    }
+
+    @Override
+    public int hashCode() {
+        return hash(author, content);
     }
 }

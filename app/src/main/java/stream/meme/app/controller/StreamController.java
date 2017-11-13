@@ -1,12 +1,14 @@
 package stream.meme.app.controller;
 
 import android.content.Context;
+import android.content.Intent;
 import android.databinding.ObservableBoolean;
 import android.databinding.ObservableByte;
 import android.support.annotation.NonNull;
 import android.support.v4.util.Pair;
 import android.support.v7.widget.LinearLayoutManager;
 
+import com.bluelinelabs.conductor.RouterTransaction;
 import com.google.common.collect.Lists;
 
 import java.util.LinkedList;
@@ -15,18 +17,18 @@ import java.util.UUID;
 
 import io.reactivex.Observable;
 import io.reactivex.functions.BiConsumer;
-import io.reactivex.functions.Function;
 import io.reactivex.subjects.PublishSubject;
 import io.reactivex.subjects.Subject;
 import stream.meme.app.R;
 import stream.meme.app.application.Comment;
 import stream.meme.app.application.MemeStream;
 import stream.meme.app.application.Post;
-import stream.meme.app.databinding.CommentViewBinding;
 import stream.meme.app.databinding.MemeViewBinding;
 import stream.meme.app.databinding.StreamViewBinding;
+import stream.meme.app.util.ControllerActivity;
 import stream.meme.app.util.ItemOffsetDecoration;
 import stream.meme.app.util.bivsc.DatabindingBIVSCModule;
+import stream.meme.app.util.bivsc.Reducer;
 import stream.meme.app.util.rxadapter.RxAdapterAlpha;
 import stream.meme.app.util.rxadapter.RxFooter;
 import stream.meme.app.util.rxadapter.RxListCallback;
@@ -36,8 +38,10 @@ import static com.jakewharton.rxbinding2.support.v4.widget.RxSwipeRefreshLayout.
 import static com.jakewharton.rxbinding2.support.v4.widget.RxSwipeRefreshLayout.refreshing;
 import static com.jakewharton.rxbinding2.view.RxView.clicks;
 import static com.jakewharton.rxbinding2.view.RxView.visibility;
-import static com.jakewharton.rxbinding2.widget.RxTextView.text;
 import static com.squareup.picasso.Picasso.with;
+import static stream.meme.app.controller.CommentsController.EXTRA_POST;
+import static stream.meme.app.util.ControllerActivity.EXTRA_CONTROLLER;
+import static stream.meme.app.util.bivsc.Reducer.controller;
 import static stream.meme.app.util.rxadapter.RxPagination.on;
 
 public class StreamController extends DatabindingBIVSCModule<StreamViewBinding, StreamController.State> {
@@ -56,16 +60,6 @@ public class StreamController extends DatabindingBIVSCModule<StreamViewBinding, 
 
             new RxFooter(1, new RxAdapterAlpha<>(views.map(view -> view.recyclerView), new RxListCallback<>(state.map(State::memes)))
                     .<MemeViewBinding>bind(0, R.layout.meme_view, (memeView, memes) -> {
-                        new RxAdapterAlpha<>(memeView.comments, new RxListCallback<>(memes.map(Post::getPreviewComments)))
-                                .<CommentViewBinding>bind(R.layout.comment_view, (commentView, comments) -> {
-                                    clicks(commentView.getRoot()).flatMap(ignored -> comments).subscribe(intents.ReplyIntent);
-                                    comments.subscribe(comment -> {
-                                        text(commentView.content).accept(comment.getContent());
-                                        text(commentView.author).accept(comment.getAuthor().getName());
-                                        text(commentView.date).accept(comment.getDate());
-                                        commentView.image.setImageBitmap(comment.getAuthor().getImage());
-                                    });
-                                });
                         //Add a shown observable if there isn't already one.
                         if (memeView.getShown() == null)
                             memeView.setShown(new ObservableBoolean(false));
@@ -75,9 +69,12 @@ public class StreamController extends DatabindingBIVSCModule<StreamViewBinding, 
                         //Bind expanding layout to toggle.
                         clicks(memeView.toggle).subscribe(ignored ->
                                 memeView.expandableLayout.setExpanded(memeView.toggle.isChecked()));
-                        memeView.comments.setLayoutManager(new LinearLayoutManager(getActivity()));
 
                         memes.subscribe(post -> {
+                            Comments comments = new Comments(post.getId(), true);
+                            getChildRouter(memeView.comments).setRoot(RouterTransaction.with(comments));
+                            comments.onReply().subscribe(intents.ReplyIntent::onNext);
+
                             //Add post information.
                             memeView.image.setImageBitmap(post.getThumbnail());
                             with(getActivity()).load(post.getImage()).into(memeView.image);
@@ -109,24 +106,32 @@ public class StreamController extends DatabindingBIVSCModule<StreamViewBinding, 
 
     @Override
     public Observable<State> getController() {
-        return Observable.merge(
-                intents.LoadNextIntent
-                        .flatMap(ignored -> memeStream.loadPosts(last)
-                                .doOnNext(posts -> last = posts.get(posts.size() - 1).getId())
-                                .map(Partial::NextPageLoaded)
-                                .startWith(Partial.NextPageLoading())
-                                .onErrorReturn(Partial::NextPageError)),
-                intents.LoadFirstIntent
-                        .flatMap(ignored -> memeStream.loadPosts(last)
-                                .map(Partial::FirstPageLoaded)
-                                .startWith(Partial.FirstPageLoading())
-                                .onErrorReturn(Partial::FirstPageError)),
-                intents.RefreshIntent
-                        .flatMap(ignored -> memeStream.loadPosts(last)
-                                .map(Partial::Refreshed)
-                                .startWith(Partial.Refreshing())
-                                .onErrorReturn(Partial::RefreshError)))
-                .scan(new State(), (state, partial) -> partial.apply(state));
+        intents.ReplyIntent.subscribe(comment -> {
+            Intent intent = new Intent(getActivity(), ControllerActivity.class);
+            intent.putExtra(EXTRA_CONTROLLER, CommentsController.class.getName());
+            intent.putExtra(EXTRA_POST, UUID.randomUUID());
+            getActivity().startActivity(intent);
+        });
+        return controller(new State(),
+                intents.LoadNextIntent.flatMap(ignored -> memeStream.loadPosts(last)
+                        .doOnNext(posts -> last = posts.get(posts.size() - 1).getId())
+                        .map(Partial::NextPageLoaded)
+                        .startWith(Partial.NextPageLoading())
+                        .onErrorReturn(Partial::NextPageError)
+                ),
+
+                intents.LoadFirstIntent.flatMap(ignored -> memeStream.loadPosts(last)
+                        .map(Partial::FirstPageLoaded)
+                        .startWith(Partial.FirstPageLoading())
+                        .onErrorReturn(Partial::FirstPageError)
+                ),
+
+                intents.RefreshIntent.flatMap(ignored -> memeStream.loadPosts(last)
+                        .map(Partial::Refreshed)
+                        .startWith(Partial.Refreshing())
+                        .onErrorReturn(Partial::RefreshError)
+                )
+        );
     }
 
     @Override
@@ -143,7 +148,6 @@ public class StreamController extends DatabindingBIVSCModule<StreamViewBinding, 
         Subject<Pair<Post, Byte>> RatedIntent = PublishSubject.create();
         Subject<Post> ShareClickIntent = PublishSubject.create();
         Subject<Comment> ReplyIntent = PublishSubject.create();
-        Subject<Object> CommentsIntent = PublishSubject.create();
     }
 
     class State {
@@ -175,14 +179,14 @@ public class StreamController extends DatabindingBIVSCModule<StreamViewBinding, 
     }
 
     interface Partial {
-        static Function<State, State> NextPageLoading() {
+        static Reducer<State> NextPageLoading() {
             return state -> {
                 state.nextPageLoading = true;
                 return state;
             };
         }
 
-        static Function<State, State> NextPageError(Throwable error) {
+        static Reducer<State> NextPageError(Throwable error) {
             return state -> {
                 state.nextPageLoading = false;
                 state.error = error;
@@ -190,7 +194,7 @@ public class StreamController extends DatabindingBIVSCModule<StreamViewBinding, 
             };
         }
 
-        static Function<State, State> NextPageLoaded(List<Post> posts) {
+        static Reducer<State> NextPageLoaded(List<Post> posts) {
             return state -> {
                 state.nextPageLoading = false;
                 for (Post post : posts)
@@ -199,14 +203,14 @@ public class StreamController extends DatabindingBIVSCModule<StreamViewBinding, 
             };
         }
 
-        static Function<State, State> FirstPageLoading() {
+        static Reducer<State> FirstPageLoading() {
             return state -> {
                 state.firstPageLoading = true;
                 return state;
             };
         }
 
-        static Function<State, State> FirstPageError(Throwable error) {
+        static Reducer<State> FirstPageError(Throwable error) {
             return state -> {
                 state.firstPageLoading = false;
                 state.error = error;
@@ -214,7 +218,7 @@ public class StreamController extends DatabindingBIVSCModule<StreamViewBinding, 
             };
         }
 
-        static Function<State, State> FirstPageLoaded(List<Post> posts) {
+        static Reducer<State> FirstPageLoaded(List<Post> posts) {
             return state -> {
                 state.firstPageLoading = false;
                 state.posts.addAll(posts);
@@ -222,14 +226,14 @@ public class StreamController extends DatabindingBIVSCModule<StreamViewBinding, 
             };
         }
 
-        static Function<State, State> Refreshing() {
+        static Reducer<State> Refreshing() {
             return state -> {
                 state.refreshing = true;
                 return state;
             };
         }
 
-        static Function<State, State> RefreshError(Throwable error) {
+        static Reducer<State> RefreshError(Throwable error) {
             return state -> {
                 state.refreshing = false;
                 state.error = error;
@@ -237,7 +241,7 @@ public class StreamController extends DatabindingBIVSCModule<StreamViewBinding, 
             };
         }
 
-        static Function<State, State> Refreshed(List<Post> posts) {
+        static Reducer<State> Refreshed(List<Post> posts) {
             return state -> {
                 state.refreshing = false;
                 for (Post post : Lists.reverse(posts))
