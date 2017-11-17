@@ -16,9 +16,4 @@ public class MemeItem extends ItemBIVSCModule<MemeViewBinding, Post> {
             });
         };
     }
-
-    class Intents {
-        Observable<>
-
-    }
 }

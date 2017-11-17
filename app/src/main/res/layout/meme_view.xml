@@ -89,7 +89,7 @@
                 <ToggleButton
                     android:id="@+id/dislike"
                     style="@style/AppTheme.CardButton"
-                    android:layout_toStartOf="@id/toggle"
+                    android:layout_toStartOf="@id/comments"
                     android:background="@drawable/ic_dislike_toggle"
                     android:checked="@{rating == -1}" />
 

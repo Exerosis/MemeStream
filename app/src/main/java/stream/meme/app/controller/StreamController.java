@@ -27,6 +27,7 @@ import stream.meme.app.databinding.MemeViewBinding;
 import stream.meme.app.databinding.StreamViewBinding;
 import stream.meme.app.util.ControllerActivity;
 import stream.meme.app.util.ItemOffsetDecoration;
+import stream.meme.app.util.Nothing;
 import stream.meme.app.util.bivsc.DatabindingBIVSCModule;
 import stream.meme.app.util.bivsc.Reducer;
 import stream.meme.app.util.rxadapter.RxAdapterAlpha;
@@ -68,13 +69,10 @@ public class StreamController extends DatabindingBIVSCModule<StreamViewBinding, 
 
                         //Bind expanding layout to toggle.
                         clicks(memeView.comments).subscribe(ignored -> {
-
+                            intents.OpenIntent.onNext(Nothing.NONE);
                         });
 
                         memes.subscribe(post -> {
-                            Comments comments = new Comments(post.getId(), true);
-                            getChildRouter(memeView.comments).setRoot(RouterTransaction.with(comments));
-                            comments.onReply().subscribe(intents.OpenIntent::onNext);
 
                             //Add post information.
                             memeView.image.setImageBitmap(post.getThumbnail());
@@ -107,7 +105,7 @@ public class StreamController extends DatabindingBIVSCModule<StreamViewBinding, 
 
     @Override
     public Observable<State> getController() {
-        intents.OpenIntent.subscribe(comment -> {
+        intents.OpenIntent.subscribe(ignored -> {
             Intent intent = new Intent(getActivity(), ControllerActivity.class);
             intent.putExtra(EXTRA_CONTROLLER, CommentsController.class.getName());
             intent.putExtra(EXTRA_POST, UUID.randomUUID().toString());
@@ -148,7 +146,7 @@ public class StreamController extends DatabindingBIVSCModule<StreamViewBinding, 
         Subject<Post> MemeClickIntent = PublishSubject.create();
         Subject<Pair<Post, Byte>> RatedIntent = PublishSubject.create();
         Subject<Post> ShareClickIntent = PublishSubject.create();
-        Subject<Comment> OpenIntent = PublishSubject.create();
+        Subject<Nothing> OpenIntent = PublishSubject.create();
     }
 
     class State {
