@@ -65,35 +65,26 @@
 
             </LinearLayout>
 
-            <net.cachapa.expandablelayout.ExpandableLayout
-                android:id="@+id/expandableLayout"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                app:el_duration="500"
-                app:el_expanded="false"
-                app:el_parallax="1"
-                app:expanded="@{shown}">
-
-                <com.bluelinelabs.conductor.ChangeHandlerFrameLayout
-                    android:id="@+id/comments"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp" />
-
-            </net.cachapa.expandablelayout.ExpandableLayout>
-
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="48dp"
                 android:paddingEnd="4dp"
                 android:paddingStart="4dp">
 
-                <ToggleButton
-                    android:id="@+id/toggle"
-                    style="@style/AppTheme.CardButton"
+                <ImageView
+                    android:id="@+id/comments"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
                     android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
                     android:layout_gravity="center_vertical|end"
-                    android:background="@drawable/ic_toggle" />
+                    android:layout_marginEnd="4dp"
+                    android:layout_marginStart="4dp"
+                    android:background="?selectableItemBackgroundBorderless"
+                    android:clickable="true"
+                    android:contentDescription="@string/content_description_share"
+                    android:focusable="true"
+                    android:src="@drawable/ic_comments" />
 
                 <ToggleButton
                     android:id="@+id/dislike"

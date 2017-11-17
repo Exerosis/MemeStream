@@ -24,6 +24,7 @@ import static com.google.common.base.Optional.fromNullable;
 import static com.jakewharton.rxbinding2.view.RxView.clicks;
 import static com.jakewharton.rxbinding2.view.RxView.enabled;
 import static com.jakewharton.rxbinding2.widget.RxTextView.textChanges;
+import static java.util.UUID.*;
 import static stream.meme.app.util.Operators.ifPresent;
 import static stream.meme.app.util.bivsc.Reducer.controller;
 
@@ -37,7 +38,7 @@ public class CommentsController extends DatabindingBIVSCModule<CommentsViewBindi
 
     public CommentsController(Bundle bundle) {
         super(R.layout.comments_view);
-        post = UUID.fromString(bundle.getString(EXTRA_POST));
+        post = fromString(bundle.getString(EXTRA_POST));
         comments = new Comments(post, false);
     }
 

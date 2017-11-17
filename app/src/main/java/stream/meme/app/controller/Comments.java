@@ -191,6 +191,7 @@ public class Comments extends DatabindingBIVSCModule<CommentsBinding, Comments.S
                 if (nested) {
                     view.comments.setNestedScrollingEnabled(false);
                     view.refreshLayout.setEnabled(false);
+                    view.comments.getLayoutManager().setAutoMeasureEnabled(true);
                 } else
                     adapter.getAdapter().registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
                         @Override
