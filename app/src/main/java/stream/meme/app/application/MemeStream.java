@@ -177,6 +177,11 @@ public class MemeStream extends Application {
     }
 
 
+    public Observable<Boolean> rate(UUID post, Boolean vote){
+        return service.rate(post, vote).startWith(vote);
+    }
+
+
     //--Getters--
     private Service getService() {
         if (service == null) {

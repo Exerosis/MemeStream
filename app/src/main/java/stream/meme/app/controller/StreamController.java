@@ -8,7 +8,6 @@ import android.support.annotation.NonNull;
 import android.support.v4.util.Pair;
 import android.support.v7.widget.LinearLayoutManager;
 
-import com.bluelinelabs.conductor.RouterTransaction;
 import com.google.common.collect.Lists;
 
 import java.util.LinkedList;
@@ -20,7 +19,6 @@ import io.reactivex.functions.BiConsumer;
 import io.reactivex.subjects.PublishSubject;
 import io.reactivex.subjects.Subject;
 import stream.meme.app.R;
-import stream.meme.app.application.Comment;
 import stream.meme.app.application.MemeStream;
 import stream.meme.app.application.Post;
 import stream.meme.app.databinding.MemeViewBinding;
@@ -73,7 +71,6 @@ public class StreamController extends DatabindingBIVSCModule<StreamViewBinding, 
                         });
 
                         memes.subscribe(post -> {
-
                             //Add post information.
                             memeView.image.setImageBitmap(post.getThumbnail());
                             with(getActivity()).load(post.getImage()).into(memeView.image);
@@ -129,7 +126,12 @@ public class StreamController extends DatabindingBIVSCModule<StreamViewBinding, 
                         .map(Partial::Refreshed)
                         .startWith(Partial.Refreshing())
                         .onErrorReturn(Partial::RefreshError)
-                )
+                ),
+
+                intents.RatedIntent.flatMap(rating -> {
+                    memeStream.rate(rating.first.getId(), rating.second)
+                            .map(Partial)
+                })
         );
     }
 
@@ -144,7 +146,7 @@ public class StreamController extends DatabindingBIVSCModule<StreamViewBinding, 
         Observable<Boolean> LoadFirstIntent = Observable.just(true);
         Subject<Boolean> LoadNextIntent = PublishSubject.create();
         Subject<Post> MemeClickIntent = PublishSubject.create();
-        Subject<Pair<Post, Byte>> RatedIntent = PublishSubject.create();
+        Subject<Pair<Post, Boolean>> RatedIntent = PublishSubject.create();
         Subject<Post> ShareClickIntent = PublishSubject.create();
         Subject<Nothing> OpenIntent = PublishSubject.create();
     }

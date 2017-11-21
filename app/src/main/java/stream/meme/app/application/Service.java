@@ -26,4 +26,7 @@ public interface Service {
     //--Posts--
     @GET("posts")
     Observable<List<Post>> posts(@Query("last") UUID last);
+
+    @GET("posts/{id}/rate")
+    Observable<Boolean> rate(@Path("id") UUID post, @Query("rating") Boolean rating);
 }

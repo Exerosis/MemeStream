@@ -9,6 +9,9 @@ import lombok.Data;
 
 @Data
 public class Post {
+    public static final Boolean UP_VOTE = true;
+    public static final Boolean NO_VOTE = null;
+    public static final Boolean DOWN_VOTE = false;
     private final UUID id;
     private final String title;
     private final String subtitle;
