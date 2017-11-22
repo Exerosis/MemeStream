@@ -17,16 +17,16 @@ public interface Service {
     Observable<String> login(@Query("provider") ProviderType type, @Body String accessToken);
 
     //--Comments--
-    @GET("posts/{id}/comments")
+    @GET("data/{id}/comments")
     Observable<List<Comment>> comments(@Path("id") UUID post);
 
-    @POST("posts/{id}/comment")
+    @POST("data/{id}/comment")
     Observable<List<Comment>> comment(@Path("id") UUID post, @Body String comment);
 
     //--Posts--
-    @GET("posts")
+    @GET("data")
     Observable<List<Post>> posts(@Query("last") UUID last);
 
-    @GET("posts/{id}/rate")
-    Observable<Boolean> rate(@Path("id") UUID post, @Query("rating") Boolean rating);
+    @GET("data/{id}/rate")
+    Observable<Post> rate(@Path("id") UUID post, @Query("rating") Boolean rating);
 }

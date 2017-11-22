@@ -1,22 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
-
-    <data>
-
-        <variable
-            name="shown"
-            type="android.databinding.ObservableBoolean" />
-
-        <variable
-            name="rating"
-            type="android.databinding.ObservableByte" />
-
-        <variable
-            name="commentList"
-            type="java.util.List&lt;stream.meme.app.application.Comment>" />
-    </data>
 
     <android.support.v7.widget.CardView
         android:layout_width="match_parent"
@@ -87,18 +71,16 @@
                     android:src="@drawable/ic_comments" />
 
                 <ToggleButton
-                    android:id="@+id/dislike"
+                    android:id="@+id/downvote"
                     style="@style/AppTheme.CardButton"
                     android:layout_toStartOf="@id/comments"
-                    android:background="@drawable/ic_dislike_toggle"
-                    android:checked="@{rating == -1}" />
+                    android:background="@drawable/ic_dislike_toggle" />
 
                 <ToggleButton
-                    android:id="@+id/like"
+                    android:id="@+id/upvote"
                     style="@style/AppTheme.CardButton"
-                    android:layout_toStartOf="@id/dislike"
-                    android:background="@drawable/ic_like_toggle"
-                    android:checked="@{rating == 1}" />
+                    android:layout_toStartOf="@id/downvote"
+                    android:background="@drawable/ic_like_toggle" />
 
                 <ImageView
                     android:id="@+id/share"

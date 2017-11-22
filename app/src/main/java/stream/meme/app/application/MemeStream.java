@@ -36,6 +36,7 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import static stream.meme.app.application.Comment.ERROR;
 import static stream.meme.app.application.Comment.SENDING;
 import static stream.meme.app.application.Comment.SUCCESS;
+import static stream.meme.app.application.Post.*;
 import static stream.meme.app.application.login.ProviderType.FACEBOOK;
 import static stream.meme.app.application.login.ProviderType.GOOGLE;
 import static stream.meme.app.application.login.ProviderType.TWITTER;
@@ -45,8 +46,6 @@ public class MemeStream extends Application {
     private Observable<List<Comment>> comments;
     @Deprecated
     private Observable<List<Post>> posts;
-    @Deprecated
-    private Observable<Profile> profile;
 
     public static final String KEY_TOKEN = "token";
     private Map<ProviderType, Provider> providers;
@@ -71,43 +70,43 @@ public class MemeStream extends Application {
                         "1d",
                         "Ut commodo elit nisi, non luctus metus gravida non. Donec at est vel libero pretium sollicitudin. Maecenas a ultric ")));
 
-        posts = getComments(null).map(comments -> asList(
+        posts = Observable.fromCallable(() -> asList(
                 new Post(randomUUID(),
                         "test0",
                         "page " + 0,
                         "https://i.vimeocdn.com/portrait/58832_300x300",
                         with(this).load("https://i.vimeocdn.com/portrait/58832_300x300").get(),
-                        comments),
+                        NO_VOTE),
                 new Post(randomUUID(),
                         "test1",
                         "page " + 0,
                         "https://i.vimeocdn.com/portrait/58832_300x300",
                         with(this).load("https://i.vimeocdn.com/portrait/58832_300x300").get(),
-                        comments),
+                        NO_VOTE),
                 new Post(randomUUID(),
                         "test2",
                         "page " + 0,
                         "https://i.vimeocdn.com/portrait/58832_300x300",
                         with(this).load("https://i.vimeocdn.com/portrait/58832_300x300").get(),
-                        comments),
+                        NO_VOTE),
                 new Post(randomUUID(),
                         "test3",
                         "page " + 0,
                         "https://i.vimeocdn.com/portrait/58832_300x300",
                         with(this).load("https://i.vimeocdn.com/portrait/58832_300x300").get(),
-                        comments),
+                        NO_VOTE),
                 new Post(randomUUID(),
                         "test4",
                         "page " + 0,
                         "https://i.vimeocdn.com/portrait/58832_300x300",
                         with(this).load("https://i.vimeocdn.com/portrait/58832_300x300").get(),
-                        comments),
+                        NO_VOTE),
                 new Post(randomUUID(),
                         "test5",
                         "page " + 0,
                         "https://i.vimeocdn.com/portrait/58832_300x300",
                         with(this).load("https://i.vimeocdn.com/portrait/58832_300x300").get(),
-                        comments)));
+                        NO_VOTE)));
 
         prefs = getSharedPreferences(getPackageName() + "authentication", MODE_PRIVATE);
 
@@ -123,7 +122,7 @@ public class MemeStream extends Application {
     }
 
     public Observable<List<Post>> loadPosts(UUID last) {
-//      return service.posts(last);
+//      return service.data(last);
         return posts.delay(1, SECONDS);
     }
 
@@ -177,8 +176,9 @@ public class MemeStream extends Application {
     }
 
 
-    public Observable<Boolean> rate(UUID post, Boolean vote){
-        return service.rate(post, vote).startWith(vote);
+    public Observable<Post> rate(Post post, Boolean vote) {
+        return service.rate(post.getId(), vote)
+                .startWith(new Post(post.getId(), post.getTitle(), post.getSubtitle(), post.getImage(), post.getThumbnail(), vote));
     }
 
 

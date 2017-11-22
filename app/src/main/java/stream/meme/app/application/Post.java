@@ -2,10 +2,13 @@ package stream.meme.app.application;
 
 import android.graphics.Bitmap;
 
-import java.util.List;
+import com.google.common.base.Optional;
+
 import java.util.UUID;
 
 import lombok.Data;
+
+import static java.util.Objects.hash;
 
 @Data
 public class Post {
@@ -17,5 +20,19 @@ public class Post {
     private final String subtitle;
     private final String image;
     private final Bitmap thumbnail;
-    private final List<Comment> previewComments;
+    private final Boolean rating;
+
+    public Optional<Boolean> getRating() {
+        return Optional.fromNullable(rating);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof Post && id.equals(((Post) obj).id) && rating == ((Post) obj).rating;
+    }
+
+    @Override
+    public int hashCode() {
+        return hash(id, rating);
+    }
 }

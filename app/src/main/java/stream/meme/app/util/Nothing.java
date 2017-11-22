@@ -6,4 +6,7 @@ public final class Nothing {
     private Nothing() {
 
     }
+
+    public @interface Ignored {
+    }
 }

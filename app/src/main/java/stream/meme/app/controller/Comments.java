@@ -181,7 +181,7 @@ public class Comments extends DatabindingBIVSCModule<CommentsBinding, Comments.S
                                 .subscribe(text(commentView.date));
                     });
 
-            //Notify the controller when a user refreshes or the activity first loads.
+            //Notify the controller when a user refreshes or the activity first loadsMore.
             intents.RefreshIntent = views
                     .switchMap(view -> refreshes(view.refreshLayout).map(ignored -> NONE))
                     .startWith(NONE);

@@ -1,61 +1,71 @@
 package stream.meme.app.controller.view;
 
 import android.content.Context;
-import android.graphics.Bitmap;
-
-import com.jakewharton.rxbinding2.view.RxView;
-import com.jakewharton.rxbinding2.widget.RxTextView;
+import android.databinding.DataBindingUtil;
+import android.support.annotation.NonNull;
+import android.support.v4.util.Pair;
+import android.widget.FrameLayout;
 
 import io.reactivex.Observable;
-import io.reactivex.subjects.PublishSubject;
-import io.reactivex.subjects.Subject;
 import stream.meme.app.R;
-import stream.meme.app.util.Nothing;
+import stream.meme.app.application.Post;
+import stream.meme.app.databinding.MemeViewBinding;
 
-public class PostView extends AngularAndroidView<PostViewBinding> {
-    public static final Boolean UP_VOTE = true;
-    public static final Boolean NO_VOTE = null;
-    public static final Boolean DOWN_VOTE = false;
-    private Observable<Nothing> shareSubject;
-    private Observable<Boolean> ratedSubject;
-    private Observable<Object> title;
-    private Observable<Object> subtitle;
-    private Observable<Bitmap> image;
+import static android.support.v4.util.Pair.create;
+import static android.view.LayoutInflater.from;
+import static com.jakewharton.rxbinding2.view.RxView.clicks;
+import static stream.meme.app.application.Post.DOWN_VOTE;
+import static stream.meme.app.application.Post.UP_VOTE;
+import static stream.meme.app.util.Operators.always;
+import static stream.meme.app.util.Optionals.ifPresent;
 
-    public PostView(Context context) {
-        super(context, R.layout.post_view);
+/**
+ * Created by Exerosis on 11/21/2017.
+ */
+public class PostView extends FrameLayout {
+    private final MemeViewBinding binding;
+    private Post post;
+
+    public PostView(@NonNull Context context) {
+        super(context);
+        binding = DataBindingUtil.inflate(from(context), R.layout.meme_view, this, true);
     }
 
-    @Override
-    protected void bind(Observable<PostViewBinding> views) {
-        shareSubject = views.switchMap(view -> RxView.clicks(view.share));
-        ratedSubject = views.switchMap(view -> ...).startWith(NO_VOTE);
+    public void post(Observable<Post> post) {
+        post.subscribe(this::post);
+    }
 
-        views.subscribe(view -> {
-            title.map(Object::toString).subscribe(RxTextView.text(view.title));
-            subtitle.map(Object::toString).subscribe(RxTextView.text(view.subtitle));
-            image.map(Object::toString).subscribe(RxTextView.text(view.image));
+    public void post(Post post) {
+        this.post = post;
+        binding.image.setImageBitmap(post.getThumbnail());
+        binding.title.setText(post.getTitle());
+        binding.subtitle.setText(post.getSubtitle());
+        ifPresent(post.getRating(), rating -> {
+            binding.upvote.setChecked(rating);
+            binding.downvote.setChecked(!rating);
         });
     }
 
-
-    public void title(@Clairfiers.Text Observable<Object> title){
-        this.title = title;
+    public Observable<Pair<Post, Boolean>> rated() {
+        return clicks(binding.upvote)
+                .compose(always(() -> create(post, UP_VOTE)))
+                .mergeWith(clicks(binding.downvote)
+                        .compose(always(() -> create(post, DOWN_VOTE))));
     }
 
-    public void subtitle(@Clairfiers.Text Observable<Object> subtitle){
-        this.subtitle = subtitle;
+    public Observable<Post> shared() {
+        return clicks(binding.share).compose(always(this::post));
     }
 
-    public void image(Observable<Bitmap> image){
-        this.image = image;
+    public Observable<Post> reply() {
+        return clicks(binding.comments).compose(always(this::post));
     }
 
-    public Observable<Nothing> shareClicked() {
-        return shareSubject;
+    public Observable<Post> clicked() {
+        return clicks(binding.getRoot()).compose(always(this::post));
     }
 
-    public Observable<Boolean> rated() {
-        return ratedSubject;
+    public Post post() {
+        return post;
     }
 }
