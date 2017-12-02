@@ -1,0 +1,12 @@
+apply plugin: 'java-library'
+
+dependencies {
+    compile "com.sparkjava:spark-core:2.7.1"
+    compile 'org.redisson:redisson:3.5.5'
+    compile 'com.google.code.gson:gson:2.8.1'
+    compile 'com.google.guava:guava:20.0'
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+}
+
+sourceCompatibility = "1.8"
+targetCompatibility = "1.8"

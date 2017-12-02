@@ -23,8 +23,10 @@ import stream.meme.app.util.Nothing;
 import stream.meme.app.util.bivsc.DatabindingBIVSCModule;
 import stream.meme.app.util.bivsc.Reducer;
 
+import static io.reactivex.Observable.just;
 import static stream.meme.app.controller.CommentsController.EXTRA_POST;
 import static stream.meme.app.util.ControllerActivity.EXTRA_CONTROLLER;
+import static stream.meme.app.util.Nothing.NONE;
 import static stream.meme.app.util.bivsc.Reducer.controller;
 
 public class StreamController extends DatabindingBIVSCModule<StreamViewBinding, StreamController.State> {
@@ -45,7 +47,7 @@ public class StreamController extends DatabindingBIVSCModule<StreamViewBinding, 
     @Override
     public BiConsumer<Observable<StreamViewBinding>, Observable<State>> getBinder() {
         return (views, state) -> {
-            Observable<PostListView> posts = views.map(view -> view.posts);
+            Observable<PostListView> posts = views.map(view -> null);
 
             //Handle post list.
             intents.RefreshIntent = posts.switchMap(PostListView::refreshes);
@@ -60,11 +62,11 @@ public class StreamController extends DatabindingBIVSCModule<StreamViewBinding, 
             views.subscribe(view -> {
                 //Show and hide first page, next page, and refreshing indicators.
                 view.loadingLayout.loading(state.map(State::firstPageLoading));
-                view.posts.loading(state.map(State::nextPageLoading));
-                view.posts.refreshing(state.map(State::refreshing));
-
-                //Display data on the list.
-                view.posts.posts(state.map(State::memes));
+//                view.posts.loading(state.map(State::nextPageLoading));
+//                view.posts.refreshing(state.map(State::refreshing));
+//
+//                //Display data on the list.
+//                view.posts.posts(state.map(State::memes));
             });
         };
     }
@@ -107,7 +109,7 @@ public class StreamController extends DatabindingBIVSCModule<StreamViewBinding, 
     class Intents {
         Observable<Nothing> RefreshIntent;
         Observable<Nothing> LoadMoreIntent;
-        Observable<Nothing> LoadFirstIntent;
+        Observable<Nothing> LoadFirstIntent = just(NONE);
         Observable<Post> PostClickedIntent;
         Observable<Post> PostSharedIntent;
         Observable<Post> PostReplyIntent;
