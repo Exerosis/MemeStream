@@ -5,6 +5,7 @@ import static spark.Spark.*;
 public class Backend {
 
     public static void main(String[] args) {
+        API api = new API();
         path("/api", () -> {
             before("/*", (request, response) -> {
                 if (!API.isAuthenticated(request.headers("auth")))
@@ -14,13 +15,13 @@ public class Backend {
             });
             path("/posts", () -> {
                 path("/:id", () -> {
-                    get("/comments", API.comments);
-                    post("/comment", API.comment);
-                    post("/rate", API.rate);
+                    get("/comments", api.comments);
+                    post("/comment", api.comment);
+                    post("/rate", api.rate);
                 });
-                get("/", API.posts);
+                get("/", api.posts);
             });
-            post("/auth", API.auth);
+            post("/auth", api.auth);
         });
     }
 }
