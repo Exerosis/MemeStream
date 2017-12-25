@@ -18,7 +18,7 @@ import static stream.meme.backend.ProviderType.valueOf;
 
 public class API {
     private final RMap<Long, Post> posts;
-    private final RMultimap<UUID, Comment> comments;
+    private final RMultimap<Long, Comment> comments;
     private final RMap<String, User> users;
     private final Gson gson = new Gson();
 
@@ -31,7 +31,7 @@ public class API {
 
     public final Route comments() {
         return (request, response) -> {
-            UUID id = gson.fromJson(request.queryParams("id"), UUID.class);
+            Long id = gson.fromJson(request.queryParams("id"), Long.class);
             response.body(gson.toJson(comments.get(id)));
             return response;
         };
@@ -39,7 +39,7 @@ public class API {
 
     public final Route comment() {
         return (request, response) -> {
-            UUID id = gson.fromJson(request.queryParams("id"), UUID.class);
+            Long id = gson.fromJson(request.queryParams("id"), Long.class);
             comments.put(id, gson.fromJson(request.body(), Comment.class));
             response.body(gson.toJson(comments.get(id)));
             return response;
@@ -48,8 +48,13 @@ public class API {
 
     public final Route rate() {
         return (request, response) -> {
-            Boolean rating = gson.fromJson(request.body(), Boolean.class);
-            //TODO implement this.
+            Long id = gson.fromJson(request.queryParams("id"), Long.class);
+            Post post = posts.get(id);
+            if (gson.fromJson(request.body(), Boolean.class)) {
+                post.upVote();
+            } else {
+                post.downVote();
+            }
             return response;
         };
     }
