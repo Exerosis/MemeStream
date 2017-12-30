@@ -13,12 +13,15 @@ import java.util.UUID;
 import spark.Request;
 import spark.Route;
 
+import static java.lang.Long.parseLong;
 import static java.util.stream.Collectors.toSet;
 import static stream.meme.backend.ProviderType.valueOf;
 
 public class API {
-    private final RMap<Long, Post> posts;
-    private final RMultimap<UUID, Comment> comments;
+    private final RMap<Long, PostData> posts;
+    private final RMap<Long, Integer> upvotes;
+    private final RMap<Long, Integer> downvotes;
+    private final RMultimap<Long, Comment> comments;
     private final RMap<String, User> users;
     private final Gson gson = new Gson();
 
@@ -26,31 +29,35 @@ public class API {
         RedissonClient redis = Redisson.create();
         posts = redis.getMap("posts");
         users = redis.getMap("users");
+        upvotes = redis.getMap("upvotes");
+        downvotes = redis.getMap("downvotes");
         comments = redis.getListMultimap("comments");
     }
 
     public final Route comments() {
-        return (request, response) -> {
-            UUID id = gson.fromJson(request.queryParams("id"), UUID.class);
-            response.body(gson.toJson(comments.get(id)));
-            return response;
-        };
+        return (request, response) -> comments.get(id(request));
     }
 
     public final Route comment() {
         return (request, response) -> {
-            UUID id = gson.fromJson(request.queryParams("id"), UUID.class);
+            Long id = id(request);
             comments.put(id, gson.fromJson(request.body(), Comment.class));
-            response.body(gson.toJson(comments.get(id)));
-            return response;
+            return request.body();
         };
     }
 
     public final Route rate() {
         return (request, response) -> {
             Boolean rating = gson.fromJson(request.body(), Boolean.class);
-            //TODO implement this.
-            return response;
+            Long id = parseLong(request.params("id"));
+            Boolean oldRating = user(request).rate(id, rating);
+            if (rating != oldRating) {
+                if (oldRating != null)
+                    (oldRating ? upvotes : downvotes).addAndGetAsync(id, -1);
+                if (rating != null)
+                    (rating ? upvotes : downvotes).addAndGetAsync(id, 1);
+            }
+            return post(request);
         };
     }
 
@@ -64,8 +71,7 @@ public class API {
                         .filter(id -> id > last)
                         .collect(toSet());
 
-            response.body(gson.toJson(posts.getAll(ids).values()));
-            return response;
+            return posts.getAll(ids).values();
         };
     }
 
@@ -74,10 +80,21 @@ public class API {
         return posts.keySet();
     }
 
-
-    //--Auth--
     private String token(Request request) {
         return request.headers("auth");
+    }
+
+    private User user(Request request) {
+        return users.get(token(request));
+    }
+
+    private Long id(Request request) {
+        return parseLong(request.params("id"));
+    }
+
+    private Post post(Request request) {
+        Long id = id(request);
+        return new Post(user(request).rating(id), upvotes.get(id), downvotes.get(id), posts.get(id));
     }
 
     public final Route auth() {
@@ -95,8 +112,7 @@ public class API {
             //TODO user details here.
 
             users.put(token, user);
-            response.body(token);
-            return response;
+            return token;
         };
     }
 
