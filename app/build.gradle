@@ -37,6 +37,7 @@ dependencies {
     provided "org.projectlombok:lombok:1.16.18"
     compile 'com.squareup.retrofit2:adapter-rxjava2:2.3.0'
     compile 'com.squareup.okhttp3:logging-interceptor:3.5.0'
+    compile 'net.jodah:typetools:0.5.0'
 
     //--RxBinding--
     compile "com.jakewharton.rxbinding2:rxbinding:$rxBindingVersion"
