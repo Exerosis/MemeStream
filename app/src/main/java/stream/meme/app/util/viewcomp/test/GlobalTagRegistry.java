@@ -9,7 +9,6 @@ import android.view.ViewGroup;
 import java.util.HashMap;
 import java.util.Map;
 
-import io.reactivex.functions.Function3;
 import io.reactivex.functions.Function4;
 import stream.meme.app.util.viewcomp.TagInflater;
 import stream.meme.app.util.viewcomp.TagRegistry;
@@ -25,12 +24,6 @@ public class GlobalTagRegistry implements TagRegistry {
 
     public static ContextWrapper injectContext(Context context) {
         return TagInflater.inject(context, getInstance());
-    }
-
-    @SafeVarargs
-    @Override
-    public final void register(Class<? extends Function3<Context, ViewGroup, AttributeSet, View>>... types) {
-        TagRegistry.super.register(types);
     }
 
     private final Map<String, Function4<String, Context, ViewGroup, AttributeSet, View>> inflaters = new HashMap<>();

@@ -1,5 +1,6 @@
 package stream.meme.app.util.viewcomp.test;
 
+import android.content.Context;
 import android.support.annotation.LayoutRes;
 import android.support.annotation.NonNull;
 import android.util.AttributeSet;
@@ -17,7 +18,8 @@ public class TestComponent extends Component<TestLayoutBinding> {
     //Though the entire class will be garbage collected when the application is no longer in use.
     private int configChanges = 0;
 
-    public TestComponent() {
+    public TestComponent(@NonNull Context context) {
+        super(context);
         //Map changes in view to fields to be accessed from elsewhere.
         //If the view in question is another ViewComponent no SwitchMap is required.
         search = getViews().switchMap(view -> RxTextView.textChanges(view.editText));

@@ -10,20 +10,18 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import io.reactivex.Observable;
-import io.reactivex.functions.Function3;
+import io.reactivex.functions.Consumer3;
 import io.reactivex.subjects.Subject;
 
 import static android.view.LayoutInflater.from;
 import static io.reactivex.subjects.BehaviorSubject.create;
 
 
-//LOL ;) Not really a view, but we shall pretend because Android is a pile of stupidity.
-//TODO find a way to make this not really so... viewy...
-public abstract class Component<ViewModel extends ViewDataBinding> extends View implements Function3<Context, ViewGroup, AttributeSet, View> {
+public abstract class Component<ViewModel extends ViewDataBinding> extends ViewDelegate implements Consumer3<Context, ViewGroup, AttributeSet> {
     private final Subject<ViewModel> binding = create();
 
-    public Component() {
-        super(null);
+    public Component(@NonNull Context context) {
+        super(context);
     }
 
     protected Observable<ViewModel> getViews() {
@@ -34,9 +32,14 @@ public abstract class Component<ViewModel extends ViewDataBinding> extends View 
     protected abstract int inflate(@NonNull AttributeSet attributes);
 
     @Override
-    public View apply(Context context, ViewGroup parent, AttributeSet attributes) throws Exception {
-        ViewModel view = DataBindingUtil.inflate(from(context), inflate(attributes), parent, false);
-        binding.onNext(view);
-        return view.getRoot();
+    public void apply(Context context, ViewGroup parent, AttributeSet attributes) throws Exception {
+        ViewModel viewModel = DataBindingUtil.inflate(from(context), inflate(attributes), parent, false);
+
+        View view = viewModel.getRoot();
+        setId(view.getId());
+        view.setId(NO_ID);
+        setView(view);
+
+        binding.onNext(viewModel);
     }
 }

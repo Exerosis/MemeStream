@@ -8,19 +8,14 @@ import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 
 import org.xmlpull.v1.XmlPullParser;
-
-import stream.meme.app.R;
-import stream.meme.app.util.viewcomp.alpha.ViewDelegateTwo;
 
 public class TagInflater extends LayoutInflater {
     private static final String[] CLASS_PREFIX_LIST = {"android.widget.", "android.webkit.", "android.app."};
     private final TagRegistry registry;
-    private AttributeSet last = null;
     private Integer resource = null;
-    private static ViewDelegateTwo viewDelegateTwo;
+    private static ViewDelegate viewDelegate;
 
     public TagInflater(LayoutInflater original, Context context, TagRegistry registry) {
         super(original, context);
@@ -29,27 +24,12 @@ public class TagInflater extends LayoutInflater {
 
     @Override
     protected View onCreateView(View parent, String tag, AttributeSet attributes) throws ClassNotFoundException {
-        if (tag.equals("ViewDelegate")) {
-            if (viewDelegateTwo == null)
-                viewDelegateTwo = new ViewDelegateTwo(getContext(), attributes);
-            viewDelegateTwo.setView(new Button(getContext()));
-            if (viewDelegateTwo.getParent() != null)
-                ((ViewGroup) viewDelegateTwo.getParent()).removeView(viewDelegateTwo);
-            return viewDelegateTwo;
-        }
-
         String id = "res:" + resource + "line:" + ((XmlResourceParser) attributes).getLineNumber();
         View view = registry.inflate(tag, id, getContext(), (ViewGroup) parent, attributes);
-        if (view != null) {
-            last = attributes;
+        if (view != null)
             return view;
-        }
 
-        if (getContext().obtainStyledAttributes(attributes, new int[]{R.attr.ignore_attributes}).getBoolean(0, false)
-                && last != null) {
-            attributes = last;
-            last = null;
-        }
+        //Copied from Android PhoneLayoutInflater for inflating normal Android views.
         for (String prefix : CLASS_PREFIX_LIST) {
             try {
                 view = createView(tag, prefix, attributes);

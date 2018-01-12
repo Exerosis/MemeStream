@@ -1,5 +1,6 @@
 package stream.meme.app.util.viewcomp.test;
 
+import android.content.Context;
 import android.support.annotation.NonNull;
 import android.util.AttributeSet;
 
@@ -11,7 +12,8 @@ import stream.meme.app.util.viewcomp.Component;
 
 public class SecondComponent extends Component<TestSecondLayoutBinding> {
 
-    public SecondComponent() {
+    public SecondComponent(@NonNull Context context) {
+        super(context);
         getViews().subscribe(view -> {
             System.out.println("View came");
         });

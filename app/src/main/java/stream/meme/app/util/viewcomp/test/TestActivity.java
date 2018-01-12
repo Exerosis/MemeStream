@@ -6,7 +6,7 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 
 import stream.meme.app.R;
-import stream.meme.app.util.viewcomp.alpha.ViewDelegateTwo;
+import stream.meme.app.util.viewcomp.ViewDelegate;
 
 
 public class TestActivity extends AppCompatActivity {
@@ -17,9 +17,8 @@ public class TestActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle in) {
         setContentView(R.layout.test_activty);
-        ViewDelegateTwo delegateTwo = findViewById(R.id.view_delegate);
-        String rotationsSoFar = delegateTwo.getRots();
-        System.out.println(rotationsSoFar);
+        ViewDelegate delegateTwo = findViewById(R.id.view_delegate);
+        System.out.println(delegateTwo.getX());
         super.onCreate(in);
     }
 
