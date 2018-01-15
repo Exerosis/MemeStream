@@ -10,15 +10,15 @@ import com.jakewharton.rxbinding2.widget.RxTextView;
 import io.reactivex.Observable;
 import stream.meme.app.R;
 import stream.meme.app.databinding.TestLayoutBinding;
-import stream.meme.app.util.viewcomp.Component;
+import stream.meme.app.util.viewcomp.ViewComponent;
 
-public class TestComponent extends Component<TestLayoutBinding> {
+public class TestViewComponent extends ViewComponent<TestLayoutBinding> {
     private final Observable<CharSequence> search;
     //Whatever data you want here, it won't go anywhere when the configuration changes.
     //Though the entire class will be garbage collected when the application is no longer in use.
     private int configChanges = 0;
 
-    public TestComponent(@NonNull Context context) {
+    public TestViewComponent(@NonNull Context context) {
         super(context);
         //Map changes in view to fields to be accessed from elsewhere.
         //If the view in question is another ViewComponent no SwitchMap is required.

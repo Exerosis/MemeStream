@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <declare-styleable name="Component">
+    <declare-styleable name="ViewComponent">
         <attr name="ignore_attributes" format="boolean" />
     </declare-styleable>
 </resources>

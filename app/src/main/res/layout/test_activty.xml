@@ -4,9 +4,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <ViewDelegate
-        android:id="@+id/view_delegate"
+    <stream.meme.app.util.viewcomp.test.TestListViewComponent
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Test" />
+        android:layout_height="match_parent" />
 </LinearLayout>
