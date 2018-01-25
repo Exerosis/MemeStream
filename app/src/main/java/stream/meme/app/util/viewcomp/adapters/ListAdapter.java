@@ -2,7 +2,6 @@ package stream.meme.app.util.viewcomp.adapters;
 
 
 import android.content.Context;
-import android.databinding.DataBindingUtil;
 import android.databinding.ViewDataBinding;
 import android.support.annotation.LayoutRes;
 import android.support.v7.util.DiffUtil;
@@ -13,8 +12,11 @@ import java.util.List;
 import io.reactivex.Observable;
 import io.reactivex.functions.BiConsumer;
 import io.reactivex.functions.BiPredicate;
-import io.reactivex.subjects.BehaviorSubject;
+import io.reactivex.functions.unsafe.Predicate;
+import io.reactivex.subjects.PublishSubject;
+import io.reactivex.subjects.Subject;
 
+import static android.databinding.DataBindingUtil.inflate;
 import static android.support.v7.util.DiffUtil.calculateDiff;
 import static android.view.LayoutInflater.from;
 import static io.reactivex.android.schedulers.AndroidSchedulers.mainThread;
@@ -74,23 +76,27 @@ public class ListAdapter<Data> extends Adapter {
                 .subscribe(results -> results.dispatchUpdatesTo(this));
     }
 
+    public <View extends ViewDataBinding> void bind(@LayoutRes int layout, BiConsumer<View, Observable<Data>> binding) {
+        bind(position -> true, layout, binding);
+    }
+
     @SuppressWarnings("unchecked")
-    public <View extends ViewDataBinding> int bind(@LayoutRes int layout, BiConsumer<View, BehaviorSubject<Data>> binding) {
-        ViewDataBinding view = DataBindingUtil.inflate(from(context), layout, null, false);
-        BehaviorSubject<Data> subject = BehaviorSubject.create();
-        try {
+    public <View extends ViewDataBinding> void bind(Predicate<Integer> positions, @LayoutRes int layout, BiConsumer<View, Observable<Data>> binding) {
+        bind(positions, () -> {
+            ViewDataBinding view = inflate(from(context), layout, null, false);
+            Subject<Data> subject = PublishSubject.create();
             binding.accept((View) view, subject);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-        return super.bind(position -> true, (positions) -> {
-            positions.map(position -> data.get(position)).subscribe(subject);
-            return view.getRoot();
+            return new ViewHolder(view.getRoot()) {
+                @Override
+                void bind(int position) {
+                    subject.onNext(data.get(position));
+                }
+            };
         });
     }
 
     @Override
-    public int size() {
+    public int getItemCount() {
         return data.size();
     }
 }
