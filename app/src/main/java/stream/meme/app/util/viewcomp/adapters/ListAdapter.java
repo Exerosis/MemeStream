@@ -1,7 +1,10 @@
 package stream.meme.app.util.viewcomp.adapters;
 
 
+import android.content.Context;
+import android.databinding.DataBindingUtil;
 import android.databinding.ViewDataBinding;
+import android.support.annotation.LayoutRes;
 import android.support.v7.util.DiffUtil;
 
 import java.util.ArrayList;
@@ -13,19 +16,23 @@ import io.reactivex.functions.BiPredicate;
 import io.reactivex.subjects.BehaviorSubject;
 
 import static android.support.v7.util.DiffUtil.calculateDiff;
+import static android.view.LayoutInflater.from;
 import static io.reactivex.android.schedulers.AndroidSchedulers.mainThread;
 import static io.reactivex.schedulers.Schedulers.computation;
 
 public class ListAdapter<Data> extends Adapter {
+    private final Context context;
     private List<Data> data = new ArrayList<>();
 
-    public ListAdapter(Observable<List<Data>> lists) {
-        this(lists, Object::equals, Object::equals);
+    public ListAdapter(Context context, Observable<List<Data>> lists) {
+        this(context, lists, Object::equals, Object::equals);
     }
 
-    public ListAdapter(Observable<List<Data>> lists,
+    public ListAdapter(Context context,
+                       Observable<List<Data>> lists,
                        BiPredicate<Data, Data> itemsSame,
                        BiPredicate<Data, Data> contentsSame) {
+        this.context = context;
         lists.filter(list -> !list.isEmpty())
                 .observeOn(computation())
                 .map(list -> {
@@ -67,16 +74,23 @@ public class ListAdapter<Data> extends Adapter {
                 .subscribe(results -> results.dispatchUpdatesTo(this));
     }
 
-    public <View extends ViewDataBinding> int bind(BiConsumer<View, BehaviorSubject<Data>> binding) {
+    @SuppressWarnings("unchecked")
+    public <View extends ViewDataBinding> int bind(@LayoutRes int layout, BiConsumer<View, BehaviorSubject<Data>> binding) {
+        ViewDataBinding view = DataBindingUtil.inflate(from(context), layout, null, false);
         BehaviorSubject<Data> subject = BehaviorSubject.create();
-        return super.<View>bind(position -> true, (view, positions) -> {
-            positions.map(data::get).subscribe(subject);
-            binding.accept(view, subject);
+        try {
+            binding.accept((View) view, subject);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return super.bind(position -> true, (positions) -> {
+            positions.map(position -> data.get(position)).subscribe(subject);
+            return view.getRoot();
         });
     }
 
     @Override
-    public int getItemCount() {
+    public int size() {
         return data.size();
     }
 }

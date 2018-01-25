@@ -42,9 +42,11 @@ public interface TagRegistry {
 
     default View inflate(String tag, String id, Context context, ViewGroup parent, AttributeSet attributes) {
         try {
-            return getInflaters().get(tag).apply(id, context, parent, attributes);
-        } catch (Exception e) {
+            if (getInflaters().containsKey(tag))
+                return getInflaters().get(tag).apply(id, context, parent, attributes);
             return null;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 }

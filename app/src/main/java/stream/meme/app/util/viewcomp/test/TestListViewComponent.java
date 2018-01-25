@@ -9,11 +9,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import io.reactivex.Observable;
+import io.reactivex.subjects.BehaviorSubject;
 import io.reactivex.subjects.PublishSubject;
 import io.reactivex.subjects.Subject;
 import stream.meme.app.R;
 import stream.meme.app.databinding.StringItemBinding;
 import stream.meme.app.databinding.TestSecondLayoutBinding;
+import stream.meme.app.util.Nothing;
 import stream.meme.app.util.viewcomp.ViewComponent;
 import stream.meme.app.util.viewcomp.adapters.ListAdapter;
 
@@ -35,10 +37,14 @@ public class TestListViewComponent extends ViewComponent<TestSecondLayoutBinding
                     return list;
                 });
 
-        final ListAdapter<String> adapter = new ListAdapter<>(data);
+        final ListAdapter<String> adapter = new ListAdapter<>(context, data);
+        adapter.addElement(pos -> pos == 0, "Top");
+        adapter.addElement(pos -> pos == adapter.size() - 1, "Bottom");
+        adapter.addElement(pos -> pos == (adapter.size() / 2) - 1, "Middle");
+
 
         //Notice the lack of R.layout.<value>, this is not needed, it's drawn from the generic.
-        adapter.<StringItemBinding>bind((view, values) -> {
+        adapter.bind(R.layout.string_item, (StringItemBinding view, BehaviorSubject<String> values) -> {
             values.subscribe(view.textView::setText);
 
             //Whenever an item gets clicked, emit the clicked data.
@@ -50,7 +56,7 @@ public class TestListViewComponent extends ViewComponent<TestSecondLayoutBinding
         //Populate our RecyclerView with data.
         getViews().subscribe(view -> {
             view.recyclerView.setLayoutManager(new LinearLayoutManager(context));
-            view.recyclerView.setAdapter(adapter);
+            view.recyclerView.setAdapter(adapter.getAdapter());
         });
     }
 
