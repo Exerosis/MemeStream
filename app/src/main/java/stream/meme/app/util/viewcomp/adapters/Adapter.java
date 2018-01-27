@@ -4,31 +4,32 @@ import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.view.ViewGroup;
 
+import io.reactivex.functions.Predicate;
+import io.reactivex.functions.unsafe.BiFunction;
 import io.reactivex.functions.unsafe.Function;
-import io.reactivex.functions.unsafe.Predicate;
-import io.reactivex.functions.unsafe.Supplier;
 
 public abstract class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
-    public static final int DEFAULT_TYPE = -1;
-    private int currentType = 0;
+    public static final int DEFAULT_TYPE = 0;
+    private int currentType = DEFAULT_TYPE;
     private Function<Integer, Integer> types = position -> DEFAULT_TYPE;
-    private Function<Integer, ViewHolder> bindings = type -> {
-        throw new IllegalStateException("Could not find a binding for type: " + type);
+    private BiFunction<ViewGroup, Integer, ViewHolder> bindings = (parent, type) -> {
+       return null;
     };
 
-    public void bind(Predicate<Integer> positions, Supplier<ViewHolder> binding) {
+    public int bind(Predicate<Integer> positions, Function<ViewGroup, ViewHolder> binding) {
         int nextType = currentType++;
-        types = positions.map(nextType, types);
-        bindings = type -> {
+        types = types.returnWhen(nextType, positions);
+        bindings = bindings.whenNotNull((parent, type) -> {
             if (type == nextType)
-                return binding.apply();
-            return bindings.apply(type);
-        };
+                return binding.apply(parent);
+            return null;
+        });
+        return nextType;
     }
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int type) {
-        return bindings.applyUnsafe(type);
+        return bindings.applyUnsafe(parent, type);
     }
 
     @Override

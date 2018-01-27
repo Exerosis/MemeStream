@@ -2,26 +2,29 @@ package stream.meme.app.util.viewcomp.test;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
-import android.support.v7.widget.LinearLayoutManager;
 import android.util.AttributeSet;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import io.reactivex.Observable;
-import io.reactivex.subjects.BehaviorSubject;
 import io.reactivex.subjects.PublishSubject;
 import io.reactivex.subjects.Subject;
-import stream.meme.app.R;
+import stream.meme.app.databinding.DivItemBinding;
 import stream.meme.app.databinding.StringItemBinding;
 import stream.meme.app.databinding.TestSecondLayoutBinding;
-import stream.meme.app.util.Nothing;
 import stream.meme.app.util.viewcomp.ViewComponent;
 import stream.meme.app.util.viewcomp.adapters.ListAdapter;
 
 import static com.jakewharton.rxbinding2.view.RxView.clicks;
-import static java.util.concurrent.TimeUnit.SECONDS;
+import static java.lang.String.valueOf;
+import static java.lang.Thread.sleep;
+import static java.util.concurrent.ThreadLocalRandom.current;
+import static stream.meme.app.R.layout.div_item;
+import static stream.meme.app.R.layout.string_item;
+import static stream.meme.app.R.layout.test_second_layout;
 import static stream.meme.app.util.Operators.always;
+import static stream.meme.app.util.viewcomp.adapters.Pagination.paginate;
 
 public class TestListViewComponent extends ViewComponent<TestSecondLayoutBinding> {
     private final Subject<String> itemClicked = PublishSubject.create();
@@ -29,22 +32,10 @@ public class TestListViewComponent extends ViewComponent<TestSecondLayoutBinding
     public TestListViewComponent(@NonNull Context context) {
         super(context);
 
-        //Represents data from a database, this data might change over time thus Observable.
-        final Observable<List<String>> data = Observable.interval(0, 3, SECONDS)
-                .map(ticks -> "Number " + ticks)
-                .scanWith(ArrayList::new, (list, value) -> {
-                    list.add(value);
-                    return list;
-                });
+        final List<String> data = new ArrayList<>();
+        final ListAdapter<String> adapter = new ListAdapter<>();
 
-        final ListAdapter<String> adapter = new ListAdapter<>(context, data);
-        adapter.addElement(pos -> pos == 0, "Top");
-        adapter.addElement(pos -> pos == adapter.size() - 1, "Bottom");
-        adapter.addElement(pos -> pos == (adapter.size() / 2) - 1, "Middle");
-
-
-        //Notice the lack of R.layout.<value>, this is not needed, it's drawn from the generic.
-        adapter.bind(R.layout.string_item, (StringItemBinding view, BehaviorSubject<String> values) -> {
+        adapter.<StringItemBinding>bind(string_item, (view, values) -> {
             values.subscribe(view.textView::setText);
 
             //Whenever an item gets clicked, emit the clicked data.
@@ -53,10 +44,19 @@ public class TestListViewComponent extends ViewComponent<TestSecondLayoutBinding
                     .subscribe(itemClicked);
         });
 
-        //Populate our RecyclerView with data.
+        adapter.<DivItemBinding>addBind(pos -> pos % 2 == 0, div_item, (view, positions) ->
+                positions.map(pos -> "div for " + pos).subscribe(view.textView::setText)
+        );
+
         getViews().subscribe(view -> {
-            view.recyclerView.setLayoutManager(new LinearLayoutManager(context));
-            view.recyclerView.setAdapter(adapter.getAdapter());
+            view.recyclerView.setAdapter(adapter);
+            view.recyclerView.setLayoutManager(paginate(context, adapter).loading(() -> {
+                sleep(2000);
+                for (int i = 0; i < 5; i++) {
+                    data.add(valueOf(current().nextInt(99999)));
+                }
+                adapter.getData().onNext(data);
+            }).load());
         });
     }
 
@@ -66,6 +66,6 @@ public class TestListViewComponent extends ViewComponent<TestSecondLayoutBinding
 
     @Override
     public int inflate(@NonNull AttributeSet attributes) {
-        return R.layout.test_second_layout;
+        return test_second_layout;
     }
 }

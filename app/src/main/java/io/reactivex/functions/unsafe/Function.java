@@ -19,6 +19,10 @@ public interface Function<From, To> extends io.reactivex.functions.Function<From
         }
     }
 
+    default Function<From, To> returnWhen(To value, io.reactivex.functions.Predicate<From> when) {
+        return from -> when.test(from) ? value : apply(from);
+    }
+
     default <Final> Function<From, Final> andThen(Function<To, Final> next) {
         return from -> next.apply(apply(from));
     }
