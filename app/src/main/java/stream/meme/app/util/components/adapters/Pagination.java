@@ -1,43 +1,33 @@
-package stream.meme.app.util.viewcomp.adapters;
+package stream.meme.app.util.components.adapters;
 
 import android.content.Context;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 
+import io.reactivex.Completable;
 import io.reactivex.Observable;
-import io.reactivex.functions.unsafe.Action;
+import io.reactivex.functions.Action;
 import io.reactivex.subjects.BehaviorSubject;
 
+import static io.reactivex.Completable.fromAction;
 import static io.reactivex.android.schedulers.AndroidSchedulers.mainThread;
-import static io.reactivex.schedulers.Schedulers.computation;
-import static stream.meme.app.R.layout.loading_view;
 
 /**
  * Created by Exerosis on 1/27/2018.
  */
 
 public class Pagination extends LinearLayoutManager {
+    private final Completable loader;
     private BehaviorSubject<Boolean> loading = BehaviorSubject.createDefault(false);
-    private final Action loader;
-
 
     public static PaginationBuilder paginate(Context context) {
-        return paginate(context, null);
-    }
-
-    public static PaginationBuilder paginate(Context context, ListAdapter<?> adapter) {
         return new PaginationBuilder() {
             private boolean vertical = true;
             private boolean reversed = false;
 
             @Override
-            public Pagination loading(Action loader) {
-                Pagination pagination = new Pagination(context, loader, vertical, reversed);
-                if (adapter != null) {
-                    pagination.loading.observeOn(mainThread()).subscribe(loading -> adapter.reinjectBindings());
-                    adapter.addBind(position -> pagination.loading.getValue() && position == adapter.size() - 1, loading_view);
-                }
-                return pagination;
+            public Pagination loading(Completable loader) {
+                return new Pagination(context, loader, vertical, reversed);
             }
 
             @Override
@@ -56,21 +46,27 @@ public class Pagination extends LinearLayoutManager {
     }
 
     public interface PaginationBuilder {
-        Pagination loading(Action action);
+        default Pagination loading(Action action) {
+            return loading(fromAction(action));
+        }
+
+        Pagination loading(Completable loader);
 
         PaginationBuilder horizontally();
 
         PaginationBuilder reversed();
     }
 
-
-    public Pagination(Context context, Action loader, boolean vertical, boolean reversed) {
+    public Pagination(Context context, Completable loader, boolean vertical, boolean reversed) {
         super(context, vertical ? VERTICAL : HORIZONTAL, reversed);
-        this.loader = loader;
+        this.loader = loader.observeOn(mainThread());
     }
 
+    public boolean isLoading() {
+        return loading.getValue();
+    }
 
-    public Observable<Boolean> isLoading() {
+    public Observable<Boolean> onLoad() {
         return loading;
     }
 
@@ -89,11 +85,8 @@ public class Pagination extends LinearLayoutManager {
     }
 
     public Pagination load() {
-        computation().createWorker().schedule(() -> {
-            loading.onNext(true);
-            loader.runUnsafe();
-            loading.onNext(false);
-        });
+        loading.onNext(true);
+        loader.subscribe(() -> loading.onNext(false));
         return this;
     }
 

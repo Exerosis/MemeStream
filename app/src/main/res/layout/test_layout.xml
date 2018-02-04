@@ -6,10 +6,9 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <stream.meme.app.util.viewcomp.test.TestListViewComponent
-            android:id="@+id/second_component"
+        <stream.meme.app.util.components.test.ThirdLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="match_parent" />
 
         <TextView
             android:layout_width="match_parent"
@@ -20,6 +19,5 @@
             android:id="@+id/edit_text"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
-
     </LinearLayout>
 </layout>

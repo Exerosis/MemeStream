@@ -1,4 +1,4 @@
-package stream.meme.app.util.viewcomp.adapters;
+package stream.meme.app.util.components.adapters;
 
 import android.support.v7.widget.RecyclerView;
 import android.view.View;

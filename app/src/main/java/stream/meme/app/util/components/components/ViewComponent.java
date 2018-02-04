@@ -1,4 +1,4 @@
-package stream.meme.app.util.viewcomp;
+package stream.meme.app.util.components.components;
 
 import android.content.Context;
 import android.databinding.DataBindingUtil;
@@ -8,38 +8,31 @@ import android.support.annotation.NonNull;
 import android.util.AttributeSet;
 import android.view.ViewGroup;
 
-import io.reactivex.Maybe;
 import io.reactivex.Observable;
 import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Consumer3;
 import io.reactivex.subjects.BehaviorSubject;
+import stream.meme.app.util.components.ViewDelegate;
 
 import static android.view.LayoutInflater.from;
+import static stream.meme.app.util.Functions.runtime;
 
 
-public abstract class ViewComponent<ViewModel extends ViewDataBinding> extends ViewDelegate implements Consumer3<Context, ViewGroup, AttributeSet> {
+public class ViewComponent<ViewModel extends ViewDataBinding> extends ViewDelegate implements Consumer3<Context, ViewGroup, AttributeSet> {
     private final BehaviorSubject<ViewModel> binding = BehaviorSubject.create();
-    private boolean setup = true;
+    private final int layout;
 
     public ViewComponent(@NonNull Context context) {
-        super(context);
+        this(context, -1);
     }
 
-    //TODO ehhh I don't like this much not gonna lie.
-    protected boolean setupOnly(Runnable runnable) {
-        if (!setup)
-            return false;
-        runnable.run();
-        setup = false;
-        return true;
+    public ViewComponent(@NonNull Context context, @LayoutRes int layout) {
+        super(context);
+        this.layout = layout;
     }
 
     public Observable<ViewModel> getViews() {
         return binding;
-    }
-
-    public Maybe<ViewModel> getComponents() {
-        return binding.firstElement();
     }
 
     public void getComponents(Consumer<ViewModel> components) {
@@ -47,14 +40,18 @@ public abstract class ViewComponent<ViewModel extends ViewDataBinding> extends V
             if (binding.hasValue())
                 components.accept(binding.getValue());
             else
-                getComponents().subscribe(components);
+                binding.firstElement().subscribe(components);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw runtime(e);
         }
     }
 
     @LayoutRes
-    protected abstract int inflate(@NonNull AttributeSet attributes);
+    protected int inflate(@NonNull AttributeSet attributes) {
+        if (layout == -1)
+            throw new IllegalStateException("View was not set!");
+        return layout;
+    }
 
     @Override
     public void apply(Context context, ViewGroup parent, AttributeSet attributes) throws Exception {

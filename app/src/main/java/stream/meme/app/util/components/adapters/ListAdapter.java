@@ -1,6 +1,7 @@
-package stream.meme.app.util.viewcomp.adapters;
+package stream.meme.app.util.components.adapters;
 
 
+import android.content.Context;
 import android.databinding.ViewDataBinding;
 import android.support.annotation.LayoutRes;
 
@@ -11,8 +12,11 @@ import io.reactivex.Observable;
 import io.reactivex.functions.BiConsumer;
 import io.reactivex.functions.Predicate;
 import io.reactivex.functions.unsafe.BiFunction;
+import io.reactivex.functions.unsafe.Consumer;
 import io.reactivex.functions.unsafe.Function;
 import io.reactivex.subjects.BehaviorSubject;
+import io.reactivex.subjects.Subject;
+import stream.meme.app.util.components.components.StatefulViewComponent;
 
 import static android.databinding.DataBindingUtil.inflate;
 import static android.support.v7.util.DiffUtil.Callback;
@@ -20,11 +24,12 @@ import static android.support.v7.util.DiffUtil.calculateDiff;
 import static android.view.LayoutInflater.from;
 import static io.reactivex.android.schedulers.AndroidSchedulers.mainThread;
 import static io.reactivex.schedulers.Schedulers.computation;
+import static io.reactivex.subjects.PublishSubject.create;
 
 public class ListAdapter<Data> extends Adapter {
-    public static final Boolean NOTHING = null;
-    public static final Boolean ITEM = false;
-    public static final Boolean CONTENT = true;
+    public static final Boolean NOTHING = false;
+    public static final Boolean ITEM = true;
+    public static final Boolean CONTENT = null;
 
     private List<Entry> entries = new ArrayList<>();
     private Function<Integer, Integer> fixedTypes = position -> DEFAULT_TYPE;
@@ -32,11 +37,15 @@ public class ListAdapter<Data> extends Adapter {
     private BehaviorSubject<List<Data>> lists = BehaviorSubject.create();
 
     public ListAdapter() {
-        this(null);
+        this((Observable<List<Data>>) null);
     }
 
     public ListAdapter(Observable<List<Data>> lists) {
         this(lists, (first, second) -> first.equals(second) ? CONTENT : NOTHING);
+    }
+
+    public ListAdapter(BiFunction<Data, Data, Boolean> relation) {
+        this(null, relation);
     }
 
     public ListAdapter(Observable<List<Data>> lists, BiFunction<Data, Data, Boolean> relation) {
@@ -83,7 +92,7 @@ public class ListAdapter<Data> extends Adapter {
                                 Entry second = newEntries.get(newItem);
                                 if (!first.isData)
                                     return true;
-                                return relation.applyUnsafe(first.data(), second.data());
+                                return relation.applyUnsafe(first.data(), second.data()) == CONTENT;
                             }
                         });
                     } finally {
@@ -103,11 +112,14 @@ public class ListAdapter<Data> extends Adapter {
             lists.onNext(lists.getValue());
     }
 
+    //--Added Binds--
     public int addBind(Predicate<Integer> positions, @LayoutRes int layout) {
         return addBind(positions, layout, ($, $_) -> {
         });
     }
 
+
+    //--Raw Binds--
     public <View extends ViewDataBinding> int addBind(Predicate<Integer> positions, @LayoutRes int layout, BiConsumer<View, BehaviorSubject<Integer>> binding) {
         int type = bindInternal(position -> {
             Entry entry = entries.get(position);
@@ -128,7 +140,6 @@ public class ListAdapter<Data> extends Adapter {
         }, layout, binding);
     }
 
-    @SuppressWarnings("all")
     private <View, Data> int bindInternal(Predicate<Integer> positions, @LayoutRes int layout, BiConsumer<View, BehaviorSubject<Data>> binding) {
         return bind(positions, parent -> {
             ViewDataBinding view = inflate(from(parent.getContext()), layout, parent, false);
@@ -142,6 +153,46 @@ public class ListAdapter<Data> extends Adapter {
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
+                }
+            };
+        });
+    }
+
+    //--Components--
+    public <View extends StatefulViewComponent<Data, ? extends ViewDataBinding>> Observable<View> bind(Class<View> type) {
+        Subject<View> views = create();
+        bind(type, views::onNext);
+        return views;
+    }
+
+    public <View extends StatefulViewComponent<Data, ? extends ViewDataBinding>> int bind(Class<View> type, Consumer<View> components) {
+        return bind(context -> type.getDeclaredConstructor(Context.class).newInstance(context), components);
+    }
+
+    public <View extends StatefulViewComponent<Data, ? extends ViewDataBinding>> Observable<View> bind(Function<Context, View> type) {
+        Subject<View> views = create();
+        bind(type, views::onNext);
+        return views;
+    }
+
+    public <View extends StatefulViewComponent<Data, ? extends ViewDataBinding>> int bind(Function<Context, View> type, Consumer<View> components) {
+        return bindInternal(position -> true, context -> {
+            View component = type.apply(context);
+            components.accept(component);
+            return component;
+        });
+    }
+
+    private <View extends StatefulViewComponent<Data, ? extends ViewDataBinding>> int bindInternal(Predicate<Integer> positions, Function<Context, View> binding) {
+        return super.bind(position -> {
+            Entry entry = entries.get(position);
+            return entry.isData && positions.test(entry.dataIndex);
+        }, parent -> {
+            View component = binding.apply(parent.getContext());
+            return new ViewHolder(component) {
+                @Override
+                void bind(int position) {
+                    component.setState(entries.get(position).<Data>data());
                 }
             };
         });

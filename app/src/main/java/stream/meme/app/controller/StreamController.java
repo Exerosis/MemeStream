@@ -24,8 +24,6 @@ import stream.meme.app.util.bivsc.DatabindingBIVSCModule;
 import stream.meme.app.util.bivsc.Reducer;
 
 import static io.reactivex.Observable.just;
-import static stream.meme.app.controller.CommentsController.EXTRA_POST;
-import static stream.meme.app.util.ControllerActivity.EXTRA_CONTROLLER;
 import static stream.meme.app.util.Nothing.NONE;
 import static stream.meme.app.util.bivsc.Reducer.controller;
 
@@ -75,8 +73,6 @@ public class StreamController extends DatabindingBIVSCModule<StreamViewBinding, 
     public Observable<State> getController() {
         intents.PostReplyIntent.subscribe(ignored -> {
             Intent intent = new Intent(getActivity(), ControllerActivity.class);
-            intent.putExtra(EXTRA_CONTROLLER, CommentsController.class.getName());
-            intent.putExtra(EXTRA_POST, UUID.randomUUID().toString());
             getActivity().startActivity(intent);
         });
 

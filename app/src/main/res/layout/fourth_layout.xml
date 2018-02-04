@@ -3,12 +3,11 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:layout_height="match_parent">
 
-        <stream.meme.app.util.components.test.TestViewComponent
-            android:id="@+id/testView"
+        <TextView
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent"
+            android:text="test" />
     </LinearLayout>
 </layout>

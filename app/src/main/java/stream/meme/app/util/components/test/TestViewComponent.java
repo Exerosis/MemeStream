@@ -1,4 +1,4 @@
-package stream.meme.app.util.viewcomp.test;
+package stream.meme.app.util.components.test;
 
 import android.content.Context;
 import android.support.annotation.LayoutRes;
@@ -10,7 +10,7 @@ import com.jakewharton.rxbinding2.widget.RxTextView;
 import io.reactivex.Observable;
 import stream.meme.app.R;
 import stream.meme.app.databinding.TestLayoutBinding;
-import stream.meme.app.util.viewcomp.ViewComponent;
+import stream.meme.app.util.components.components.ViewComponent;
 
 public class TestViewComponent extends ViewComponent<TestLayoutBinding> {
     private final Observable<CharSequence> search;

@@ -1,4 +1,4 @@
-package stream.meme.app.util.viewcomp.test;
+package stream.meme.app.util.components.test;
 
 import android.content.Context;
 import android.content.ContextWrapper;
@@ -11,8 +11,8 @@ import java.util.Map;
 
 import io.reactivex.functions.Consumer3;
 import io.reactivex.functions.Function4;
-import stream.meme.app.util.viewcomp.TagInflater;
-import stream.meme.app.util.viewcomp.TagRegistry;
+import stream.meme.app.util.components.TagInflater;
+import stream.meme.app.util.components.TagRegistry;
 
 public class GlobalTagRegistry implements TagRegistry {
     private static GlobalTagRegistry instance;

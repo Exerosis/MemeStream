@@ -26,7 +26,7 @@
                 android:value="stream.meme.app.controller.StreamController" />
         </activity>
 
-        <activity android:name=".util.viewcomp.test.TestActivity">
+        <activity android:name=".util.components.test.TestActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

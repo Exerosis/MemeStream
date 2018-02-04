@@ -8,7 +8,7 @@ import android.support.v4.util.Pair;
 
 public class Functions {
 
-    public static RuntimeException runtime(Exception exception) {
+    public static RuntimeException runtime(Throwable exception) {
         if (exception instanceof RuntimeException)
             return (RuntimeException) exception;
         return new RuntimeException(exception);

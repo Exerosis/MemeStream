@@ -1,4 +1,4 @@
-package stream.meme.app.util.viewcomp;
+package stream.meme.app.util.components;
 
 import android.content.Context;
 import android.util.AttributeSet;
