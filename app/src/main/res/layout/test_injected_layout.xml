@@ -2,22 +2,16 @@
 <layout xmlns:android="http://schemas.android.com/apk/res/android">
 
     <LinearLayout
+        android:id="@+id/test_injected_linear_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <stream.meme.app.util.components.test.ThirdLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
-
         <TextView
+            android:id="@+id/test_injected_text_view"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Test Test test" />
-
-        <TextView
-            android:id="@+id/edit_text"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:text="Injected Text" />
     </LinearLayout>
+
 </layout>

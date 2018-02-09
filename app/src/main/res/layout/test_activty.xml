@@ -2,13 +2,27 @@
 <layout xmlns:android="http://schemas.android.com/apk/res/android">
 
     <LinearLayout
+        android:id="@+id/test_native_linear_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <stream.meme.app.util.components.test.TestViewComponent
-            android:id="@+id/testView"
+        <TextView
+            android:id="@+id/test_native_text_view"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="wrap_content"
+            android:text="Native Text" />
+
+        <stream.meme.app.util.components.superalpha.TestInjectedView
+            android:id="@+id/test_injected_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/test_pass_in_text_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Passed In Text" />
+        </stream.meme.app.util.components.superalpha.TestInjectedView>
     </LinearLayout>
 </layout>

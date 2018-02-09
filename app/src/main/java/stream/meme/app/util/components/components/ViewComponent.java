@@ -56,7 +56,7 @@ public class ViewComponent<ViewModel extends ViewDataBinding> extends ViewDelega
     @Override
     public void apply(Context context, ViewGroup parent, AttributeSet attributes) throws Exception {
         ViewModel viewModel = DataBindingUtil.inflate(from(context), inflate(attributes), parent, false);
-        setView(viewModel.getRoot());
+        resetView(viewModel.getRoot(), attributes);
         binding.onNext(viewModel);
     }
 }
