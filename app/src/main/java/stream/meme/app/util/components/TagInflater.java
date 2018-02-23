@@ -9,22 +9,46 @@ import android.view.InflateException;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 
 import org.xmlpull.v1.XmlPullParser;
 
-public class TagInflater extends LayoutInflater {
+import io.reactivex.functions.unsafe.TriFunction;
+
+import static android.view.View.NO_ID;
+
+public class TagInflater<Component extends View & TriFunction<Context, ViewGroup, AttributeSet, View>> extends LayoutInflater {
     private static final String[] CLASS_PREFIX_LIST = {"android.widget.", "android.webkit.", "android.app."};
-    private final TagRegistry registry;
+    private final TagRegistry<Component> registry;
     private Integer layout = null;
 
-    public TagInflater(LayoutInflater original, Context context, TagRegistry registry) {
+    public TagInflater(LayoutInflater original, Context context, TagRegistry<Component> registry) {
         super(original, context);
         this.registry = registry;
         setFactory2(new Factory2() {
             @Override
             public View onCreateView(View parent, String tag, Context context, AttributeSet attributes) {
+                //TODO override ID when custom attribute is present.
                 String id = "res:" + layout + "line:" + ((XmlResourceParser) attributes).getLineNumber();
-                return registry.inflate(tag, id, getContext(), (ViewGroup) parent, attributes);
+                Component component = registry.inflate(tag, id, getContext());
+                if (component != null) {
+                    View content = component.applyUnsafe(context, (ViewGroup) parent, attributes);
+                    component.setId(content.getId());
+                    content.setId(NO_ID);
+                    if (content instanceof ViewGroup) {
+                        ((ViewGroup) content).addView(component);
+                        return content;
+                    }
+                    if (parent == null) {
+                        parent = new FrameLayout(context);
+                        ((ViewGroup) parent).addView(content);
+                        ((ViewGroup) parent).addView(component);
+                        return parent;
+                    }
+                    ((ViewGroup) parent).addView(component);
+                    return content;
+                }
+                return null;
             }
 
             @Override
@@ -70,10 +94,10 @@ public class TagInflater extends LayoutInflater {
 
     @Override
     public LayoutInflater cloneInContext(Context context) {
-        return new TagInflater(this, context, registry);
+        return new TagInflater<>(this, context, registry);
     }
 
-    public static ContextWrapper inject(Context context, TagRegistry registry) {
+    public static <Component extends View & TriFunction<Context, ViewGroup, AttributeSet, View>> ContextWrapper inject(Context context, TagRegistry<Component> registry) {
         return new ContextWrapper(context) {
             private TagInflater inflater;
 
@@ -81,7 +105,7 @@ public class TagInflater extends LayoutInflater {
             public Object getSystemService(String name) {
                 if (LAYOUT_INFLATER_SERVICE.equals(name)) {
                     if (inflater == null)
-                        inflater = new TagInflater(from(getBaseContext()), context, registry);
+                        inflater = new TagInflater<>(from(getBaseContext()), context, registry);
                     return inflater;
                 }
                 return super.getSystemService(name);

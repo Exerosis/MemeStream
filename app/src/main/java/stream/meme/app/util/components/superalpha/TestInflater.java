@@ -80,13 +80,13 @@ public class TestInflater extends LayoutInflater {
                     TestInjectedLayoutBinding binding = TestInjectedLayoutBinding.bind(inflate);
                     //Sweet we got content that we want to inject into this tag, but we need to deal with the tags id before we return anything.
 
-                    View content = binding.getRoot();
+                    ViewGroup content = (ViewGroup) binding.getRoot();
                     //Now we can remove the ID from our injected content and prepare to return it.
                     injectedView.setId(attributeManifestation.getId());
                     content.setId(NO_ID);
 
                     //Now we can inject our completely undisplayed controller view into the parent without saying a word.
-                    parent.addView(injectedView);
+                    content.addView(injectedView);
 
                     return content;
                 }
