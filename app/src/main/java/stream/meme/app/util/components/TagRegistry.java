@@ -16,6 +16,8 @@ public interface TagRegistry<Component> {
     default void register(String tag, Function<Context, Component> inflater) {
         final Map<String, Component> components = new HashMap<>();
         getInflaters().put(tag, (id, context) -> {
+            if (context == null)
+                return components.remove(id);
             Component component = components.get(id);
             if (component == null) {
                 component = inflater.apply(context);
@@ -35,9 +37,12 @@ public interface TagRegistry<Component> {
         register(resolveRawArgument(Function.class, inflaters.getClass()).getName(), inflaters);
     }
 
+    default Component destroy(String tag, String id) {
+        return inflate(tag, id, null); //Not an overload, this is just how we clear views.s
+    }
+
     default Component inflate(String tag, String id, Context context) {
-        if (getInflaters().containsKey(tag))
-            return getInflaters().get(tag).applyUnsafe(id, context);
-        return null;
+        BiFunction<String, Context, Component> compressed = getInflaters().get(tag);
+        return compressed == null ? null : compressed.applyUnsafe(id, context);
     }
 }

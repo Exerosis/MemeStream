@@ -17,6 +17,7 @@ import io.reactivex.functions.unsafe.TriFunction;
 
 import static android.view.View.NO_ID;
 
+//FIXME figure out how to clear out views when activites get destroyed.
 public class TagInflater<Component extends View & TriFunction<Context, ViewGroup, AttributeSet, View>> extends LayoutInflater {
     private static final String[] CLASS_PREFIX_LIST = {"android.widget.", "android.webkit.", "android.app."};
     private final TagRegistry<Component> registry;
