@@ -2,6 +2,7 @@ package stream.meme.app.controller.alpha;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
+import android.support.v7.widget.LinearLayoutManager;
 
 import com.google.common.base.Optional;
 
@@ -10,8 +11,11 @@ import java.util.List;
 
 import io.reactivex.Observable;
 import io.reactivex.Single;
+import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Function;
+import stream.meme.app.R;
 import stream.meme.app.databinding.ListViewBinding;
+import stream.meme.app.util.ItemOffsetDecoration;
 import stream.meme.app.util.Nothing;
 import stream.meme.app.util.bivsc.Reducer;
 import stream.meme.app.util.components.adapters.ListAdapter;
@@ -29,7 +33,6 @@ import static stream.meme.app.util.Operators.ignored;
 
 public class ListView extends ViewComponent<ListViewBinding> {
     private final Observable<Nothing> refresh;
-    private StatefulViewComponent<? extends State, ?> parent;
 
     public ListView(@NonNull Context context) {
         super(context, list_view);
@@ -39,39 +42,44 @@ public class ListView extends ViewComponent<ListViewBinding> {
     }
 
     public <Data> AdapterAttachment<Data> attach(StatefulViewComponent<? extends State<Data>, ?> parent) {
-        this.parent = parent;
+        return attach(parent.getStates(), partial -> parent.applyPartial((Function) partial));
+    }
+
+    public <Data> AdapterAttachment<Data> attach(Observable<? extends State<Data>> state, Consumer<Function<State<Data>, State<Data>>> partials) {
         return new AdapterAttachment<Data>() {
 
             @Override
             public AdapterAttachment adapter(ListAdapter<Data> adapter) {
                 getViews().subscribe(view -> {
                     view.recyclerView.setAdapter(adapter);
+                    view.recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+                    view.recyclerView.addItemDecoration(new ItemOffsetDecoration(getContext(), R.dimen.item_offset));
 
                     //Show a progress bar when the view is loading.
-                    parent.getStates().map(State::loading)
+                    state.map(State::loading)
                             .distinctUntilChanged()
                             .subscribe(visibility(view.progressBar, INVISIBLE));
 
                     //Show a refreshing circle when the view is refreshing.
-                    parent.getStates().map(State::refreshing)
+                    state.map(State::refreshing)
                             .distinctUntilChanged()
                             .subscribe(refreshing(view.refreshLayout));
-
                 });
                 return this;
             }
 
             @Override
             public PaginationAttachment paginate(ListAdapter<Data> adapter) {
-                return new PaginationAttachment() {
+                adapter(adapter);
+                return new PaginationAttachment<Data>() {
                     private boolean vertical = true;
                     private boolean reversed = false;
 
                     @Override
-                    public Pagination loading(Single<Function<State, State>> loader) {
+                    public Pagination loading(Single<Function<State<Data>, State<Data>>> loader) {
                         Pagination pagination = new Pagination(getContext(), create(observer -> {
-                            parent.applyPartial(Partials.LoadMore());
-                            parent.applyPartial((Function) loader.blockingGet());
+                            partials.accept(Partials.LoadMore());
+                            partials.accept(loader.blockingGet());
                         }), vertical, reversed);
                         adapter.addBind(position -> position == adapter.size() - 1 && pagination.isLoading(), loading_view);
                         pagination.onLoad().subscribe(loading -> adapter.reinjectBindings());
@@ -167,16 +175,20 @@ public class ListView extends ViewComponent<ListViewBinding> {
         }
     }
 
-    public interface PaginationAttachment {
-        default Pagination loading(Observable<Function<State, State>> loader) {
+    public interface PaginationAttachment<Data> {
+        default Pagination loading(Observable<Function<State<Data>, State<Data>>> loader) {
             return loading(loader.single(Partials.Error(new IllegalStateException("A new state was not returned!"))));
         }
 
-        Pagination loading(Single<Function<State, State>> loader);
+        Pagination loading(Single<Function<State<Data>, State<Data>>> loader);
 
         PaginationAttachment horizontally();
 
         PaginationAttachment reversed();
+    }
+
+    public interface Attachment<Data> {
+
     }
 
     public interface AdapterAttachment<Data> {

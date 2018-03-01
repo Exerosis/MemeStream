@@ -6,8 +6,9 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <stream.meme.app.util.components.layertest.ViewTwo
+        <stream.meme.app.controller.alpha.posts.PostsView
+            android:id="@+id/comments"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="wrap_content" />
     </FrameLayout>
 </layout>

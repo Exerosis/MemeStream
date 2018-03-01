@@ -41,7 +41,6 @@ public class TestInflater extends LayoutInflater {
 
     private final LayoutInflater original;
     private Integer layout = null;
-    private AttributeSet lastAttributes = null;
 
     public TestInflater(LayoutInflater original, Context context) {
         super(original, context);
@@ -61,11 +60,6 @@ public class TestInflater extends LayoutInflater {
                 String tagID = "res:" + layout + "line:" + ((XmlResourceParser) attributes).getLineNumber();
                 //Here we should be totally free to use as much info as we want to do what's needed.
 
-                if (lastAttributes != null) {
-//                    attributes = lastAttributes;
-                    lastAttributes = null;
-                }
-
                 //This won't quite work if there isn't a parent of some kind... so either find a work around or just make that a req.
                 if (tag.equals(TestInjectedView.class.getName())) {
                     //Ok so this is the tag that triggers the inflater to inject custom content
@@ -73,7 +67,6 @@ public class TestInflater extends LayoutInflater {
 
                     View attributeManifestation = new View(context, attributes);
 
-                    lastAttributes = attributes;
                     //So first step is to get our injected binding prepared using a copy of this inflater.(Although the original would work too I think)
                     View inflate = inflate(R.layout.test_injected_layout, parent, false);
                     TestInjectedLayoutBinding binding = TestInjectedLayoutBinding.bind(inflate);
@@ -85,7 +78,7 @@ public class TestInflater extends LayoutInflater {
                     content.setId(NO_ID);
 
                     //Now we can inject our completely undisplayed controller view into the parent without saying a word.
-                    content.addView(injectedView);
+                    parent.addView(injectedView);
 
                     return content;
                 }

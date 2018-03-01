@@ -15,7 +15,7 @@ import org.xmlpull.v1.XmlPullParser;
 
 import io.reactivex.functions.unsafe.TriFunction;
 
-import static android.view.View.NO_ID;
+import static android.view.View.*;
 
 //FIXME figure out how to clear out views when activites get destroyed.
 public class TagInflater<Component extends View & TriFunction<Context, ViewGroup, AttributeSet, View>> extends LayoutInflater {
@@ -33,9 +33,17 @@ public class TagInflater<Component extends View & TriFunction<Context, ViewGroup
                 String id = "res:" + layout + "line:" + ((XmlResourceParser) attributes).getLineNumber();
                 Component component = registry.inflate(tag, id, getContext());
                 if (component != null) {
+                    int idManifestation = new View(context, attributes).getId();
                     View content = component.applyUnsafe(context, (ViewGroup) parent, attributes);
-                    component.setId(content.getId());
-                    content.setId(NO_ID);
+
+                    //--Id--
+                    component.setId(idManifestation);
+                    if (idManifestation != NO_ID) {
+                        if (parent == null)
+                            throw new IllegalStateException("ViewComponents must have parents to have an id.");
+                        ((ViewGroup) parent).addView(component);
+                        return content;
+                    }
                     if (content instanceof ViewGroup) {
                         ((ViewGroup) content).addView(component);
                         return content;
@@ -46,8 +54,6 @@ public class TagInflater<Component extends View & TriFunction<Context, ViewGroup
                         ((ViewGroup) parent).addView(component);
                         return parent;
                     }
-                    ((ViewGroup) parent).addView(component);
-                    return content;
                 }
                 return null;
             }

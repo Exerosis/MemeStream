@@ -27,9 +27,9 @@ import static io.reactivex.schedulers.Schedulers.computation;
 import static io.reactivex.subjects.PublishSubject.create;
 
 public class ListAdapter<Data> extends Adapter {
-    public static final Boolean NOTHING = false;
-    public static final Boolean ITEM = true;
-    public static final Boolean CONTENT = null;
+    public static final Boolean NOTHING = null;
+    public static final Boolean ITEM = false;
+    public static final Boolean CONTENT = true;
 
     private List<Entry> entries = new ArrayList<>();
     private Function<Integer, Integer> fixedTypes = position -> DEFAULT_TYPE;
@@ -92,7 +92,7 @@ public class ListAdapter<Data> extends Adapter {
                                 Entry second = newEntries.get(newItem);
                                 if (!first.isData)
                                     return true;
-                                return relation.applyUnsafe(first.data(), second.data()) == CONTENT;
+                                return relation.applyUnsafe(first.data(), second.data());
                             }
                         });
                     } finally {
@@ -189,7 +189,7 @@ public class ListAdapter<Data> extends Adapter {
             return entry.isData && positions.test(entry.dataIndex);
         }, parent -> {
             View component = binding.apply(parent.getContext());
-            return new ViewHolder(component) {
+            return new ViewHolder(component.applyUnsafe(parent.getContext(), parent, null)) {
                 @Override
                 void bind(int position) {
                     component.setState(entries.get(position).<Data>data());

@@ -14,7 +14,5 @@ import stream.meme.app.util.components.components.ViewComponent;
 public class ViewOne extends ViewComponent<ViewOneBinding> {
     public ViewOne(@NonNull Context context) {
         super(context, R.layout.view_one);
-        getComponents(components -> {
-        });
     }
 }

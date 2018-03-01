@@ -1,20 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <LinearLayout
-        android:id="@+id/test_native_linear_layout"
+    <stream.meme.app.util.components.layertest.ViewOne
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
-
-        <TextView
-            android:id="@+id/test_native_text_view"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Native Text" />
-
-        <stream.meme.app.util.components.layertest.ViewOne
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-    </LinearLayout>
+        android:layout_height="match_parent" />
 </layout>

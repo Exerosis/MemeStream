@@ -5,6 +5,8 @@ import android.databinding.ViewDataBinding;
 import android.support.annotation.NonNull;
 
 import io.reactivex.Observable;
+import io.reactivex.ObservableSource;
+import io.reactivex.functions.BiFunction;
 import io.reactivex.functions.Function;
 import io.reactivex.subjects.BehaviorSubject;
 
@@ -28,6 +30,14 @@ public class StatefulViewComponent<State, ViewModel extends ViewDataBinding> ext
         } catch (Exception e) {
             throw runtime(e);
         }
+    }
+
+    public <Return> Observable<Return> viewSwitchMap(Function<ViewModel, ObservableSource<Return>> mapper) {
+        return getViews().switchMap(mapper);
+    }
+
+    public <Return> Observable<Return> viewStateSwitchMap(BiFunction<ViewModel, State, ObservableSource<Return>> mapper) {
+        return getViews().flatMap(view -> getStates().switchMap(state -> mapper.apply(view, state)));
     }
 
     public void setState(State state) {

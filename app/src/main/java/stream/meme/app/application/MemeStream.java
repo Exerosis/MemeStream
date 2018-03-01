@@ -14,8 +14,6 @@ import java.util.Map;
 import java.util.UUID;
 
 import io.reactivex.Observable;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.schedulers.Schedulers;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
@@ -28,6 +26,8 @@ import stream.meme.app.application.login.TwitterProvider;
 import static com.google.gson.FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES;
 import static com.squareup.picasso.Picasso.with;
 import static io.reactivex.Observable.empty;
+import static io.reactivex.android.schedulers.AndroidSchedulers.mainThread;
+import static io.reactivex.schedulers.Schedulers.io;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
@@ -36,7 +36,7 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import static stream.meme.app.application.Comment.ERROR;
 import static stream.meme.app.application.Comment.SENDING;
 import static stream.meme.app.application.Comment.SUCCESS;
-import static stream.meme.app.application.Post.*;
+import static stream.meme.app.application.Post.NO_VOTE;
 import static stream.meme.app.application.login.ProviderType.FACEBOOK;
 import static stream.meme.app.application.login.ProviderType.GOOGLE;
 import static stream.meme.app.application.login.ProviderType.TWITTER;
@@ -106,7 +106,7 @@ public class MemeStream extends Application {
                         "page " + 0,
                         "https://i.vimeocdn.com/portrait/58832_300x300",
                         with(this).load("https://i.vimeocdn.com/portrait/58832_300x300").get(),
-                        NO_VOTE)));
+                        NO_VOTE))).subscribeOn(io()).observeOn(mainThread());
 
         prefs = getSharedPreferences(getPackageName() + "authentication", MODE_PRIVATE);
 
@@ -154,7 +154,7 @@ public class MemeStream extends Application {
                 "exerosis@gmail.com",
                 randomUUID(),
                 FACEBOOK,
-                TWITTER)).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread());
+                TWITTER)).subscribeOn(io()).observeOn(mainThread());
     }
 
 
@@ -165,10 +165,9 @@ public class MemeStream extends Application {
     }
 
     public Observable<List<Comment>> addComment(UUID post, String comment) {
-        return Observable.<List<Comment>>empty()
-                .onErrorResumeNext(newComment(comment, ERROR))
-                .mergeWith(newComment(comment, SENDING))
-                .mergeWith(newComment(comment, current().nextBoolean() ? ERROR : SUCCESS).delay(1, SECONDS));
+        return newComment(comment, current().nextBoolean() ? ERROR : SUCCESS).delay(1, SECONDS)
+                .startWith(newComment(comment, SENDING));
+/*                .onErrorResumeNext(newComment(comment, ERROR));*/
     }
 
     private Observable<List<Comment>> newComment(String comment, Boolean status) {

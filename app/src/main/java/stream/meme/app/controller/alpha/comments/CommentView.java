@@ -34,6 +34,7 @@ public class CommentView extends StatefulViewComponent<Comment, CommentViewBindi
                 view.content.setText(state.getContent());
                 view.date.setText(state.getDate());
             });
+
             getStates().map(Comment::getStatus)
                     .compose(ifPresent())
                     .distinctUntilChanged()

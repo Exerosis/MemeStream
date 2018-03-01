@@ -6,17 +6,14 @@ import android.text.Editable;
 
 import com.google.common.base.Optional;
 
-import java.util.List;
-
-import io.reactivex.Observable;
 import stream.meme.app.R;
 import stream.meme.app.application.Comment;
 import stream.meme.app.application.MemeStream;
 import stream.meme.app.controller.alpha.ListView;
 import stream.meme.app.databinding.CommentsViewBinding;
 import stream.meme.app.util.bivsc.Reducer;
-import stream.meme.app.util.components.components.StatefulViewComponent;
 import stream.meme.app.util.components.adapters.ListAdapter;
+import stream.meme.app.util.components.components.StatefulViewComponent;
 
 import static com.jakewharton.rxbinding2.view.RxView.clicks;
 import static com.jakewharton.rxbinding2.view.RxView.enabled;
@@ -24,25 +21,25 @@ import static com.jakewharton.rxbinding2.widget.RxTextView.textChanges;
 import static java.util.UUID.randomUUID;
 import static stream.meme.app.util.Operators.always;
 import static stream.meme.app.util.Operators.ifPresent;
-import static stream.meme.app.util.components.adapters.ListAdapter.CONTENT;
+import static stream.meme.app.util.components.adapters.ListAdapter.NOTHING;
 
 public class CommentsView extends StatefulViewComponent<CommentsView.State, CommentsViewBinding> {
     private static final int MIN_LENGTH = 10;
-    private final MemeStream memeSteam;
 
     public CommentsView(@NonNull Context context) {
         super(context, R.layout.comments_view);
-        memeSteam = (MemeStream) context.getApplicationContext();
+        final MemeStream memeSteam = (MemeStream) context.getApplicationContext();
+
+        setState(new State()); //Geez don't forget this, it takes a while to debug.
 
         //Feed the data to the list adapter.
-        Observable<List<Comment>> data = getStates()
-                .map(State::data)
-                .distinctUntilChanged();
-        final ListAdapter<Comment> adapter = new ListAdapter<>(data, (first, second) ->
-                !first.getStatus().equals(second.getStatus()) ? first.equals(second) : CONTENT
-        );
+        final ListAdapter<Comment> adapter = new ListAdapter<>(getStates()
+                .map(State::data), (first, second) -> {
+            if (!first.equals(second))
+                return NOTHING;
+            return first.getStatus().equals(second.getStatus());
+        });
 
-/*
 
         //Attach the adapter to the list view component.
         getComponents(components -> {
@@ -55,13 +52,12 @@ public class CommentsView extends StatefulViewComponent<CommentsView.State, Comm
                     ).map(Partials::Reply)
                     .subscribe(this::applyPartial);
         });
-*/
 
 
         //Add a comment whenever send is clicked
         getViews().switchMap(view -> clicks(view.send)
                 .compose(always(view.reply::getText))
-                .doOnNext(Editable::clear)
+                .doAfterNext(Editable::clear)
                 .map(Editable::toString))
                 .flatMap(comment -> memeSteam.addComment(randomUUID(), comment))
                 .map(ListView.Partials::<Comment, State>Loaded)
@@ -104,6 +100,4 @@ public class CommentsView extends StatefulViewComponent<CommentsView.State, Comm
             return Optional.fromNullable(reply);
         }
     }
-
-
 }
