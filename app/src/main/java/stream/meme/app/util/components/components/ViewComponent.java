@@ -6,19 +6,19 @@ import android.databinding.ViewDataBinding;
 import android.support.annotation.LayoutRes;
 import android.support.annotation.NonNull;
 import android.util.AttributeSet;
+import android.view.View;
 import android.view.ViewGroup;
 
 import io.reactivex.Observable;
 import io.reactivex.functions.Consumer;
-import io.reactivex.functions.Consumer3;
+import io.reactivex.functions.unsafe.TriFunction;
 import io.reactivex.subjects.BehaviorSubject;
-import stream.meme.app.util.components.ViewDelegate;
 
 import static android.view.LayoutInflater.from;
 import static stream.meme.app.util.Functions.runtime;
 
 
-public class ViewComponent<ViewModel extends ViewDataBinding> extends ViewDelegate implements Consumer3<Context, ViewGroup, AttributeSet> {
+public class ViewComponent<ViewModel extends ViewDataBinding> extends View implements TriFunction<Context, ViewGroup, AttributeSet, View> {
     private final BehaviorSubject<ViewModel> binding = BehaviorSubject.create();
     private final int layout;
 
@@ -54,9 +54,9 @@ public class ViewComponent<ViewModel extends ViewDataBinding> extends ViewDelega
     }
 
     @Override
-    public void apply(Context context, ViewGroup parent, AttributeSet attributes) throws Exception {
+    public View apply(Context context, ViewGroup parent, AttributeSet attributes) throws Exception {
         ViewModel viewModel = DataBindingUtil.inflate(from(context), inflate(attributes), parent, false);
-        resetView(viewModel.getRoot(), attributes);
         binding.onNext(viewModel);
+        return viewModel.getRoot();
     }
 }

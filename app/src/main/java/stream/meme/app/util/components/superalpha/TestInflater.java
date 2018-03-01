@@ -61,7 +61,6 @@ public class TestInflater extends LayoutInflater {
                 String tagID = "res:" + layout + "line:" + ((XmlResourceParser) attributes).getLineNumber();
                 //Here we should be totally free to use as much info as we want to do what's needed.
 
-
                 if (lastAttributes != null) {
 //                    attributes = lastAttributes;
                     lastAttributes = null;

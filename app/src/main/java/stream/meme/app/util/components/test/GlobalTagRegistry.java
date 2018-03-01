@@ -2,18 +2,16 @@ package stream.meme.app.util.components.test;
 
 import android.content.Context;
 import android.content.ContextWrapper;
-import android.util.AttributeSet;
-import android.view.View;
-import android.view.ViewGroup;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import io.reactivex.functions.Function4;
+import io.reactivex.functions.unsafe.BiFunction;
 import stream.meme.app.util.components.TagInflater;
 import stream.meme.app.util.components.TagRegistry;
+import stream.meme.app.util.components.components.ViewComponent;
 
-public class GlobalTagRegistry implements TagRegistry {
+public class GlobalTagRegistry implements TagRegistry<ViewComponent<?>> {
     private static GlobalTagRegistry instance;
 
     public static GlobalTagRegistry getInstance() {
@@ -26,14 +24,14 @@ public class GlobalTagRegistry implements TagRegistry {
         return TagInflater.inject(context, getInstance());
     }
 
-    private final Map<String, Function4<String, Context, ViewGroup, AttributeSet, View>> inflaters = new HashMap<>();
+    private final Map<String, BiFunction<String, Context, ViewComponent<?>>> inflaters = new HashMap<>();
 
     private GlobalTagRegistry() {
 
     }
 
     @Override
-    public Map<String, Function4<String, Context, ViewGroup, AttributeSet, View>> getInflaters() {
+    public Map<String, BiFunction<String, Context, ViewComponent<?>>> getInflaters() {
         return inflaters;
     }
 }
