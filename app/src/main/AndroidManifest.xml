@@ -26,12 +26,16 @@
                 android:value="stream.meme.app.controller.StreamController" />
         </activity>
 
-        <activity android:name=".util.components.test.TestActivity">
+        <activity android:name=".controller.alpha.app.PostsActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity android:name=".controller.alpha.app.CommentsActivity" />
+        
+        <activity android:name=".util.components.test.TestActivity" />
     </application>
 
 </manifest>

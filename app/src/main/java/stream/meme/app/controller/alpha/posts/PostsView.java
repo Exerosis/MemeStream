@@ -3,6 +3,7 @@ package stream.meme.app.controller.alpha.posts;
 import android.content.Context;
 import android.support.annotation.NonNull;
 
+import io.reactivex.Observable;
 import stream.meme.app.R;
 import stream.meme.app.application.MemeStream;
 import stream.meme.app.application.Post;
@@ -12,9 +13,11 @@ import stream.meme.app.util.components.adapters.ListAdapter;
 import stream.meme.app.util.components.components.StatefulViewComponent;
 
 import static io.reactivex.android.schedulers.AndroidSchedulers.mainThread;
+import static stream.meme.app.util.Operators.always;
 import static stream.meme.app.util.components.adapters.ListAdapter.NOTHING;
 
 public class PostsView extends StatefulViewComponent<PostsView.State, PostsListBinding> {
+    private final Observable<Post> clicked;
 
     public PostsView(@NonNull Context context) {
         super(context, R.layout.posts_list);
@@ -31,12 +34,20 @@ public class PostsView extends StatefulViewComponent<PostsView.State, PostsListB
             return first.getRating().equals(second.getRating());
         });
 
+        clicked = adapter.bind(PostView::new).flatMap(post ->
+                post.onClicked().compose(always(post::getState))
+        );
+
         getComponents(components -> {
             components.posts.attach(this)
                     .paginate(adapter)
                     .loading(memeStream.loadPosts().map(ListView.Partials::Loaded));
-            adapter.bind(PostView::new);
         });
+    }
+
+
+    public Observable<Post> onClick() {
+        return clicked;
     }
 
 

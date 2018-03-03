@@ -48,8 +48,8 @@ public class StreamContainerController extends DatabindingBIVSCModule<StreamCont
 
     public StreamContainerController() {
         super(R.layout.stream_container_view);
-        streams.put(R.id.navigation_home, StreamController::new);
-        streams.put(R.id.navigation_top, StreamController::new);
+//        streams.put(R.id.navigation_home, StreamController::new);
+//        streams.put(R.id.navigation_top, StreamController::new);
     }
 
     @Override

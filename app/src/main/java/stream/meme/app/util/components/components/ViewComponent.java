@@ -37,6 +37,7 @@ public class ViewComponent<ViewModel extends ViewDataBinding> extends View imple
 
     public void getComponents(Consumer<ViewModel> components) {
         try {
+            //TODO don't think this if is needed
             if (binding.hasValue())
                 components.accept(binding.getValue());
             else

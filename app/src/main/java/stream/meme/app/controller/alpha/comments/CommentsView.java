@@ -6,6 +6,8 @@ import android.text.Editable;
 
 import com.google.common.base.Optional;
 
+import java.util.UUID;
+
 import stream.meme.app.R;
 import stream.meme.app.application.Comment;
 import stream.meme.app.application.MemeStream;
@@ -18,13 +20,14 @@ import stream.meme.app.util.components.components.StatefulViewComponent;
 import static com.jakewharton.rxbinding2.view.RxView.clicks;
 import static com.jakewharton.rxbinding2.view.RxView.enabled;
 import static com.jakewharton.rxbinding2.widget.RxTextView.textChanges;
-import static java.util.UUID.randomUUID;
 import static stream.meme.app.util.Operators.always;
 import static stream.meme.app.util.Operators.ifPresent;
 import static stream.meme.app.util.components.adapters.ListAdapter.NOTHING;
 
 public class CommentsView extends StatefulViewComponent<CommentsView.State, CommentsViewBinding> {
     private static final int MIN_LENGTH = 10;
+    //Replace with observable in some way?
+    private UUID post;
 
     public CommentsView(@NonNull Context context) {
         super(context, R.layout.comments_view);
@@ -59,7 +62,7 @@ public class CommentsView extends StatefulViewComponent<CommentsView.State, Comm
                 .compose(always(view.reply::getText))
                 .doAfterNext(Editable::clear)
                 .map(Editable::toString))
-                .flatMap(comment -> memeSteam.addComment(randomUUID(), comment))
+                .flatMap(comment -> memeSteam.addComment(post, comment))
                 .map(ListView.Partials::<Comment, State>Loaded)
                 .subscribe(this::applyPartial);
 
@@ -81,6 +84,10 @@ public class CommentsView extends StatefulViewComponent<CommentsView.State, Comm
                         view.reply.requestFocus();
                     });
         });
+    }
+
+    public void setPost(UUID post) {
+        this.post = post;
     }
 
 

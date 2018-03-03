@@ -1,5 +1,6 @@
 package stream.meme.app.util.components;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.res.XmlResourceParser;
@@ -13,18 +14,43 @@ import android.widget.FrameLayout;
 
 import org.xmlpull.v1.XmlPullParser;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+
 import io.reactivex.functions.unsafe.TriFunction;
 
 import static android.view.View.*;
+import static stream.meme.app.util.Functions.runtime;
 
 //FIXME figure out how to clear out views when activites get destroyed.
+@SuppressLint("PrivateApi")
 public class TagInflater<Component extends View & TriFunction<Context, ViewGroup, AttributeSet, View>> extends LayoutInflater {
-    private static final String[] CLASS_PREFIX_LIST = {"android.widget.", "android.webkit.", "android.app."};
+    private static final Field PARENT;
+    private static final Method CREATE_VIEW_FROM_TAG;
+
+    static {
+        try {
+            PARENT = View.class.getDeclaredField("mParent");
+            PARENT.setAccessible(true);
+            CREATE_VIEW_FROM_TAG = LayoutInflater.class.getDeclaredMethod(
+                    "createViewFromTag", View.class,
+                    String.class, Context.class,
+                    AttributeSet.class, boolean.class
+            );
+            CREATE_VIEW_FROM_TAG.setAccessible(true);
+        } catch (Exception e) {
+            throw runtime(e);
+        }
+    }
+
     private final TagRegistry<Component> registry;
+    private final LayoutInflater original;
     private Integer layout = null;
 
     public TagInflater(LayoutInflater original, Context context, TagRegistry<Component> registry) {
         super(original, context);
+        this.original = original;
         this.registry = registry;
         setFactory2(new Factory2() {
             @Override
@@ -33,6 +59,11 @@ public class TagInflater<Component extends View & TriFunction<Context, ViewGroup
                 String id = "res:" + layout + "line:" + ((XmlResourceParser) attributes).getLineNumber();
                 Component component = registry.inflate(tag, id, getContext());
                 if (component != null) {
+                    try {
+                        PARENT.set(component, null);
+                    } catch (IllegalAccessException e) {
+                        throw runtime(e);
+                    }
                     int idManifestation = new View(context, attributes).getId();
                     View content = component.applyUnsafe(context, (ViewGroup) parent, attributes);
 
@@ -55,7 +86,15 @@ public class TagInflater<Component extends View & TriFunction<Context, ViewGroup
                         return parent;
                     }
                 }
-                return null;
+
+
+                //If not we return null and it falls back on the the outer classes onCreateView method.
+                //If and only if it can't directly create an instance of the tag.(Stupid Android)
+                try {
+                    return (View) CREATE_VIEW_FROM_TAG.invoke(original, parent, tag, context, attributes, false);
+                } catch (IllegalAccessException | InvocationTargetException e) {
+                    throw new RuntimeException(e);
+                }
             }
 
             @Override
@@ -63,21 +102,6 @@ public class TagInflater<Component extends View & TriFunction<Context, ViewGroup
                 return null;
             }
         });
-    }
-
-    @Override
-    protected View onCreateView(View parent, String tag, AttributeSet attributes) throws ClassNotFoundException {
-        //Copied from Android PhoneLayoutInflater for inflating normal Android views.
-        for (String prefix : CLASS_PREFIX_LIST) {
-            try {
-                View view = createView(tag, prefix, attributes);
-                if (view != null)
-                    return view;
-            } catch (ClassNotFoundException ignored) {
-
-            }
-        }
-        return super.onCreateView(parent, tag, attributes);
     }
 
     @Override
@@ -101,7 +125,7 @@ public class TagInflater<Component extends View & TriFunction<Context, ViewGroup
 
     @Override
     public LayoutInflater cloneInContext(Context context) {
-        return new TagInflater<>(this, context, registry);
+        return new TagInflater<>(original, context, registry);
     }
 
     public static <Component extends View & TriFunction<Context, ViewGroup, AttributeSet, View>> ContextWrapper inject(Context context, TagRegistry<Component> registry) {

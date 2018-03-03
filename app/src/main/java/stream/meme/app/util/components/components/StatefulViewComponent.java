@@ -32,6 +32,10 @@ public class StatefulViewComponent<State, ViewModel extends ViewDataBinding> ext
         }
     }
 
+    public <Return> Observable<Return> componentSwitchMap(Function<ViewModel, ObservableSource<Return>> mapper) {
+        return getViews().firstElement().flatMapObservable(mapper::apply);
+    }
+
     public <Return> Observable<Return> viewSwitchMap(Function<ViewModel, ObservableSource<Return>> mapper) {
         return getViews().switchMap(mapper);
     }

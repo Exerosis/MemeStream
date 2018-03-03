@@ -1,39 +1,13 @@
 package stream.meme.app.controller;
 
-import android.content.Context;
-import android.content.Intent;
-import android.support.annotation.NonNull;
-import android.support.v4.util.Pair;
-
-import com.google.common.collect.Lists;
-
-import java.util.LinkedList;
-import java.util.List;
-import java.util.UUID;
-
-import io.reactivex.Observable;
-import io.reactivex.functions.BiConsumer;
-import stream.meme.app.R;
-import stream.meme.app.application.MemeStream;
-import stream.meme.app.application.Post;
-import stream.meme.app.controller.view.PostListView;
-import stream.meme.app.databinding.StreamViewBinding;
-import stream.meme.app.util.ControllerActivity;
-import stream.meme.app.util.Nothing;
-import stream.meme.app.util.bivsc.DatabindingBIVSCModule;
-import stream.meme.app.util.bivsc.Reducer;
-
-import static io.reactivex.Observable.just;
-import static stream.meme.app.util.Nothing.NONE;
-import static stream.meme.app.util.bivsc.Reducer.controller;
-
+/*
 public class StreamController extends DatabindingBIVSCModule<StreamViewBinding, StreamController.State> {
     private final Intents intents = new Intents();
     private MemeStream memeStream;
     private UUID last;
 
     public StreamController() {
-        super(R.layout.stream_view);
+        super(R.layout.posts_activity);
     }
 
     @Override
@@ -220,5 +194,4 @@ public class StreamController extends DatabindingBIVSCModule<StreamViewBinding, 
                 return state;
             };
         }
-    }
-}
+    }*/

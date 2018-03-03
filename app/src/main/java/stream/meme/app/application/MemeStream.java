@@ -7,7 +7,6 @@ import android.content.SharedPreferences;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -51,10 +50,6 @@ public class MemeStream extends Application {
     private Map<ProviderType, Provider> providers;
     private SharedPreferences prefs;
     private Service service;
-
-    public MemeStream() throws IOException {
-
-    }
 
     @Override
     public void onCreate() {
