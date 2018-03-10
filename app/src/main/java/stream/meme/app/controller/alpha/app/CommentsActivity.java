@@ -7,7 +7,7 @@ import stream.meme.app.databinding.CommentsActivtyBinding;
 import stream.meme.app.util.components.components.ComponentActivity;
 import stream.meme.app.util.components.test.GlobalTagRegistry;
 
-import static stream.meme.app.controller.alpha.app.PostsActivity.EXTRA_POST;
+import static stream.meme.app.controller.alpha.main.MainView.EXTRA_POST;
 
 public class CommentsActivity extends ComponentActivity<CommentsActivtyBinding> {
 

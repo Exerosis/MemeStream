@@ -8,7 +8,7 @@ import stream.meme.app.R;
 import stream.meme.app.application.MemeStream;
 import stream.meme.app.application.Post;
 import stream.meme.app.controller.alpha.ListView;
-import stream.meme.app.databinding.PostsListBinding;
+import stream.meme.app.databinding.PostsViewBinding;
 import stream.meme.app.util.components.adapters.ListAdapter;
 import stream.meme.app.util.components.components.StatefulViewComponent;
 
@@ -16,11 +16,11 @@ import static io.reactivex.android.schedulers.AndroidSchedulers.mainThread;
 import static stream.meme.app.util.Operators.always;
 import static stream.meme.app.util.components.adapters.ListAdapter.NOTHING;
 
-public class PostsView extends StatefulViewComponent<PostsView.State, PostsListBinding> {
+public class PostsView extends StatefulViewComponent<PostsView.State, PostsViewBinding> {
     private final Observable<Post> clicked;
 
     public PostsView(@NonNull Context context) {
-        super(context, R.layout.posts_list);
+        super(context, R.layout.posts_view);
         final MemeStream memeStream = (MemeStream) getContext().getApplicationContext();
 
         setState(new State());

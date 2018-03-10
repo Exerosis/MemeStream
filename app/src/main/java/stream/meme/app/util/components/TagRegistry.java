@@ -27,7 +27,6 @@ public interface TagRegistry<Component> {
         });
     }
 
-    @SuppressWarnings("unchecked")
     default void register(Class<? extends Component>... types) {
         for (Class<? extends Component> type : types)
             register(type.getName(), context -> type.getConstructor(Context.class).newInstance(context));

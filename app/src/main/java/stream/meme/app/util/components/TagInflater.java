@@ -5,22 +5,24 @@ import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.res.XmlResourceParser;
 import android.support.annotation.Nullable;
+import android.support.v4.util.Pair;
 import android.util.AttributeSet;
 import android.view.InflateException;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.FrameLayout;
 
 import org.xmlpull.v1.XmlPullParser;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Stack;
 
 import io.reactivex.functions.unsafe.TriFunction;
 
-import static android.view.View.*;
 import static stream.meme.app.util.Functions.runtime;
 
 //FIXME figure out how to clear out views when activites get destroyed.
@@ -45,8 +47,52 @@ public class TagInflater<Component extends View & TriFunction<Context, ViewGroup
     }
 
     private final TagRegistry<Component> registry;
+    private final Stack<Pair<ViewGroup, List<View>>> children = new Stack<>();
     private final LayoutInflater original;
     private Integer layout = null;
+    private ComponentRoot root;
+
+
+    class ComponentInflater {
+        ComponentInflater(LayoutInflater original) {
+
+        }
+    }
+
+    static class ComponentRoot extends ViewGroup {
+        static final int TAG_COMPONENT = 1999;
+        static final Object TAG = 1;
+
+        public ComponentRoot(Context context, AttributeSet attrs) {
+            super(context, attrs);
+        }
+
+        @Override
+        protected void onLayout(boolean changed, int l, int t, int r, int b) {
+            if (changed)
+                for (int i = 0; i < getChildCount(); i++) {
+                    View child = getChildAt(i);
+                    if (child.getTag(TAG_COMPONENT) == TAG)
+                        child.layout(l, t, r, b);
+                }
+        }
+
+        @Override
+        protected void onDetachedFromWindow() {
+            removeAllViews();
+            super.onDetachedFromWindow();
+        }
+
+        public void addComponent(View component) {
+            try {
+                PARENT.set(component, null);
+            } catch (IllegalAccessException e) {
+                throw runtime(e);
+            }
+            component.setTag(TAG_COMPONENT, TAG);
+            addViewInLayout(component, -1, generateDefaultLayoutParams(), true);
+        }
+    }
 
     public TagInflater(LayoutInflater original, Context context, TagRegistry<Component> registry) {
         super(original, context);
@@ -55,46 +101,67 @@ public class TagInflater<Component extends View & TriFunction<Context, ViewGroup
         setFactory2(new Factory2() {
             @Override
             public View onCreateView(View parent, String tag, Context context, AttributeSet attributes) {
+                if (tag.equals("component"))
+                    return root = new ComponentRoot(context, attributes);
+
+                if (tag.equals("children"))
+                    return new ViewGroup(context, attributes) {
+                        {
+                            Pair<ViewGroup, List<View>> pair = TagInflater.this.children.pop();
+                            for (View child : pair.second) {
+                                pair.first.removeView(child);
+                                addView(child);
+                            }
+                        }
+
+                        @Override
+                        protected void onLayout(boolean changed, int l, int t, int r, int b) {
+                            if (changed)
+                                for (int i = 0; i < getChildCount(); i++) {
+                                    View child = getChildAt(i);
+                                    child.layout(l, t, r, b);
+                                }
+                        }
+                    };
+
                 //TODO override ID when custom attribute is present.
                 String id = "res:" + layout + "line:" + ((XmlResourceParser) attributes).getLineNumber();
+
+                View content;
+
                 Component component = registry.inflate(tag, id, getContext());
                 if (component != null) {
-                    try {
-                        PARENT.set(component, null);
-                    } catch (IllegalAccessException e) {
-                        throw runtime(e);
-                    }
-                    int idManifestation = new View(context, attributes).getId();
-                    View content = component.applyUnsafe(context, (ViewGroup) parent, attributes);
+                    if (root == null)
+                        throw new IllegalStateException("Components must be used within a <component /> tag.");
 
-                    //--Id--
+                    //Manifest an ID from the current attribute set and assign it to the component.
+                    int idManifestation = new View(context, attributes).getId();
                     component.setId(idManifestation);
-                    if (idManifestation != NO_ID) {
-                        if (parent == null)
-                            throw new IllegalStateException("ViewComponents must have parents to have an id.");
-                        ((ViewGroup) parent).addView(component);
-                        return content;
-                    }
-                    if (content instanceof ViewGroup) {
-                        ((ViewGroup) content).addView(component);
-                        return content;
-                    }
-                    if (parent == null) {
-                        parent = new FrameLayout(context);
-                        ((ViewGroup) parent).addView(content);
-                        ((ViewGroup) parent).addView(component);
-                        return parent;
-                    }
+
+                    //Add the component to the component root.
+                    root.addComponent(component);
+
+
+                    //Inflate the components content.
+                    content = component.applyUnsafe(context, (ViewGroup) parent, attributes);
+
+                    //Create an empty list to hold children until we find a place for them.
+                    children.push(new Pair<>((ViewGroup) content, new ArrayList<>()));
                 }
 
 
                 //If not we return null and it falls back on the the outer classes onCreateView method.
                 //If and only if it can't directly create an instance of the tag.(Stupid Android)
                 try {
-                    return (View) CREATE_VIEW_FROM_TAG.invoke(original, parent, tag, context, attributes, false);
+                    content = (View) CREATE_VIEW_FROM_TAG.invoke(original, parent, tag, context, attributes, false);
                 } catch (IllegalAccessException | InvocationTargetException e) {
                     throw new RuntimeException(e);
                 }
+
+                if (children.peek().first == parent)
+                    children.peek().second.add(content);
+
+                return content;
             }
 
             @Override
@@ -107,12 +174,14 @@ public class TagInflater<Component extends View & TriFunction<Context, ViewGroup
     @Override
     public View inflate(int resource, @Nullable ViewGroup root, boolean attachToRoot) {
         try {
-            this.layout = resource;
+            layout = resource;
             return super.inflate(resource, root, attachToRoot);
         } catch (InflateException e) {
             throw new InflateException("Did you register your component?", e);
         } finally {
-            this.layout = null;
+            root = null;
+            layout = null;
+            children.clear();
         }
     }
 

@@ -31,6 +31,12 @@ public class GlobalTagRegistry implements TagRegistry<ViewComponent<?>> {
     }
 
     @Override
+    @SafeVarargs
+    public final void register(Class<? extends ViewComponent<?>>... types) {
+        TagRegistry.super.register(types);
+    }
+
+    @Override
     public Map<String, BiFunction<String, Context, ViewComponent<?>>> getInflaters() {
         return inflaters;
     }
