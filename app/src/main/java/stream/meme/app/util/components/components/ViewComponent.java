@@ -55,7 +55,7 @@ public class ViewComponent<ViewModel extends ViewDataBinding> extends View imple
     }
 
     @Override
-    public View apply(Context context, ViewGroup parent, AttributeSet attributes) throws Exception {
+    public View apply(Context context, ViewGroup parent, AttributeSet attributes) {
         ViewModel viewModel = DataBindingUtil.inflate(from(context), inflate(attributes), parent, false);
         binding.onNext(viewModel);
         return viewModel.getRoot();

@@ -1,14 +1,15 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 26
-    buildToolsVersion '27.0.1'
+    compileSdkVersion 27
+    buildToolsVersion '27.0.3'
 
     defaultConfig {
         applicationId "stream.meme.app"
         minSdkVersion 21
-        targetSdkVersion 26
+        targetSdkVersion 27
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        multiDexEnabled true
     }
 
     compileOptions {
@@ -19,74 +20,68 @@ android {
     dataBinding {
         enabled = true
     }
-
-    defaultConfig {
-        resConfigs "auto"
-    }
 }
 
 
 dependencies {
-    compile 'com.bluelinelabs:conductor:2.1.4'
-    compile 'com.facebook.fresco:fresco:1.5.0'
-    compile 'com.jakewharton.retrofit:retrofit2-rxjava2-adapter:1.0.0'
-    compile 'jp.wasabeef:fresco-processors:2.1.0'
-    compile 'jp.wasabeef:blurry:2.1.1'
-    compile 'com.github.nirhart:parallaxscroll:1.0'
-    annotationProcessor "org.projectlombok:lombok:1.16.18"
-    provided "org.projectlombok:lombok:1.16.18"
-    compile 'com.squareup.retrofit2:adapter-rxjava2:2.3.0'
-    compile 'com.squareup.okhttp3:logging-interceptor:3.5.0'
-    compile 'net.jodah:typetools:0.5.0'
+    //--Other--
+    implementation 'com.google.code.gson:gson:2.8.1'
+    implementation 'com.google.guava:guava:20.0'
+    implementation 'net.cachapa.expandablelayout:expandablelayout:2.9.1'
+    implementation 'de.hdodenhof:circleimageview:2.1.0'
+    implementation 'net.jodah:typetools:0.5.0'
+    implementation 'com.google.android.gms:play-services-auth:11.8.0'
+    implementation 'com.android.support:multidex:1.0.3'
+
+    //--TBR--
+    implementation 'com.bluelinelabs:conductor:2.1.4'
+    implementation 'com.github.nirhart:parallaxscroll:1.0'
+
+
+    implementation 'com.jakewharton.retrofit:retrofit2-rxjava2-adapter:1.0.0'
+    implementation 'com.squareup.retrofit2:adapter-rxjava2:2.3.0'
+    implementation 'com.squareup.okhttp3:logging-interceptor:3.5.0'
+    implementation 'com.squareup.okhttp3:okhttp:3.8.0'
 
     //--RxBinding--
-    compile "com.jakewharton.rxbinding2:rxbinding:$rxBindingVersion"
-    compile "com.jakewharton.rxbinding2:rxbinding-support-v4:$rxBindingVersion"
-    compile "com.jakewharton.rxbinding2:rxbinding-appcompat-v7:$rxBindingVersion"
-    compile "com.jakewharton.rxbinding2:rxbinding-design:$rxBindingVersion"
-    compile "com.jakewharton.rxbinding2:rxbinding-recyclerview-v7:$rxBindingVersion"
-    compile('com.mikepenz:materialdrawer:5.9.5@aar') {
-        transitive = true
-    }
-    compile 'com.github.pakoito:RxSealedUnions2:1.0.0'
+    implementation "com.jakewharton.rxbinding2:rxbinding:$rxBindingVersion"
+    implementation "com.jakewharton.rxbinding2:rxbinding-support-v4:$rxBindingVersion"
+    implementation "com.jakewharton.rxbinding2:rxbinding-appcompat-v7:$rxBindingVersion"
+    implementation "com.jakewharton.rxbinding2:rxbinding-design:$rxBindingVersion"
+    implementation "com.jakewharton.rxbinding2:rxbinding-recyclerview-v7:$rxBindingVersion"
 
     //--Support Libraries--
-    compile "com.android.support:support-v4:$androidSupportVersion"
-    compile "com.android.support:support-v13:$androidSupportVersion"
-    compile "com.android.support:appcompat-v7:$androidSupportVersion"
-    compile "com.android.support:appcompat-v7:$androidSupportVersion"
-    compile "com.android.support:palette-v7:$androidSupportVersion"
-    compile "com.android.support:recyclerview-v7:$androidSupportVersion"
-    compile "com.android.support:cardview-v7:$androidSupportVersion"
-    compile "com.android.support:design:$androidSupportVersion"
+    implementation "com.android.support:support-v4:$androidSupportVersion"
+    implementation "com.android.support:support-v13:$androidSupportVersion"
+    implementation "com.android.support:appcompat-v7:$androidSupportVersion"
+    implementation "com.android.support:appcompat-v7:$androidSupportVersion"
+    implementation "com.android.support:palette-v7:$androidSupportVersion"
+    implementation "com.android.support:recyclerview-v7:$androidSupportVersion"
+    implementation "com.android.support:cardview-v7:$androidSupportVersion"
+    implementation "com.android.support:design:$androidSupportVersion"
 
     //--Store Libraries--
-    compile "com.nytimes.android:store3:$storeVersion"
-    compile "com.nytimes.android:cache3:$storeVersion"
-    compile "com.nytimes.android:filesystem3:$storeVersion"
-    compile "com.nytimes.android:middleware3:$storeVersion"
+    implementation "com.nytimes.android:store3:$storeVersion"
+    implementation "com.nytimes.android:cache3:$storeVersion"
+    implementation "com.nytimes.android:filesystem3:$storeVersion"
+    implementation "com.nytimes.android:middleware3:$storeVersion"
 
-    //--Butter Knife--
-    compile 'com.jakewharton:butterknife:8.5.1'
-    annotationProcessor 'com.jakewharton:butterknife-compiler:8.5.1'
+    //--Lombok--
+    annotationProcessor "org.projectlombok:lombok:1.16.20"
+    compileOnly "org.projectlombok:lombok:1.16.20"
 
     //--Social Logins--
-    compile 'com.twitter.sdk.android:twitter:3.1.1'
-    compile 'com.facebook.android:facebook-android-sdk:4.20.0'
+    implementation 'com.twitter.sdk.android:twitter:3.1.1'
+    implementation 'com.facebook.android:facebook-android-sdk:4.20.0'
 
-    //--Play Services
-    compile 'com.google.android.gms:play-services-auth:11.0.4'
+    //--Image Processing--
+    implementation 'com.squareup.picasso:picasso:2.5.2'
+    implementation 'com.facebook.fresco:fresco:1.5.0'
+    implementation 'jp.wasabeef:fresco-processors:2.1.0'
+    implementation 'jp.wasabeef:blurry:2.1.1'
 
-    //--Other Libraries--
-    compile 'com.google.code.gson:gson:2.8.1'
-    compile 'com.squareup.okhttp3:okhttp:3.8.0'
-    compile 'com.squareup.picasso:picasso:2.5.2'
-    compile 'com.google.guava:guava:20.0'
-    compile 'net.cachapa.expandablelayout:expandablelayout:2.9.1'
-    compile 'de.hdodenhof:circleimageview:2.1.0'
-
-    //--DataBindings Libraries--
-    testCompile 'junit:junit:4.12'
+    //--Testing--
+    testImplementation 'junit:junit:4.12'
 }
 apply plugin: 'com.google.gms.google-services'
 

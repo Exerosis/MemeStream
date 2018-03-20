@@ -4,6 +4,8 @@ import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.view.LayoutInflater;
+import android.view.View;
 
 import stream.meme.app.R;
 import stream.meme.app.controller.alpha.ListView;
@@ -31,7 +33,9 @@ public class TestActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(@Nullable Bundle in) {
-        setContentView(R.layout.test_activty);
+        final View view = LayoutInflater.from(this).inflate(R.layout.test_activty, null);
+        view.invalidate();
+        setContentView(view);
         super.onCreate(in);
     }
 

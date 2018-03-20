@@ -73,7 +73,7 @@ public class TestInflater extends LayoutInflater {
                     //Sweet we got content that we want to inject into this tag, but we need to deal with the tags id before we return anything.
 
                     ViewGroup content = (ViewGroup) binding.getRoot();
-                    //Now we can remove the ID from our injected content and prepare to return it.
+                    //Now we can remove the ATTR_ID from our injected content and prepare to return it.
                     injectedView.setId(attributeManifestation.getId());
                     content.setId(NO_ID);
 
@@ -106,7 +106,7 @@ public class TestInflater extends LayoutInflater {
         //Hold onto the previous value so we can restore it when we finish inflating this resource.
         Integer layout = this.layout;
         try {
-            //When someone asks us to inflate a layout, we need to save the ID so we can use it
+            //When someone asks us to inflate a layout, we need to save the ATTR_ID so we can use it
             //along with the line number to create a unique identifier for each custom tag.
             this.layout = resource;
             return super.inflate(resource, root, attachToRoot);
